@@ -18,7 +18,8 @@ import {
   ClipboardList,
   CreditCard,
   ShoppingCart,
-  MessageSquare
+  MessageSquare,
+  History
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -40,12 +41,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const navItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Vendors", href: "/vendors", icon: Store },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Expenses", href: "/calendar", icon: CreditCard },
-  { name: "Feedback", href: "/feedback", icon: MessageSquare },
-  { name: "Insights", href: "/insights", icon: BrainCircuit },
+  { name: "Orders", href: "/orders", icon: History },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
@@ -126,12 +126,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </Avatar>
                   <div className="text-right hidden sm:block">
                     <p className="text-sm font-bold tracking-wide">Gentuu</p>
-                    <p className="text-[10px] text-muted-foreground font-medium">Hi, 1122024001</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">S. STU1234001</p>
                   </div>
                 </div>
                 <div className="h-10 px-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shadow-inner">
                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rs.</span>
-                   <span className="text-sm font-headline font-bold text-primary">500.50</span>
+                   <span className="text-sm font-headline font-bold text-primary">53.62</span>
                 </div>
               </div>
             </header>
