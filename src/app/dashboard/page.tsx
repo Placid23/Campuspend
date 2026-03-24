@@ -1,4 +1,3 @@
-
 "use client"
 
 import { DashboardShell } from "@/components/layout/Shell"
@@ -116,8 +115,8 @@ export default function DashboardPage() {
                <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                  <div className="md:col-span-8">
                    <div className="grid grid-cols-7 gap-2 mb-4">
-                     {['Sun', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                       <div key={day} className="text-center text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{day}</div>
+                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                       <div key={`header-${day}`} className="text-center text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{day}</div>
                      ))}
                    </div>
                    <div className="grid grid-cols-7 gap-2">
@@ -125,7 +124,7 @@ export default function DashboardPage() {
                        <div 
                          key={day} 
                          className={cn(
-                           "aspect-square rounded-xl flex items-center justify-center text-xs font-bold border border-white/5 transition-all cursor-pointer hover:bg-white/10",
+                           "aspect-square rounded-xl flex items-center justify-center text-xs font-bold border border-white/5 transition-all cursor-pointer hover:bg-white/10 relative",
                            day === 6 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : 
                            day === 16 ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : 
                            day === 17 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
