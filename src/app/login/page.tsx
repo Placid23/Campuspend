@@ -3,22 +3,22 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
 import { 
   Zap, 
   Mail, 
   Lock, 
   Eye, 
   EyeOff, 
-  ArrowRight,
   ShieldCheck
 } from "lucide-react"
 
-// Social Icons as SVGs for high fidelity
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -42,10 +42,27 @@ const AppleIcon = () => (
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const router = useRouter()
+  const { toast } = useToast()
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Hardcoded credentials for preview
+    if (email === "gentuu@campus.edu" && password === "student123") {
+      router.push("/dashboard")
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Please use gentuu@campus.edu / student123",
+      })
+    }
+  }
 
   return (
     <div className="min-h-screen nebula-bg flex flex-col">
-      {/* Header Navigation */}
       <nav className="w-full z-50 py-6 px-6 md:px-12 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
@@ -66,11 +83,8 @@ export default function LoginPage() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Left Side: Welcome Text & Social Login */}
           <div className="space-y-10 animate-in fade-in slide-in-from-left duration-700">
             <div className="space-y-6">
               <h1 className="text-5xl font-headline font-bold leading-tight">
@@ -79,18 +93,14 @@ export default function LoginPage() {
               <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
                 Log in to continue ordering and tracking your campus spending.
               </p>
-              <p className="text-sm text-muted-foreground/80 max-w-md leading-relaxed border-l-2 border-primary/30 pl-4 py-1">
-                The all-in-one campus marketplace where you can buy from trusted vendors and automatically track your expenses. Every order is logged; analyzed.
-              </p>
+              <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl max-w-sm">
+                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Demo Credentials</p>
+                <p className="text-sm text-muted-foreground">Email: gentuu@campus.edu</p>
+                <p className="text-sm text-muted-foreground">Password: student123</p>
+              </div>
             </div>
 
             <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-                <div className="h-[1px] flex-1 bg-white/10"></div>
-                <span>Don't have an account?</span>
-                <div className="h-[1px] flex-1 bg-white/10"></div>
-              </div>
-              
               <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all justify-start px-8">
                 <GoogleIcon />
                 <span className="text-base font-medium">Continue with Google</span>
@@ -106,9 +116,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Right Side: Login Form Card */}
           <div className="relative animate-in fade-in slide-in-from-right duration-700">
-            {/* Outer Glow Effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 to-secondary/40 blur-2xl opacity-20 animate-pulse"></div>
             
             <GlassCard className="relative z-10 p-10 md:p-12 border-white/10 backdrop-blur-3xl shadow-[0_0_50px_rgba(239,26,184,0.1)]">
@@ -117,12 +125,12 @@ export default function LoginPage() {
                   <ShieldCheck className="w-8 h-8 text-primary" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-3xl font-headline font-bold tracking-tight">Login Page</h2>
+                  <h2 className="text-3xl font-headline font-bold tracking-tight">Login</h2>
                   <p className="text-sm text-muted-foreground">Log in to continue ordering and tracking your campus</p>
                 </div>
               </div>
 
-              <form className="mt-10 space-y-6" onSubmit={(e) => e.preventDefault()}>
+              <form className="mt-10 space-y-6" onSubmit={handleLogin}>
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Email</Label>
                   <div className="relative group">
@@ -131,9 +139,11 @@ export default function LoginPage() {
                       id="email"
                       type="email" 
                       placeholder="Email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="h-14 bg-white/5 border-white/10 rounded-2xl pl-12 pr-12 focus:border-primary/50 transition-all"
+                      required
                     />
-                    <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30" />
                   </div>
                 </div>
 
@@ -145,7 +155,10 @@ export default function LoginPage() {
                       id="password"
                       type={showPassword ? "text" : "password"} 
                       placeholder="Password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="h-14 bg-white/5 border-white/10 rounded-2xl pl-12 pr-12 focus:border-primary/50 transition-all"
+                      required
                     />
                     <button 
                       type="button"
@@ -165,7 +178,7 @@ export default function LoginPage() {
                   <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Forgot password?</Link>
                 </div>
 
-                <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all">
+                <Button type="submit" className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all">
                   Login
                 </Button>
 
@@ -174,26 +187,12 @@ export default function LoginPage() {
                     Don't have an account? <Link href="/register" className="text-primary font-bold hover:underline">Sign Up</Link>
                   </p>
                 </div>
-
-                <div className="flex items-center gap-4 text-sm text-muted-foreground/30 pt-4">
-                  <div className="h-[1px] flex-1 bg-white/5"></div>
-                  <div className="flex gap-4">
-                     <button className="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-primary/50 transition-all">
-                       <GoogleIcon />
-                     </button>
-                     <button className="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-primary/50 transition-all">
-                       <FacebookIcon />
-                     </button>
-                  </div>
-                  <div className="h-[1px] flex-1 bg-white/5"></div>
-                </div>
               </form>
             </GlassCard>
           </div>
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="py-10 px-6 border-t border-white/5 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground/60 font-medium">
           <div className="flex gap-10">
