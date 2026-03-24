@@ -28,18 +28,6 @@ const GoogleIcon = () => (
   </svg>
 )
 
-const FacebookIcon = () => (
-  <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-  </svg>
-)
-
-const AppleIcon = () => (
-  <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z" />
-  </svg>
-)
-
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
@@ -52,11 +40,13 @@ export default function LoginPage() {
     // Hardcoded credentials for preview
     if (email === "gentuu@campus.edu" && password === "student123") {
       router.push("/dashboard")
+    } else if (email === "vendor@qfcafe.edu" && password === "vendor123") {
+      router.push("/vendor/dashboard")
     } else {
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Please use gentuu@campus.edu / student123",
+        description: "Student: gentuu@campus.edu / student123 | Vendor: vendor@qfcafe.edu / vendor123",
       })
     }
   }
@@ -68,18 +58,7 @@ export default function LoginPage() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
             <Zap className="text-white w-5 h-5" />
           </div>
-          <span className="font-headline font-bold text-xl tracking-tighter">CampusSpend</span>
-        </div>
-        <div className="hidden md:flex items-center gap-10">
-          <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">Home</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">How it Works</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">Vendors</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" className="text-sm font-medium px-6 border border-white/10 rounded-full hover:bg-white/5">Log in</Button>
-          <Button className="glow-button rounded-full px-8 bg-gradient-to-r from-primary to-secondary hover:opacity-90">Get Started</Button>
+          <span className="font-headline font-bold text-xl tracking-tighter text-white">CampusSpend</span>
         </div>
       </nav>
 
@@ -87,46 +66,38 @@ export default function LoginPage() {
         <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-10 animate-in fade-in slide-in-from-left duration-700">
             <div className="space-y-6">
-              <h1 className="text-5xl font-headline font-bold leading-tight">
+              <h1 className="text-5xl font-headline font-bold leading-tight text-white">
                 Welcome <span className="text-primary neon-text-glow">Back!</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
-                Log in to continue ordering and tracking your campus spending.
+                Log in to continue managing your campus presence or tracking your spending.
               </p>
               <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl max-w-sm">
-                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Demo Credentials</p>
-                <p className="text-sm text-muted-foreground">Email: gentuu@campus.edu</p>
-                <p className="text-sm text-muted-foreground">Password: student123</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Demo Credentials</p>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs text-white font-bold">Student:</p>
+                    <p className="text-xs text-muted-foreground">Email: gentuu@campus.edu | Pass: student123</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-white font-bold">Vendor (QFCafe):</p>
+                    <p className="text-xs text-muted-foreground">Email: vendor@qfcafe.edu | Pass: vendor123</p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="space-y-4 pt-4">
-              <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all justify-start px-8">
-                <GoogleIcon />
-                <span className="text-base font-medium">Continue with Google</span>
-              </Button>
-              <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all justify-start px-8">
-                <FacebookIcon />
-                <span className="text-base font-medium">Continue with Facebook</span>
-              </Button>
-              <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all justify-start px-8">
-                <AppleIcon />
-                <span className="text-base font-medium">Continue with Apple</span>
-              </Button>
             </div>
           </div>
 
           <div className="relative animate-in fade-in slide-in-from-right duration-700">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 to-secondary/40 blur-2xl opacity-20 animate-pulse"></div>
-            
             <GlassCard className="relative z-10 p-10 md:p-12 border-white/10 backdrop-blur-3xl shadow-[0_0_50px_rgba(239,26,184,0.1)]">
               <div className="flex flex-col items-center text-center space-y-6">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(239,26,184,0.2)]">
                   <ShieldCheck className="w-8 h-8 text-primary" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-3xl font-headline font-bold tracking-tight">Login</h2>
-                  <p className="text-sm text-muted-foreground">Log in to continue ordering and tracking your campus</p>
+                  <h2 className="text-3xl font-headline font-bold tracking-tight text-white">Login</h2>
+                  <p className="text-sm text-muted-foreground">Log in to your CampusSpend account</p>
                 </div>
               </div>
 
@@ -141,7 +112,7 @@ export default function LoginPage() {
                       placeholder="Email" 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-14 bg-white/5 border-white/10 rounded-2xl pl-12 pr-12 focus:border-primary/50 transition-all"
+                      className="h-14 bg-white/5 border-white/10 rounded-2xl pl-12 pr-12 focus:border-primary/50 transition-all text-white"
                       required
                     />
                   </div>
@@ -157,7 +128,7 @@ export default function LoginPage() {
                       placeholder="Password" 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-14 bg-white/5 border-white/10 rounded-2xl pl-12 pr-12 focus:border-primary/50 transition-all"
+                      className="h-14 bg-white/5 border-white/10 rounded-2xl pl-12 pr-12 focus:border-primary/50 transition-all text-white"
                       required
                     />
                     <button 
@@ -178,33 +149,17 @@ export default function LoginPage() {
                   <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Forgot password?</Link>
                 </div>
 
-                <Button type="submit" className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all">
+                <Button type="submit" className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all text-white">
                   Login
                 </Button>
-
-                <div className="text-center pt-2">
-                  <p className="text-sm text-muted-foreground">
-                    Don't have an account? <Link href="/register" className="text-primary font-bold hover:underline">Sign Up</Link>
-                  </p>
-                </div>
               </form>
             </GlassCard>
           </div>
         </div>
       </main>
 
-      <footer className="py-10 px-6 border-t border-white/5 mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground/60 font-medium">
-          <div className="flex gap-10">
-            <Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-primary transition-colors flex items-center gap-2">
-               <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
-               Help Center
-            </Link>
-          </div>
-          <p>© 2024 CampusSpend. All rights reserved.</p>
-        </div>
+      <footer className="py-10 px-6 border-t border-white/5 mt-auto text-center text-muted-foreground/60 text-sm">
+        <p>© 2024 CampusSpend. All rights reserved.</p>
       </footer>
     </div>
   )
