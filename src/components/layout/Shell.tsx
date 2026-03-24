@@ -46,7 +46,7 @@ const navItems = [
   { name: "Expenses", href: "/calendar", icon: CreditCard },
   { name: "Feedback", href: "/feedback", icon: MessageSquare },
   { name: "Insights", href: "/insights", icon: BrainCircuit },
-  { name: "Settings", href: "#", icon: Settings },
+  { name: "Settings", href: "/settings", icon: Settings },
 ]
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
