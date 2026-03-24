@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -18,7 +17,8 @@ import {
   ChevronRight,
   ClipboardList,
   CreditCard,
-  ShoppingCart
+  ShoppingCart,
+  MessageSquare
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -43,8 +43,8 @@ const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Vendors", href: "/vendors", icon: Store },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
-  { name: "Orders", href: "#", icon: ClipboardList },
   { name: "Expenses", href: "/calendar", icon: CreditCard },
+  { name: "Feedback", href: "/feedback", icon: MessageSquare },
   { name: "Insights", href: "/insights", icon: BrainCircuit },
   { name: "Settings", href: "#", icon: Settings },
 ]
