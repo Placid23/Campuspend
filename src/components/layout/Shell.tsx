@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -31,6 +32,8 @@ import {
   useSidebar
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { signOut } from 'firebase/auth'
+import { useAuth, useUser } from '@/firebase'
 
 const navItems = [
   { name: "Vendors", href: "/vendors", icon: Store },
@@ -44,6 +47,13 @@ const navItems = [
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const auth = useAuth()
+  const { user } = useUser()
+
+  const handleLogout = async () => {
+    await signOut(auth)
+    router.push("/login")
+  }
 
   return (
     <SidebarProvider>
@@ -90,7 +100,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <SidebarFooter className="p-8">
               <Button 
                 variant="ghost" 
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="w-full justify-start text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl px-6 h-12"
               >
                 <LogOut className="w-5 h-5 mr-4" />
@@ -99,7 +109,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </SidebarFooter>
           </Sidebar>
 
-          {/* Mobile Sidebar (Sheet content handled by Sidebar component automatically if trigger exists) */}
+          {/* Mobile Sidebar */}
           <Sidebar side="left" className="md:hidden" collapsible="offcanvas" />
 
           <SidebarInset className="bg-transparent overflow-hidden pb-20 md:pb-0">
@@ -125,12 +135,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <div className="ml-auto flex items-center gap-4 md:gap-6">
                 <div className="flex items-center gap-3 md:gap-4 group cursor-pointer">
                   <Avatar className="w-8 h-8 md:w-10 md:h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
-                    <AvatarImage src="https://picsum.photos/seed/gentuu/100/100" />
-                    <AvatarFallback>G</AvatarFallback>
+                    <AvatarImage src={`https://picsum.photos/seed/${user?.uid || 'student'}/100/100`} />
+                    <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || 'S'}</AvatarFallback>
                   </Avatar>
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold tracking-wide">Gentuu</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase">STU1234001</p>
+                    <p className="text-sm font-bold tracking-wide">{user?.displayName || 'Student'}</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase truncate max-w-[100px]">{user?.email}</p>
                   </div>
                 </div>
                 <div className="h-9 md:h-10 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 md:gap-3 shadow-inner">
@@ -146,7 +156,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </SidebarInset>
         </div>
 
-        {/* Surprise Element: Mobile Bottom Navigation Bar */}
+        {/* Mobile Bottom Navigation Bar */}
         <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
           <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl h-16 flex items-center justify-around px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
             {[

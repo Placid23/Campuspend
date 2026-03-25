@@ -16,31 +16,79 @@ import {
   Lock, 
   Eye, 
   EyeOff, 
-  ShieldCheck
+  ShieldCheck,
+  Loader2
 } from "lucide-react"
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { useAuth, useFirestore } from '@/firebase'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
   const { toast } = useToast()
+  const auth = useAuth()
+  const db = useFirestore()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Hardcoded credentials for preview
-    if (email === "gentuu@campus.edu" && password === "student123") {
-      router.push("/dashboard")
-    } else if (email === "vendor@qfcafe.edu" && password === "vendor123") {
-      router.push("/vendor/dashboard")
-    } else if (email === "admin@campusspend.com" && password === "admin123") {
-      router.push("/admin/dashboard")
-    } else {
+    setLoading(true)
+
+    try {
+      // 1. Sign in with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user
+
+      // 2. Fetch the user's role and profile from Firestore
+      const profileRef = doc(db, "userProfiles", user.uid)
+      const profileSnap = await getDoc(profileRef)
+
+      if (!profileSnap.exists()) {
+        // Safety check: Auth exists but profile doesn't
+        await signOut(auth)
+        toast({
+          variant: "destructive",
+          title: "Account Error",
+          description: "User profile data not found. Please contact support.",
+        })
+        return
+      }
+
+      const role = profileSnap.data().role
+
+      // 3. Redirect based on role
+      if (role === 'student') {
+        router.push("/dashboard")
+      } else if (role === 'vendor') {
+        router.push("/vendor/dashboard")
+      } else if (role === 'admin') {
+        router.push("/admin/dashboard")
+      } else {
+        await signOut(auth)
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "Unauthorized role detected.",
+        })
+      }
+
+      toast({
+        title: "Welcome back!",
+        description: `Successfully logged in as ${role}.`,
+      })
+
+    } catch (error: any) {
+      console.error("Login error:", error)
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Student: gentuu@campus.edu/student123 | Vendor: vendor@qfcafe.edu/vendor123 | Admin: admin@campusspend.com/admin123",
+        description: error.message || "Invalid email or password.",
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -66,20 +114,11 @@ export default function LoginPage() {
                 Log in to continue managing your campus presence, tracking your spending, or overseeing the ecosystem.
               </p>
               <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl max-w-sm">
-                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Demo Credentials</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Login Instructions</p>
                 <div className="space-y-3">
-                  <div>
-                    <p className="text-[10px] text-white font-bold uppercase">Student:</p>
-                    <p className="text-[10px] text-muted-foreground tracking-tight">gentuu@campus.edu | student123</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-white font-bold uppercase">Vendor:</p>
-                    <p className="text-[10px] text-muted-foreground tracking-tight">vendor@qfcafe.edu | vendor123</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-white font-bold uppercase text-primary">Admin:</p>
-                    <p className="text-[10px] text-muted-foreground tracking-tight">admin@campusspend.com | admin123</p>
-                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Please use the credentials you used during registration. Roles are automatically determined based on your profile settings.
+                  </p>
                 </div>
               </div>
             </div>
@@ -146,9 +185,19 @@ export default function LoginPage() {
                   <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Forgot password?</Link>
                 </div>
 
-                <Button type="submit" className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all text-white">
-                  Login
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all text-white"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Login"}
                 </Button>
+
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Don't have an account? <Link href="/register" className="text-primary font-bold hover:underline transition-colors">Sign up</Link>
+                  </p>
+                </div>
               </form>
             </GlassCard>
           </div>

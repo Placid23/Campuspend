@@ -33,11 +33,12 @@ import {
   SidebarProvider 
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { signOut } from 'firebase/auth'
+import { useAuth, useUser } from '@/firebase'
 
 const vendorNavItems = [
   { name: "Dashboard", href: "/vendor/dashboard", icon: LayoutDashboard },
   { name: "Add Product", href: "/vendor/add-product", icon: PlusCircle },
-  { name: "Vendor Ds...", href: "/vendor/dashboard", icon: Store },
   { name: "Manage Products", href: "/vendor/manage", icon: ShoppingCart },
   { name: "Orders", href: "/vendor/orders", icon: History },
   { name: "Sales Summary", href: "/vendor/sales", icon: TrendingUp },
@@ -47,6 +48,13 @@ const vendorNavItems = [
 export function VendorShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const auth = useAuth()
+  const { user } = useUser()
+
+  const handleLogout = async () => {
+    await signOut(auth)
+    router.push("/login")
+  }
 
   return (
     <SidebarProvider>
@@ -88,7 +96,7 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
             <SidebarFooter className="p-8">
               <Button 
                 variant="ghost" 
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="w-full justify-start text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl px-6 h-12"
               >
                 <LogOut className="w-5 h-5 mr-4" />
@@ -100,22 +108,21 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
           <SidebarInset className="bg-transparent overflow-hidden">
             <header className="flex h-24 items-center gap-8 px-10 border-b border-white/5 sticky top-0 z-40 bg-transparent backdrop-blur-xl">
               <div className="hidden md:flex items-center gap-10">
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors text-white">Home</Link>
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors text-white">Orders</Link>
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors text-white">Manage Products</Link>
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors text-white">Sales Summary</Link>
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors text-white">About</Link>
+                <Link href="/vendor/dashboard" className={cn("text-sm font-bold tracking-widest uppercase transition-colors", pathname === '/vendor/dashboard' ? "text-primary" : "text-muted-foreground hover:text-white")}>Dashboard</Link>
+                <Link href="/vendor/manage" className="text-sm font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Inventory</Link>
+                <Link href="/vendor/orders" className="text-sm font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Orders</Link>
+                <Link href="/vendor/sales" className="text-sm font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Sales</Link>
               </div>
 
               <div className="ml-auto flex items-center gap-6">
                 <div className="flex items-center gap-4 group cursor-pointer">
                   <Avatar className="w-10 h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
-                    <AvatarImage src="https://picsum.photos/seed/qfcafe/100/100" />
+                    <AvatarImage src={`https://picsum.photos/seed/${user?.uid || 'vendor'}/100/100`} />
                     <AvatarFallback>QF</AvatarFallback>
                   </Avatar>
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold tracking-wide text-white">QFCafe</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">A14 (Rs. 12,850)</p>
+                    <p className="text-sm font-bold tracking-wide text-white">Vendor</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{user?.email}</p>
                   </div>
                 </div>
                 <div className="h-10 px-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shadow-inner">

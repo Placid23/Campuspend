@@ -34,6 +34,8 @@ import {
   SidebarProvider 
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { signOut } from 'firebase/auth'
+import { useAuth, useUser } from '@/firebase'
 
 const adminNavItems = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -48,6 +50,13 @@ const adminNavItems = [
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const auth = useAuth()
+  const { user } = useUser()
+
+  const handleLogout = async () => {
+    await signOut(auth)
+    router.push("/login")
+  }
 
   return (
     <SidebarProvider>
@@ -89,7 +98,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <SidebarFooter className="p-8">
               <Button 
                 variant="ghost" 
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="w-full justify-start text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl px-6 h-12"
               >
                 <LogOut className="w-5 h-5 mr-4" />
@@ -111,17 +120,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <div className="ml-auto flex items-center gap-6">
                 <div className="flex items-center gap-4 group cursor-pointer">
                   <Avatar className="w-10 h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
-                    <AvatarImage src="https://picsum.photos/seed/admin/100/100" />
+                    <AvatarImage src={`https://picsum.photos/seed/${user?.uid || 'admin'}/100/100`} />
                     <AvatarFallback>AD</AvatarFallback>
                   </Avatar>
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold tracking-wide text-white">Hi, Admin!</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">admin@campusspend.com</p>
+                    <p className="text-sm font-bold tracking-wide text-white">Admin</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{user?.email}</p>
                   </div>
                 </div>
                 <div className="h-10 px-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shadow-inner">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rs.</span>
-                   <span className="text-sm font-headline font-bold text-primary">28,500</span>
+                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sys</span>
+                   <span className="text-sm font-headline font-bold text-primary">Active</span>
                    <ChevronRight className="w-4 h-4 text-primary ml-2 rotate-90" />
                 </div>
               </div>
