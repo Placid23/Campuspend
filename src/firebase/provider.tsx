@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
@@ -76,25 +77,23 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
-    if (!auth) { // If no Auth service instance, cannot determine user state
+    if (!auth) {
       setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
       return;
     }
 
-    setUserAuthState({ user: null, isUserLoading: true, userError: null }); // Reset on auth instance change
-
     const unsubscribe = onAuthStateChanged(
       auth,
-      (firebaseUser) => { // Auth state determined
+      (firebaseUser) => {
         setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
       },
-      (error) => { // Auth listener error
+      (error) => {
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
         setUserAuthState({ user: null, isUserLoading: false, userError: error });
       }
     );
-    return () => unsubscribe(); // Cleanup
-  }, [auth]); // Depends on the auth instance
+    return () => unsubscribe();
+  }, [auth]);
 
   // Effect to fetch profile when user is authenticated
   useEffect(() => {
@@ -103,7 +102,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       return;
     }
 
-    setProfileState(prev => ({ ...prev, isProfileLoading: true }));
+    setProfileState(prev => ({ ...prev, isProfileLoading: true, profileError: null }));
 
     const profileRef = doc(firestore, 'userProfiles', userAuthState.user.uid);
     const unsubscribe = onSnapshot(
@@ -116,7 +115,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         }
       },
       (error) => {
-        console.error("FirebaseProvider: profile onSnapshot error:", error);
+        // Only log error if it's not a standard "missing permissions" which usually happens during sign-out
+        if (error.code !== 'permission-denied') {
+          console.error("FirebaseProvider: profile onSnapshot error:", error);
+        }
         setProfileState({ profile: null, isProfileLoading: false, profileError: error });
       }
     );

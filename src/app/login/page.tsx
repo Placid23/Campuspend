@@ -17,7 +17,8 @@ import {
   Eye, 
   EyeOff, 
   ShieldCheck,
-  Loader2
+  Loader2,
+  AlertCircle
 } from "lucide-react"
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { useAuth, useUser } from '@/firebase'
@@ -33,7 +34,7 @@ export default function LoginPage() {
   const auth = useAuth()
   const { user, profile, isProfileLoading, profileError } = useUser()
 
-  // Use an effect to handle redirection once the profile is loaded via global context
+  // Redirection Logic
   useEffect(() => {
     if (user && profile && !isProfileLoading) {
       const role = profile.role
@@ -51,6 +52,7 @@ export default function LoginPage() {
           title: "Access Denied",
           description: "Unauthorized role detected.",
         })
+        setLoading(false)
         return
       }
 
@@ -61,15 +63,27 @@ export default function LoginPage() {
     }
   }, [user, profile, isProfileLoading, router, auth, toast])
 
-  // Handle errors from the global profile listener (e.g. user exists but profile doc is missing)
+  // Handle errors (Missing profile or Firestore errors)
   useEffect(() => {
     if (user && profileError) {
-      signOut(auth)
-      toast({
-        variant: "destructive",
-        title: "Account Error",
-        description: "User profile data not found or inaccessible. Please contact support.",
-      })
+      console.error("Profile sync error:", profileError)
+      setLoading(false)
+      
+      // If profile is missing, it's often because the user was created in Auth but not Firestore
+      if (profileError.message === "Profile not found") {
+        signOut(auth)
+        toast({
+          variant: "destructive",
+          title: "Profile Missing",
+          description: "Your account exists but your profile data was not found. Please re-register.",
+        })
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Sync Error",
+          description: "Unable to sync your account details. Please check your internet connection.",
+        })
+      }
     }
   }, [user, profileError, auth, toast])
 
@@ -78,17 +92,16 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      // Sign in with Firebase Auth. 
-      // The redirection is handled by the useEffect above once the profile is synced.
       await signInWithEmailAndPassword(auth, email, password)
+      // Redirection is handled by the useEffect above once profile is synced
     } catch (error: any) {
       console.error("Login error:", error)
+      setLoading(false)
       toast({
         variant: "destructive",
         title: "Login Failed",
         description: error.message || "Invalid email or password.",
       })
-      setLoading(false)
     }
   }
 
@@ -114,10 +127,10 @@ export default function LoginPage() {
                 Log in to continue managing your campus presence, tracking your spending, or overseeing the ecosystem.
               </p>
               <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl max-w-sm">
-                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Login Instructions</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">System Status</p>
                 <div className="space-y-3">
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    Please use the credentials you used during registration. Roles are automatically determined based on your profile settings.
+                  <p className="text-[10px] text-muted-foreground leading-relaxed flex items-center gap-2">
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Secure Firebase Connection Active
                   </p>
                 </div>
               </div>
@@ -190,7 +203,12 @@ export default function LoginPage() {
                   disabled={loading}
                   className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all text-white"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Login"}
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      {isProfileLoading ? "Syncing Profile..." : "Authenticating..."}
+                    </span>
+                  ) : "Login"}
                 </Button>
 
                 <div className="text-center">
