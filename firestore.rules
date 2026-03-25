@@ -1,0 +1,188 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * CAMPUSSPEND SECURITY RULES
+     *
+     * Core Philosophy: 
+     * This ruleset implements a multi-role authorization model (Student, Vendor, Admin) using a combination 
+     * of Path-Based Ownership and Data-Based Access Control (DBAC). It prioritizes "Authorization 
+     * Independence" by denormalizing ownership IDs (e.g., vendorOwnerId) onto documents to ensure 
+     * fast, non-recursive security checks.
+     *
+     * Data Structure:
+     * - /userProfiles/{userId}: Private profile data owned by the user.
+     * - /users/{userId}/...: Hierarchical user data (orders, expenses, budgets) secured by path.
+     * - /vendors, /products, /categories: Top-level shared collections with specific owner/admin write permissions.
+     * - /roles_admin/{userId}: Sentinel collection used to verify administrative privileges.
+     *
+     * Key Security Decisions:
+     * 1. Path-Based Security: All data under /users/{studentId} is strictly restricted to that specific student.
+     * 2. Denormalization for Vendor Access: Vendors can access specific OrderItems via collection group queries 
+     *    enabled by the 'vendorOwnerId' field denormalized onto each item.
+     * 3. Prototyping Flexibility: Rules enforce WHO can write but do NOT enforce the internal schema 
+     *    of non-relational fields, allowing for rapid front-end iteration.
+     * 4. Admin Sentinel: Global admin status is checked via the existence of a document in /roles_admin.
+     */
+
+    // --- HELPER FUNCTIONS ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    function isDocOwner(ownerField) {
+      return isSignedIn() && request.auth.uid == resource.data[ownerField];
+    }
+
+    function isNewDocOwner(ownerField) {
+      return isSignedIn() && request.auth.uid == request.resource.data[ownerField];
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for user profile documents. Users can create their own profile and manage it.
+     * @path /userProfiles/{userId}
+     * @allow User 'abc' (get) /userProfiles/abc
+     * @deny User 'xyz' (update) /userProfiles/abc
+     * @principle Path-based ownership for private profile data.
+     */
+    match /userProfiles/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == userId;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Administrative role sentinel. Only existing admins can manage this collection.
+     * @path /roles_admin/{userId}
+     * @allow Admin 'admin1' (get) /roles_admin/admin1
+     * @deny Student 'stud1' (create) /roles_admin/stud1
+     * @principle Existence-based access control for global roles.
+     */
+    match /roles_admin/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    /**
+     * @description Rules for student orders. Access is restricted to the student identified in the path.
+     * @path /users/{studentId}/orders/{orderId}
+     * @allow Student 's1' (list) /users/s1/orders
+     * @deny Student 's2' (get) /users/s1/orders/o1
+     * @principle Path-based ownership for transaction history.
+     */
+    match /users/{studentId}/orders/{orderId} {
+      allow get, list: if isOwner(studentId) || isAdmin();
+      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
+      allow update: if isExistingOwner(studentId) && request.resource.data.studentId == studentId;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Individual items within an order. Accessible by the student owner and the vendor who owns the product.
+     * @path /users/{studentId}/orders/{orderId}/orderItems/{orderItemId}
+     * @allow Student 's1' (get) .../orderItems/oi1
+     * @deny Student 's2' (get) .../orderItems/oi1
+     * @principle Multi-party access via path (student) and denormalized field (vendor).
+     */
+    match /users/{studentId}/orders/{orderId}/orderItems/{orderItemId} {
+      allow get, list: if isOwner(studentId) || isAdmin() || (isSignedIn() && resource.data.vendorOwnerId == request.auth.uid);
+      allow create: if isOwner(studentId);
+      allow update: if isExistingOwner(studentId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Collection group rule to allow vendors to find their items across all orders.
+     * @path /{path=**}/orderItems/{orderItemId}
+     */
+    match /{path=**}/orderItems/{orderItemId} {
+      allow list: if isSignedIn() && (request.query.limit <= 100) && (resource == null || resource.data.vendorOwnerId == request.auth.uid);
+    }
+
+    /**
+     * @description Private expense records for students.
+     * @path /users/{studentId}/expenses/{expenseId}
+     * @allow Student 's1' (create) /users/s1/expenses/e1
+     * @deny Student 's1' (update) /users/s2/expenses/e1
+     * @principle Restricts access to a user's own financial data tree.
+     */
+    match /users/{studentId}/expenses/{expenseId} {
+      allow get, list: if isOwner(studentId) || isAdmin();
+      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
+      allow update: if isExistingOwner(studentId) && request.resource.data.studentId == studentId;
+      allow delete: if isExistingOwner(studentId) || isAdmin();
+    }
+
+    /**
+     * @description Student budget configurations.
+     * @path /users/{studentId}/budgets/{budgetId}
+     * @allow Student 's1' (list) /users/s1/budgets
+     * @deny Unauthenticated (get) /users/s1/budgets/b1
+     * @principle Path-based ownership for personal financial planning.
+     */
+    match /users/{studentId}/budgets/{budgetId} {
+      allow get, list: if isOwner(studentId) || isAdmin();
+      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
+      allow update: if isExistingOwner(studentId) && request.resource.data.studentId == studentId;
+      allow delete: if isExistingOwner(studentId) || isAdmin();
+    }
+
+    /**
+     * @description Vendor profiles. Publicly readable, writeable by the assigned managing user.
+     * @path /vendors/{vendorId}
+     * @allow Any (get) /vendors/v1
+     * @deny Vendor 'v2' (update) /vendors/v1
+     * @principle Public Read with Owner-Only Writes using denormalized userId.
+     */
+    match /vendors/{vendorId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isNewDocOwner('userId');
+      allow update: if isDocOwner('userId') && request.resource.data.userId == resource.data.userId;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Product catalog. Publicly readable, managed by vendor owners.
+     * @path /products/{productId}
+     * @allow Any (list) /products
+     * @deny Vendor 'v1' (update) product owned by 'v2'
+     * @principle Validates relational integrity using denormalized vendorOwnerId.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isNewDocOwner('vendorOwnerId');
+      allow update: if isDocOwner('vendorOwnerId') && request.resource.data.vendorOwnerId == resource.data.vendorOwnerId;
+      allow delete: if isDocOwner('vendorOwnerId') || isAdmin();
+    }
+
+    /**
+     * @description Global product categories. Managed only by administrators.
+     * @path /categories/{categoryId}
+     * @allow Any (get) /categories/food
+     * @deny Vendor (create) /categories/electronics
+     * @principle Publicly readable data with strict administrative write control.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

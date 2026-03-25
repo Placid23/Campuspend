@@ -1,0 +1,587 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user of the CampusSpend application, encompassing students, vendors, and administrators. This entity stores core profile information and a reference to the external authentication system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "firebaseUid": {
+          "type": "string",
+          "description": "Unique identifier from the external Firebase Authentication system. (Relationship: Firebase 1:1 UserProfile)"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the user within the application (student, vendor, admin)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firebaseUid",
+        "email",
+        "name",
+        "role",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Vendor": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vendor",
+      "type": "object",
+      "description": "Represents a vendor selling products on CampusSpend. Each vendor is managed by a specific user with a 'vendor' role.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Vendor entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the vendor."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the vendor or their offerings."
+        },
+        "contactEmail": {
+          "type": "string",
+          "description": "The primary contact email for the vendor.",
+          "format": "email"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile of the user who manages this vendor account. (Relationship: UserProfile 1:1 Vendor)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the vendor profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the vendor profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "contactEmail",
+        "userId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category for organizing products, enabling filtering and browsing.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the category (e.g., 'Food & Drink', 'Textbooks', 'Stationery')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the category."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the category was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the category was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a single product available for purchase from a vendor.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Product entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the product."
+        },
+        "price": {
+          "type": "number",
+          "description": "The current selling price of the product."
+        },
+        "stock": {
+          "type": "number",
+          "description": "The current quantity of the product available in stock."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to the primary image of the product.",
+          "format": "uri"
+        },
+        "vendorId": {
+          "type": "string",
+          "description": "Reference to the Vendor who sells this product. (Relationship: Vendor 1:N Product)"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category this product belongs to. (Relationship: Category 1:N Product)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the product was added.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the product information was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "price",
+        "stock",
+        "vendorId",
+        "categoryId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents a completed transaction or purchase made by a student.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Order entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the UserProfile (student) who placed this order. (Relationship: UserProfile 1:N Order)"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "Timestamp when the order was placed.",
+          "format": "date-time"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The total monetary amount of the order, including all items and potential taxes/fees."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the order (e.g., 'pending', 'completed', 'cancelled', 'delivered')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the order record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the order record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "orderDate",
+        "totalAmount",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OrderItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrderItem",
+      "type": "object",
+      "description": "Represents a single product item within a specific order, capturing the product details at the time of purchase.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the OrderItem entity."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to the Order this item belongs to. (Relationship: Order 1:N OrderItem)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to the Product that was purchased. (Relationship: Product 1:N OrderItem)"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the product ordered."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "The price of a single unit of the product at the time the order was placed."
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "The total cost for this specific item (quantity * unitPrice)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the order item record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the order item record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "orderId",
+        "productId",
+        "quantity",
+        "unitPrice",
+        "subtotal",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Expense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Expense",
+      "type": "object",
+      "description": "Represents a record of spending, typically generated automatically upon successful order completion, used for student expense tracking and reporting.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Expense entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the UserProfile (student) who incurred this expense. (Relationship: UserProfile 1:N Expense)"
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to the Order from which this expense was generated. (Relationship: Order 1:1 Expense)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The total monetary amount of the expense."
+        },
+        "expenseDate": {
+          "type": "string",
+          "description": "The date and time when the expense occurred.",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the expense (e.g., 'Order #12345 from Campus Coffee')."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the primary Category associated with this expense, derived from the order's items. (Relationship: Category 1:N Expense)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the expense record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the expense record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "orderId",
+        "amount",
+        "expenseDate",
+        "description",
+        "categoryId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Budget": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Budget",
+      "type": "object",
+      "description": "Represents a student's personal budget or spending threshold, used for monitoring spending behavior and providing insights.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Budget entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the UserProfile (student) to whom this budget belongs. (Relationship: UserProfile 1:N Budget)"
+        },
+        "name": {
+          "type": "string",
+          "description": "A descriptive name for the budget (e.g., 'Monthly Food Budget', 'Overall Spending Limit')."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The total monetary amount allocated for this budget."
+        },
+        "period": {
+          "type": "string",
+          "description": "The recurrence period for the budget (e.g., 'daily', 'weekly', 'monthly', 'yearly')."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date of the current budget period.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date of the current budget period. Can be null for ongoing budgets or automatically calculated based on period.",
+          "format": "date-time"
+        },
+        "warningThreshold": {
+          "type": "number",
+          "description": "A decimal percentage (0-1) representing the spending level at which a 'Warning' status is triggered (e.g., 0.8 for 80% of budget spent)."
+        },
+        "overspendingThreshold": {
+          "type": "number",
+          "description": "A decimal percentage (0-1) representing the spending level at which an 'Overspending' status is triggered (e.g., 1.0 for 100% of budget spent)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the budget was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the budget was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "name",
+        "amount",
+        "period",
+        "startDate",
+        "warningThreshold",
+        "overspendingThreshold",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/userProfiles/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores core user profile information. The document ID (`userId`) is the Firebase UID, ensuring direct ownership. Includes denormalized 'firebaseUid' which matches the document ID for explicit clarity."
+        }
+      },
+      {
+        "path": "/users/{studentId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Represents orders made by a specific student. Path-based ownership ensures that only the `studentId` (Firebase UID in path) can access their own orders.",
+          "params": [
+            {
+              "name": "studentId",
+              "description": "The Firebase UID of the student who placed the order."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier for the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{studentId}/orders/{orderId}/orderItems/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Represents individual items within a student's order. This collection is nested to maintain order context. Includes denormalized 'studentId' (from parent Order) and 'vendorOwnerId' (Firebase UID of the vendor's managing user) for authorization independence, enabling secure vendor access to their specific items via collection group queries.",
+          "params": [
+            {
+              "name": "studentId",
+              "description": "The Firebase UID of the student who placed the parent order."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier for the parent order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier for the order item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{studentId}/expenses/{expenseId}",
+        "definition": {
+          "entityName": "Expense",
+          "schema": {
+            "$ref": "#/backend/entities/Expense"
+          },
+          "description": "Records individual expenses incurred by a student. Path-based ownership ensures that only the `studentId` (Firebase UID in path) can access their own expense records.",
+          "params": [
+            {
+              "name": "studentId",
+              "description": "The Firebase UID of the student who incurred the expense."
+            },
+            {
+              "name": "expenseId",
+              "description": "The unique identifier for the expense."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{studentId}/budgets/{budgetId}",
+        "definition": {
+          "entityName": "Budget",
+          "schema": {
+            "$ref": "#/backend/entities/Budget"
+          },
+          "description": "Stores personal budget information for a student. Path-based ownership ensures that only the `studentId` (Firebase UID in path) can access and manage their own budgets.",
+          "params": [
+            {
+              "name": "studentId",
+              "description": "The Firebase UID of the student who owns this budget."
+            },
+            {
+              "name": "budgetId",
+              "description": "The unique identifier for the budget."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/vendors/{vendorId}",
+        "definition": {
+          "entityName": "Vendor",
+          "schema": {
+            "$ref": "#/backend/entities/Vendor"
+          },
+          "description": "Represents a vendor selling products. Publicly readable. Includes denormalized 'userId' (Firebase UID of the managing user) for authorization independence, allowing the managing user to update their vendor profile.",
+          "params": [
+            {
+              "name": "vendorId",
+              "description": "The unique identifier for the vendor."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Defines product categories. Publicly readable by all users (students, vendors) for browsing. Write access restricted to administrators.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "The unique identifier for the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Represents individual products. Publicly readable by all users. Includes denormalized 'vendorOwnerId' (Firebase UID of the managing user of the vendor) for authorization independence, allowing vendors to manage their own products without cross-collection lookups.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "The unique identifier for the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "A sentinel collection for defining administrative roles. The existence of a document at this path (where `userId` is the Firebase UID) grants administrative privileges. Uses 'Existence over Content' for simple DBAC."
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for CampusSpend is designed with a strong emphasis on Authorization Independence, Structural Segregation, and consistent Access Modeling to ensure robust security, scalability, and debuggability. \n\n**Authorization Independence via Denormalization:**\nThis principle is critical and is achieved by denormalizing authorization-relevant fields directly into the documents where they are needed. This eliminates the need for `get()` calls in security rules, which can break atomic operations and complicate debugging. Key examples:\n*   **Vendor:** Each `Vendor` document includes a `userId` field, which is the Firebase UID of the user who manages that vendor. This allows a vendor to manage their own profile simply by checking `request.auth.uid == resource.data.userId` without needing to look up the user profile separately.\n*   **Product:** Each `Product` document, while part of a top-level collection, denormalizes the `vendorOwnerId` (the Firebase UID of the user managing the vendor) from its associated `Vendor` entity. This enables direct authorization checks for product management (`request.auth.uid == resource.data.vendorOwnerId`) without needing to `get()` the parent `Vendor` document.\n*   **OrderItem:** This is a crucial example. `OrderItem` documents are nested under a student's `Order`. For a vendor to view their products within a student's order, the `OrderItem` document explicitly denormalizes both the `studentId` (inherited from the parent path) and the `vendorOwnerId` (the Firebase UID of the managing user for the product's vendor at the time of purchase). This allows both students to access their order items and vendors to access *their* specific order items without cross-collection `get()` operations. \n\n**Structural Segregation & QAPs (Queries Are Not Filters):**\nCollections are structured such that documents within a single collection share similar security requirements, simplifying rules and enabling efficient, secure `list` operations (QAPs).\n*   **User-Specific Data:** Private user data (profiles, orders, expenses, budgets) are stored under a path-based ownership model: `/userProfiles/{userId}` and `/users/{studentId}/<subcollection>/{docId}`. This naturally segregates each user's data, allowing rules like `allow read, write: if request.auth.uid == userId;` and enabling QAPs by restricting queries to the user's own branch (e.g., `db.collection('users').doc(request.auth.uid).collection('expenses')`).\n*   **Public/Global Data:** `vendors`, `products`, and `categories` are top-level collections. These are generally publicly readable for browsing, with write access restricted to owners (for `vendors`, `products`) or administrators (for `categories`).\n    *   For `products`, students can query all products (`db.collection('products')`). Vendors can list *their* products securely using `db.collection('products').where('vendorOwnerId', '==', request.auth.uid)`. The `vendorOwnerId` denormalization facilitates this secure and efficient QAP without reliance on security rules to filter the results.\n    *   For `orderItems`, while nested, `collectionGroup` queries are enabled by the `vendorOwnerId` denormalization. A vendor can securely list all order items pertaining to their products across all orders using `db.collectionGroup('orderItems').where('vendorOwnerId', '==', request.auth.uid)`. This query is efficient and secure because the authorization field is present on every document.\n*   **Global Roles (DBAC):** Admin roles are managed via existence over content in `/roles_admin/{userId}`. This makes admin authorization simple: `allow write: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));`.\n\nThis structure prioritizes flat, owner-centric security rules by embedding authorization context where it's needed, ensuring that complex authorization scenarios (like a vendor seeing their portion of a student's order) can be handled securely and efficiently with QAP-compliant queries and without problematic `get()` calls in rules."
+  }
+}
