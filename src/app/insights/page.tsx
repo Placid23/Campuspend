@@ -127,7 +127,7 @@ export default function InsightsPage() {
                     <div key={i} className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="font-bold">{cat.category}</span>
-                        <span className="text-muted-foreground">${cat.spent} / ${cat.budget || '∞'}</span>
+                        <span className="text-muted-foreground">₦{cat.spent} / ₦{cat.budget || '∞'}</span>
                       </div>
                       <Progress 
                         value={cat.budget ? (cat.spent / cat.budget) * 100 : 100} 

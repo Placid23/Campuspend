@@ -33,7 +33,7 @@ const vendors = [
     distance: "300m from Main Campus",
     timing: "Until 10:30 PM",
     rating: 120,
-    priceRange: "Rs. 120 Starting",
+    priceRange: "₦120 Starting",
     image: "https://picsum.photos/seed/pizza-shop/400/225"
   },
   {
@@ -43,7 +43,7 @@ const vendors = [
     distance: "300m from Main Campus",
     timing: "Until 8:30 PM",
     rating: 80,
-    priceRange: "Rs. 100 Starting",
+    priceRange: "₦100 Starting",
     image: "https://picsum.photos/seed/bookstore/400/225"
   },
   {
@@ -53,7 +53,7 @@ const vendors = [
     distance: "350m from Main Campus",
     timing: "Until 10:00 PM",
     rating: 21,
-    priceRange: "Rs. 100 Starting",
+    priceRange: "₦100 Starting",
     image: "https://picsum.photos/seed/cafe/400/225"
   },
   {
@@ -63,7 +63,7 @@ const vendors = [
     distance: "400m from Main Campus",
     timing: "Until 10:00 PM",
     rating: 40,
-    priceRange: "Rs. 150 Starting",
+    priceRange: "₦150 Starting",
     image: "https://picsum.photos/seed/printshop/400/225"
   }
 ]

@@ -29,7 +29,7 @@ import {
   ChevronRight, 
   ChevronLeft,
   Calendar,
-  IndianRupee,
+  Banknote,
   ShoppingBag,
   Users,
   ChefHat,
@@ -64,10 +64,10 @@ const topProducts = [
 ]
 
 const topVendors = [
-  { name: "Fresh Foods Catering", revenue: "Rs. 98,000", status: "Completed", icon: ChefHat },
-  { name: "EduSupplies Co.", revenue: "Rs. 82,000", status: "Pending", icon: BookOpen },
-  { name: "CleanSweep Janitorial", revenue: "Rs. 88,500", status: "Completed", icon: Box },
-  { name: "Tech Solutions Ltd.", revenue: "Rs. 62,000", status: "Cancelled", icon: Monitor },
+  { name: "Fresh Foods Catering", revenue: "₦98,000", status: "Completed", icon: ChefHat },
+  { name: "EduSupplies Co.", revenue: "₦82,000", status: "Pending", icon: BookOpen },
+  { name: "CleanSweep Janitorial", revenue: "₦88,500", status: "Completed", icon: Box },
+  { name: "Tech Solutions Ltd.", revenue: "₦62,000", status: "Cancelled", icon: Monitor },
 ]
 
 export default function AdminReportsPage() {
@@ -90,7 +90,7 @@ export default function AdminReportsPage() {
               <Select defaultValue="revenue">
                 <SelectTrigger className="h-8 border-none bg-transparent hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest p-0 flex gap-2">
                   <div className="p-1 rounded-md bg-amber-500/20 text-amber-500">
-                    <IndianRupee className="w-3 h-3" />
+                    <Banknote className="w-3 h-3" />
                   </div>
                   <SelectValue placeholder="Metric" />
                 </SelectTrigger>
@@ -101,8 +101,8 @@ export default function AdminReportsPage() {
             </div>
             <div className="p-8 space-y-1">
               <div className="flex items-center gap-3">
-                <IndianRupee className="w-5 h-5 text-amber-500" />
-                <h3 className="text-2xl font-bold text-white">Rs. 530,000</h3>
+                <Banknote className="w-5 h-5 text-amber-500" />
+                <h3 className="text-2xl font-bold text-white">₦530,000</h3>
               </div>
             </div>
           </GlassCard>
@@ -147,8 +147,8 @@ export default function AdminReportsPage() {
             <div className="p-8 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <IndianRupee className="w-5 h-5 text-amber-500" />
-                  <h3 className="text-2xl font-bold text-white">Rs. 120,000</h3>
+                  <Banknote className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-2xl font-bold text-white">₦120,000</h3>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 border border-white/10">
                   <Monitor className="w-4 h-4 text-muted-foreground" />
@@ -166,7 +166,7 @@ export default function AdminReportsPage() {
             <h2 className="text-2xl font-headline font-bold text-white">Revenue</h2>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total <span className="text-white">Rs. 120,000</span></p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total <span className="text-white">₦120,000</span></p>
               </div>
               <MoreVertical className="w-4 h-4 text-muted-foreground cursor-pointer" />
             </div>
@@ -193,7 +193,7 @@ export default function AdminReportsPage() {
                   tickLine={false} 
                   tick={{ fill: '#64748b', fontSize: 10 }}
                   ticks={[30000, 60000, 90000, 120000]}
-                  tickFormatter={(val) => `Rs. ${val/1000}K`}
+                  tickFormatter={(val) => `₦${val/1000}K`}
                 />
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(239,26,184,0.3)', borderRadius: '16px' }}

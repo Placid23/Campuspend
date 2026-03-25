@@ -86,7 +86,7 @@ export default function SpendingSummaryPage() {
                       <div className="flex items-center gap-4">
                          <div className="h-10 px-4 rounded-xl bg-primary/20 border border-primary/30 flex items-center gap-2">
                            <Zap className="w-4 h-4 text-primary" />
-                           <span className="text-sm font-bold text-white">5,725 Rs. Spent</span>
+                           <span className="text-sm font-bold text-white">₦5,725 Spent</span>
                          </div>
                          <div className="h-10 w-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400">
                            275
@@ -94,7 +94,7 @@ export default function SpendingSummaryPage() {
                       </div>
                       <Progress value={95} className="h-2 bg-white/5 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-secondary" />
                       <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
-                        Over budget! Spending limit is Rs. 275 left
+                        Over budget! Spending limit is ₦275 left
                       </p>
                     </div>
                   </div>
@@ -110,7 +110,7 @@ export default function SpendingSummaryPage() {
                       ].map((item, i) => (
                         <div key={i} className="flex justify-between items-center group cursor-pointer hover:text-primary transition-colors">
                           <span className="text-muted-foreground group-hover:text-white">{item.name}</span>
-                          <span className="font-bold">Rs. {item.amount}</span>
+                          <span className="font-bold">₦{item.amount}</span>
                         </div>
                       ))}
                     </div>
@@ -142,7 +142,7 @@ export default function SpendingSummaryPage() {
                     </ResponsiveContainer>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Spent</p>
-                       <p className="text-lg font-bold">Rs. 5,725</p>
+                       <p className="text-lg font-bold">₦5,725</p>
                     </div>
                   </div>
 
@@ -173,7 +173,7 @@ export default function SpendingSummaryPage() {
                            <p className="text-sm font-bold truncate">{item.name}</p>
                            <p className="text-[10px] text-muted-foreground uppercase font-medium">{item.time}</p>
                         </div>
-                        <div className="text-sm font-bold text-primary">Rs. {item.price}</div>
+                        <div className="text-sm font-bold text-primary">₦{item.price}</div>
                       </div>
                     ))}
                   </div>
@@ -212,7 +212,7 @@ export default function SpendingSummaryPage() {
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">{item.name}</span>
-                    <span className="font-bold">Rs. {item.price}</span>
+                    <span className="font-bold">₦{item.price}</span>
                   </div>
                 ))}
               </div>

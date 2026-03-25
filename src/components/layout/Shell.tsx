@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -174,7 +175,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <div className="h-9 md:h-10 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 md:gap-3 shadow-inner">
-                   <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rs.</span>
+                   <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">₦</span>
                    <span className="text-xs md:text-sm font-headline font-bold text-primary">{profile?.walletBalance?.toLocaleString() || '0'}</span>
                 </div>
               </div>

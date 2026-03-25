@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -76,9 +77,9 @@ const topSellingProducts = [
 ]
 
 const recentActivity = [
-  { id: 1, name: "QDBurger Bundle", desc: "Rs. 300 • 2ipie Corps", time: "15 mins ago", price: "Rs. 4,950", image: "https://picsum.photos/seed/act1/100/100" },
-  { id: 2, name: "Pepperoni Pizza", desc: "Rs. 4428 • Prape sten", time: "40 mins ago", price: "Rs. 325", image: "https://picsum.photos/seed/act2/100/100" },
-  { id: 3, name: "Classic Burger", desc: "Rs. 300 - 9 uinnay Mertia", time: "1 hour ago", price: "Rs. 500", image: "https://picsum.photos/seed/act3/100/100", isUser: true, userAvatar: "https://picsum.photos/seed/user-act/100/100" },
+  { id: 1, name: "QDBurger Bundle", desc: "₦300 • 2ipie Corps", time: "15 mins ago", price: "₦4,950", image: "https://picsum.photos/seed/act1/100/100" },
+  { id: 2, name: "Pepperoni Pizza", desc: "₦4428 • Prape sten", time: "40 mins ago", price: "₦325", image: "https://picsum.photos/seed/act2/100/100" },
+  { id: 3, name: "Classic Burger", desc: "₦300 - 9 uinnay Mertia", time: "1 hour ago", price: "₦500", image: "https://picsum.photos/seed/act3/100/100", isUser: true, userAvatar: "https://picsum.photos/seed/user-act/100/100" },
 ]
 
 export default function SalesSummaryPage() {
@@ -111,7 +112,7 @@ export default function SalesSummaryPage() {
                    <TrendingUp className="w-3 h-3" /> Total Sales
                 </p>
                 <div className="space-y-1">
-                   <h3 className="text-2xl font-bold text-white">Rs. 78,950</h3>
+                   <h3 className="text-2xl font-bold text-white">₦78,950</h3>
                    <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold">
                       <ArrowUpRight className="w-3 h-3" /> + 8.2%
                    </div>
@@ -264,7 +265,7 @@ export default function SalesSummaryPage() {
                   { label: "Total Sales", value: "458", color: "text-white" },
                   { label: "Delivered Orders", value: "432", color: "text-white" },
                   { label: "Products Sold", value: "820", color: "text-amber-500" },
-                  { label: "Total, lost soon Rs.", value: "-6,300", color: "text-muted-foreground" },
+                  { label: "Total, lost soon ₦", value: "-6,300", color: "text-muted-foreground" },
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center group">
                     <div className="flex items-center gap-3">
@@ -303,9 +304,9 @@ export default function SalesSummaryPage() {
                 <h3 className="text-lg font-headline font-bold text-white">Recent Activity</h3>
                 <div className="space-y-6">
                   {[
-                    { name: "QDBurger Bundle", time: "15 mins ago", price: "Rs. 770", image: "https://picsum.photos/seed/sact1/100/100" },
-                    { name: "Pepperoni Pizza", time: "40 mins ago", price: "22s. 428", image: "https://picsum.photos/seed/sact2/100/100" },
-                    { name: "Classic Burger", time: "1 hour ago", price: "Rs. 300", image: "https://picsum.photos/seed/sact3/100/100", isUser: true, userAvatar: "https://picsum.photos/seed/uact1/100/100" },
+                    { name: "QDBurger Bundle", time: "15 mins ago", price: "₦770", image: "https://picsum.photos/seed/sact1/100/100" },
+                    { name: "Pepperoni Pizza", time: "40 mins ago", price: "₦428", image: "https://picsum.photos/seed/sact2/100/100" },
+                    { name: "Classic Burger", time: "1 hour ago", price: "₦300", image: "https://picsum.photos/seed/sact3/100/100", isUser: true, userAvatar: "https://picsum.photos/seed/uact1/100/100" },
                   ].map((act, i) => (
                     <div key={i} className="flex items-center gap-4 group cursor-pointer">
                       <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10">

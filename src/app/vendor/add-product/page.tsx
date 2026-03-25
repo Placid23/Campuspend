@@ -155,7 +155,7 @@ export default function AddProductPage() {
                  <h3 className="text-lg font-headline font-bold text-white/80 tracking-wide">Pricing & Stock</h3>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Price (Rs.)</Label>
+                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Price (₦)</Label>
                        <Input 
                         type="number"
                         value={formData.price}

@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -155,7 +156,7 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <div className="h-10 px-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shadow-inner">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rs.</span>
+                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">₦</span>
                    <span className="text-sm font-headline font-bold text-primary">12,850</span>
                    <Bell className="w-4 h-4 text-primary ml-2" />
                 </div>

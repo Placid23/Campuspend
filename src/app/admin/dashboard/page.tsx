@@ -59,10 +59,10 @@ const userDistribution = [
 ]
 
 const recentOrders = [
-  { id: "#00140", student: "Priya Lashi", vendor: "QfoodHub Café", amount: "Rs. 600" },
-  { id: "#00139", student: "Ishaan Kapoor", vendor: "CALCULOS", amount: "Rs. 660" },
-  { id: "#00138", student: "Tanvi Patel", vendor: "Print & Spital", amount: "Rs. 480" },
-  { id: "#00137", student: "Alex Carter", vendor: "QfoodHub Café", amount: "Rs. 250" },
+  { id: "#00140", student: "Priya Lashi", vendor: "QfoodHub Café", amount: "₦600" },
+  { id: "#00139", student: "Ishaan Kapoor", vendor: "CALCULOS", amount: "₦660" },
+  { id: "#00138", student: "Tanvi Patel", vendor: "Print & Spital", amount: "₦480" },
+  { id: "#00137", student: "Alex Carter", vendor: "QfoodHub Café", amount: "₦250" },
 ]
 
 const recentReports = [
@@ -131,7 +131,7 @@ export default function AdminDashboardPage() {
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Revenue</p>
-                <h3 className="text-2xl font-bold text-white">Rs. 980,000</h3>
+                <h3 className="text-2xl font-bold text-white">₦980,000</h3>
               </div>
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
                 <DollarSign className="w-5 h-5" />

@@ -38,12 +38,12 @@ import {
 import { cn } from "@/lib/utils"
 
 const products = [
-  { name: "Wireless Bluetooth Headphones", sku: "ELEC-001", category: "Electronics", stock: 120, price: "Rs. 3,500", status: "Active" },
-  { name: "Cotton T-Shirt", sku: "APP-102", category: "Apparel", stock: 320, price: "Rs. 750", status: "Active" },
-  { name: "Gaming Laptop", sku: "ELEC-205", category: "Electronics", stock: 5, price: "Rs. 100,000", status: "Out of Stock" },
-  { name: "Organic Green Tea", sku: "FOOD-089", category: "Groceries", stock: 18, price: "Rs. 500", status: "Low Stock" },
-  { name: "Stainless Steel Water Bottle", sku: "ACC-150", category: "Accessories", stock: 50, price: "Rs. 700", status: "Active" },
-  { name: "Running Shoes", sku: "SHOES-233", category: "Footwear", stock: 0, price: "Rs. 4,000", status: "Out of Stock" },
+  { name: "Wireless Bluetooth Headphones", sku: "ELEC-001", category: "Electronics", stock: 120, price: "₦3,500", status: "Active" },
+  { name: "Cotton T-Shirt", sku: "APP-102", category: "Apparel", stock: 320, price: "₦750", status: "Active" },
+  { name: "Gaming Laptop", sku: "ELEC-205", category: "Electronics", stock: 5, price: "₦100,000", status: "Out of Stock" },
+  { name: "Organic Green Tea", sku: "FOOD-089", category: "Groceries", stock: 18, price: "₦500", status: "Low Stock" },
+  { name: "Stainless Steel Water Bottle", sku: "ACC-150", category: "Accessories", stock: 50, price: "₦700", status: "Active" },
+  { name: "Running Shoes", sku: "SHOES-233", category: "Footwear", stock: 0, price: "₦4,000", status: "Out of Stock" },
 ]
 
 export default function AdminManageProductsPage() {

@@ -65,7 +65,7 @@ export default function AdminThresholdSettingsPage() {
             <div className="space-y-2">
               <h3 className="text-xl font-headline font-bold text-white">Spending Limit Threshold</h3>
               <div className="space-y-1">
-                <p className="text-sm font-bold text-secondary/80">Current Setting: <span className="text-white">Rs. 2,500</span></p>
+                <p className="text-sm font-bold text-secondary/80">Current Setting: <span className="text-white">₦2,500</span></p>
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-relaxed">
                   Set daily individual spending limit for students.
                 </p>
@@ -77,7 +77,7 @@ export default function AdminThresholdSettingsPage() {
                 <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Daily Spending Limit</Label>
                 <div className="relative">
                   <Input 
-                    defaultValue="Rs. 2,500"
+                    defaultValue="₦2,500"
                     className="h-14 bg-white/5 border-white/10 rounded-2xl px-6 text-lg font-bold focus:border-secondary/50 transition-all"
                   />
                 </div>

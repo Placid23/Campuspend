@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -102,7 +103,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Wallet Balance</Label>
                     <Input 
-                      defaultValue={`Rs. ${profile?.walletBalance?.toLocaleString() || '0'}`}
+                      defaultValue={`₦${profile?.walletBalance?.toLocaleString() || '0'}`}
                       disabled
                       className="h-12 bg-white/10 border-white/10 rounded-xl text-sm px-6 opacity-60 cursor-not-allowed"
                     />
@@ -111,15 +112,15 @@ export default function SettingsPage() {
 
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Country</Label>
-                  <Select defaultValue="us">
+                  <Select defaultValue="in">
                     <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl focus:ring-primary/30 px-6">
                       <SelectValue placeholder="Select Country" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-white/10">
+                      <SelectItem value="in">Nigeria</SelectItem>
                       <SelectItem value="us">United States</SelectItem>
                       <SelectItem value="uk">United Kingdom</SelectItem>
                       <SelectItem value="ca">Canada</SelectItem>
-                      <SelectItem value="in">India</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

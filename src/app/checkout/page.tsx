@@ -54,14 +54,14 @@ export default function CheckoutPage() {
                       { 
                         name: "Cheesy Burger", 
                         vendor: "FoodHub Café", 
-                        price: "Rs. 225", 
+                        price: "₦225", 
                         tags: ["Fast Food", "300m", "15-20 mins"],
                         image: "https://picsum.photos/seed/burger-big/100/100"
                       },
                       { 
                         name: "Pepperoni Pizza", 
                         vendor: "FoodHub Café", 
-                        price: "Rs. 250", 
+                        price: "₦250", 
                         tags: ["Fast Food", "300m", "15-20 mins"],
                         image: "https://picsum.photos/seed/pizz1/100/100"
                       }
@@ -91,8 +91,8 @@ export default function CheckoutPage() {
 
                   <div className="pt-6 border-t border-white/5 space-y-3">
                     <div className="flex justify-between items-center">
-                       <span className="text-xs font-bold text-emerald-400">Wallet Discount : Rs. 50</span>
-                       <span className="text-sm font-bold text-rose-400">-Rs. 50</span>
+                       <span className="text-xs font-bold text-emerald-400">Wallet Discount : ₦50</span>
+                       <span className="text-sm font-bold text-rose-400">-₦50</span>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
                        <Clock className="w-3 h-3" /> Taal via wiler : 15-20 mins <span className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-primary"><Zap className="w-2 h-2" /></span>
@@ -110,7 +110,7 @@ export default function CheckoutPage() {
                         <AvatarFallback>G</AvatarFallback>
                       </Avatar>
                       <div className="space-y-1">
-                        <p className="text-sm font-bold">Gentuu</p>
+                        <p className="text-sm font-bold">Student</p>
                         <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">ID: STU1234001</p>
                         <div className="pt-2 text-xs text-muted-foreground space-y-1">
                            <p>Main Dormitory,</p>
@@ -125,27 +125,27 @@ export default function CheckoutPage() {
                     <div className="space-y-3 text-xs">
                        <div className="flex justify-between">
                           <span className="text-muted-foreground">Subtotal</span>
-                          <span className="font-bold">Rs. 475.00</span>
+                          <span className="font-bold">₦475.00</span>
                        </div>
                        <div className="flex justify-between">
                           <span className="text-muted-foreground">Tax</span>
-                          <span className="font-bold text-primary">Rs. 11.88</span>
+                          <span className="font-bold text-primary">₦11.88</span>
                        </div>
                        <div className="flex justify-between">
                           <span className="text-muted-foreground">Wallet Discount</span>
-                          <span className="font-bold text-rose-400">-Rs. 50.00</span>
+                          <span className="font-bold text-rose-400">-₦50.00</span>
                        </div>
                        <div className="flex justify-between">
                           <span className="text-muted-foreground">Delivery Fee</span>
-                          <span className="font-bold">Rs. 10.00</span>
+                          <span className="font-bold">₦10.00</span>
                        </div>
                        <div className="pt-3 border-t border-white/5 flex justify-between items-center">
                           <span className="text-base font-bold uppercase tracking-tighter">Total</span>
-                          <span className="text-lg font-bold text-primary">Rs. 446.88</span>
+                          <span className="text-lg font-bold text-primary">₦446.88</span>
                        </div>
                        <div className="flex justify-between text-[10px] pt-1">
                           <span className="text-muted-foreground uppercase font-bold tracking-widest">Paid via Wallet</span>
-                          <span className="font-bold text-primary">Rs. 53.62</span>
+                          <span className="font-bold text-primary">₦53.62</span>
                        </div>
                     </div>
                   </div>
@@ -167,30 +167,30 @@ export default function CheckoutPage() {
               <div className="space-y-4 text-sm font-medium">
                 <div className="flex justify-between">
                    <span className="text-muted-foreground">Subtotal</span>
-                   <span>Rs. 475.00</span>
+                   <span>₦475.00</span>
                 </div>
                 <div className="flex justify-between">
                    <span className="text-muted-foreground">Tax</span>
-                   <span className="text-primary">Rs. 11.88</span>
+                   <span className="text-primary">₦11.88</span>
                 </div>
                 <div className="flex justify-between">
                    <span className="text-muted-foreground">Wallet Discount</span>
-                   <span className="text-rose-400">-Rs. 50.00</span>
+                   <span className="text-rose-400">-₦50.00</span>
                 </div>
                 <div className="flex justify-between">
                    <span className="text-muted-foreground">Delivery Fee</span>
-                   <span>Rs. 10.00</span>
+                   <span>₦10.00</span>
                 </div>
               </div>
 
               <div className="pt-6 border-t border-white/10 space-y-1">
                  <div className="flex justify-between items-center">
                     <span className="text-xl font-headline font-bold">Total</span>
-                    <span className="text-xl font-headline font-bold text-primary neon-text-glow">Rs. 446.88</span>
+                    <span className="text-xl font-headline font-bold text-primary neon-text-glow">₦446.88</span>
                  </div>
                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
                     <span>Paid via Wallet</span>
-                    <span className="text-primary">Rs. 53.62</span>
+                    <span className="text-primary">₦53.62</span>
                  </div>
               </div>
 

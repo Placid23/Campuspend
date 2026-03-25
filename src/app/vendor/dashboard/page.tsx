@@ -59,7 +59,7 @@ export default function VendorDashboardPage() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-bold text-white">Rs. 0</h3>
+                  <h3 className="text-2xl font-bold text-white">₦0</h3>
                   <p className="text-[10px] text-muted-foreground font-bold">Waiting for first order</p>
                 </div>
               </GlassCard>

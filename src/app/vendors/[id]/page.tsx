@@ -149,7 +149,7 @@ export default function VendorProductPage() {
                 </div>
 
                 <div className="flex items-end gap-2">
-                   <div className="text-lg font-headline font-bold">Rs. {product.price.toFixed(2)}</div>
+                   <div className="text-lg font-headline font-bold">₦{product.price.toFixed(2)}</div>
                    {product.promo && <span className="text-[10px] text-primary font-bold mb-1">{product.promo}</span>}
                 </div>
 
@@ -196,7 +196,7 @@ export default function VendorProductPage() {
                   <div className="p-6 flex items-center justify-between">
                      <div className="space-y-1">
                         <h4 className="text-sm font-bold group-hover:text-primary transition-colors">{drink.name}</h4>
-                        <p className="text-xs text-primary font-bold">Rs. {drink.price.toFixed(2)}</p>
+                        <p className="text-xs text-primary font-bold">₦{drink.price.toFixed(2)}</p>
                      </div>
                      <button className="text-muted-foreground hover:text-rose-500">
                         <Heart className="w-4 h-4" />

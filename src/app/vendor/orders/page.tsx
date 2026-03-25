@@ -46,14 +46,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
 const orders = [
-  { id: "#01041", date: "Apr 24, 2024", customer: "Alex Carter", sub: "In spods", status: "Delivered", amount: "Rs. 600", statusColor: "emerald" },
-  { id: "#01042", date: "Apr 24, 2024", customer: "Priya Joshi", sub: "In spods", status: "Pending", amount: "Rs. 180", statusColor: "amber" },
-  { id: "#01043", date: "Apr 24, 2024", customer: "Ananya Mehta", sub: "In spods", status: "Pending", amount: "Rs. 325", statusColor: "amber" },
-  { id: "#01043", date: "Apr 24, 2024", customer: "Aurit Sharma", sub: "In bpods", status: "Delivered", amount: "Rs. 600", statusColor: "emerald" },
-  { id: "#01044", date: "Apr 24, 2024", customer: "Aditi Verma", sub: "In spods", status: "Delivered", amount: "Rs. 130", statusColor: "emerald" },
-  { id: "#01045", date: "Apr 24, 2024", customer: "Nikhil Singh", sub: "In spods", status: "Pending", amount: "Rs. 160", statusColor: "amber" },
-  { id: "#01046", date: "Apr 24, 2024", customer: "Tanvi Patel", sub: "In ppods", status: "Cancelled", amount: "Rs. 325", statusColor: "rose" },
-  { id: "#01047", date: "Apr 24, 2024", customer: "Apr 24, 2024", sub: "---", status: "Delivered", amount: "Rs. 210", statusColor: "emerald" },
+  { id: "#01041", date: "Apr 24, 2024", customer: "Alex Carter", sub: "In spods", status: "Delivered", amount: "₦600", statusColor: "emerald" },
+  { id: "#01042", date: "Apr 24, 2024", customer: "Priya Joshi", sub: "In spods", status: "Pending", amount: "₦180", statusColor: "amber" },
+  { id: "#01043", date: "Apr 24, 2024", customer: "Ananya Mehta", sub: "In spods", status: "Pending", amount: "₦325", statusColor: "amber" },
+  { id: "#01043", date: "Apr 24, 2024", customer: "Aurit Sharma", sub: "In bpods", status: "Delivered", amount: "₦600", statusColor: "emerald" },
+  { id: "#01044", date: "Apr 24, 2024", customer: "Aditi Verma", sub: "In spods", status: "Delivered", amount: "₦130", statusColor: "emerald" },
+  { id: "#01045", date: "Apr 24, 2024", customer: "Nikhil Singh", sub: "In spods", status: "Pending", amount: "₦160", statusColor: "amber" },
+  { id: "#01046", date: "Apr 24, 2024", customer: "Tanvi Patel", sub: "In ppods", status: "Cancelled", amount: "₦325", statusColor: "rose" },
+  { id: "#01047", date: "Apr 24, 2024", customer: "Apr 24, 2024", sub: "---", status: "Delivered", amount: "₦210", statusColor: "emerald" },
 ]
 
 const summaryData = [
@@ -63,9 +63,9 @@ const summaryData = [
 ]
 
 const recentCustomers = [
-  { name: "Alex Carter", amount: "Rs. 600", avatar: "https://picsum.photos/seed/alex/100/100" },
-  { name: "Priya Joshi", amount: "Rs. 180", avatar: "https://picsum.photos/seed/priya/100/100" },
-  { name: "Ananya Mehta", amount: "Rs. 325", avatar: "https://picsum.photos/seed/ananya/100/100" },
+  { name: "Alex Carter", amount: "₦600", avatar: "https://picsum.photos/seed/alex/100/100" },
+  { name: "Priya Joshi", amount: "₦180", avatar: "https://picsum.photos/seed/priya/100/100" },
+  { name: "Ananya Mehta", amount: "₦325", avatar: "https://picsum.photos/seed/ananya/100/100" },
 ]
 
 export default function VendorOrdersPage() {

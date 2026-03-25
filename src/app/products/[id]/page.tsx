@@ -97,10 +97,10 @@ export default function ProductDetailPage() {
 
                   <div className="space-y-4">
                     <div className="text-3xl font-headline font-bold text-primary neon-text-glow">
-                      Rs. {basePrice.toFixed(2)}
+                      ₦{basePrice.toFixed(2)}
                     </div>
                     <Badge className="bg-primary/10 text-primary border-primary/30 px-6 py-2 rounded-2xl text-xs font-bold border-dashed">
-                      - Rs. {discount.toFixed(2)} off today only!
+                      - ₦{discount.toFixed(2)} off today only!
                     </Badge>
                   </div>
 
@@ -117,7 +117,7 @@ export default function ProductDetailPage() {
                         A cheesy burger is a juicy sandwich featuring a seasoned beef patty, melted cheese, fresh lettuce, tomato, and a tangy sauce, all served on a soft, toasted bun.
                       </p>
                       <p className="text-sm font-bold text-foreground/80 leading-relaxed">
-                        Today Only! Enjoy a Rs. 25.00 off discount as part of our daily special. It's a popular fast food choice among students!
+                        Today Only! Enjoy a ₦25.00 off discount as part of our daily special. It's a popular fast food choice among students!
                       </p>
                     </div>
                   </div>
@@ -143,9 +143,9 @@ export default function ProductDetailPage() {
                       <CreditCard className="w-5 h-5 text-primary" /> Raintings:
                    </div>
                    <div className="space-y-1">
-                      <div className="text-lg font-headline font-bold">Rs. {discount} off today</div>
+                      <div className="text-lg font-headline font-bold">₦{discount} off today</div>
                       <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Expense will be auto-logged</p>
-                      <p className="text-xs text-muted-foreground pt-2">Wallet: Rs. 500.50</p>
+                      <p className="text-xs text-muted-foreground pt-2">Wallet: ₦500.50</p>
                    </div>
                 </div>
 
@@ -172,11 +172,11 @@ export default function ProductDetailPage() {
                   
                   <div className="space-y-3">
                     <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-base font-bold shadow-[0_0_30px_rgba(239,26,184,0.3)] hover:opacity-90">
-                      Add to Cart - Rs. {totalPrice.toFixed(2)}
+                      Add to Cart - ₦{totalPrice.toFixed(2)}
                     </Button>
                     <div className="flex flex-col gap-1 items-center">
                        <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
-                         <Star className="w-3 h-3 fill-emerald-400" /> Rs. 25 off today
+                         <Star className="w-3 h-3 fill-emerald-400" /> ₦25 off today
                        </div>
                        <div className="flex items-center gap-2 text-[10px] text-primary font-bold uppercase tracking-widest">
                          <Zap className="w-3 h-3" /> Expense will be auto-logged
@@ -233,7 +233,7 @@ export default function ProductDetailPage() {
                           <Heart className="w-3 h-3 text-muted-foreground hover:text-rose-500 transition-colors" />
                        </div>
                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-primary">Rs. {item.price.toFixed(2)}</p>
+                          <p className="text-xs font-bold text-primary">₦{item.price.toFixed(2)}</p>
                           <div className="flex items-center gap-1 text-[10px] text-primary/60 font-bold">
                             <Star className="w-2.5 h-2.5 fill-primary/60" /> {item.rating} <MoreVertical className="w-2.5 h-2.5" />
                           </div>

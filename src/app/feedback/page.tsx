@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -153,7 +154,7 @@ export default function FeedbackPage() {
               <h3 className="text-xl font-headline font-bold">Spending Breakdown</h3>
               
               <div className="space-y-2">
-                 <p className="text-sm text-muted-foreground font-medium">Spent <span className="text-white font-bold ml-2 text-lg">Rs. 5,725</span></p>
+                 <p className="text-sm text-muted-foreground font-medium">Spent <span className="text-white font-bold ml-2 text-lg">₦5,725</span></p>
               </div>
 
               <div className="relative h-[240px] flex items-center justify-center">
@@ -179,7 +180,7 @@ export default function FeedbackPage() {
                 </ResponsiveContainer>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">+590</p>
-                   <p className="text-sm font-bold">Rs. 5,726</p>
+                   <p className="text-sm font-bold">₦5,726</p>
                 </div>
               </div>
 
@@ -190,7 +191,7 @@ export default function FeedbackPage() {
                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                        <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">{item.name}</span>
                     </div>
-                    <span className="text-sm font-bold">Rs. {item.value}</span>
+                    <span className="text-sm font-bold">₦{item.value}</span>
                   </div>
                 ))}
               </div>

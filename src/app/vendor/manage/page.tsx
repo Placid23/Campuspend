@@ -87,7 +87,7 @@ export default function ManageProductsPage() {
                     <TableRow className="border-white/5 hover:bg-transparent">
                       <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 text-muted-foreground pl-8">Image</TableHead>
                       <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 text-muted-foreground">Product Name</TableHead>
-                      <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 text-muted-foreground">Price (Rs.)</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 text-muted-foreground">Price (₦)</TableHead>
                       <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 text-muted-foreground">Stock</TableHead>
                       <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 text-muted-foreground text-center">Status</TableHead>
                     </TableRow>
@@ -106,7 +106,7 @@ export default function ManageProductsPage() {
                             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{item.category}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm font-bold text-white/80">Rs. {item.price}</TableCell>
+                        <TableCell className="text-sm font-bold text-white/80">₦{item.price}</TableCell>
                         <TableCell className="text-sm font-bold text-white/80">{item.stock}</TableCell>
                         <TableCell>
                           <div className="flex justify-center">

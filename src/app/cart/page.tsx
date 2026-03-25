@@ -94,7 +94,7 @@ export default function CartPage() {
                           <h3 className="text-xl font-headline font-bold">{item.name}</h3>
                           <p className="text-xs text-muted-foreground">{item.vendor}</p>
                         </div>
-                        <div className="text-lg font-bold">Rs. {item.price.toFixed(0)} <ShoppingCart className="inline w-3 h-3 text-muted-foreground/50 ml-1" /></div>
+                        <div className="text-lg font-bold">₦{item.price.toFixed(0)} <ShoppingCart className="inline w-3 h-3 text-muted-foreground/50 ml-1" /></div>
                       </div>
                       
                       <div className="flex flex-wrap gap-2 justify-center md:justify-start">
@@ -106,7 +106,7 @@ export default function CartPage() {
                         ))}
                       </div>
 
-                      <div className="text-xs font-bold text-muted-foreground">Rs. {item.price.toFixed(0)}</div>
+                      <div className="text-xs font-bold text-muted-foreground">₦{item.price.toFixed(0)}</div>
                     </div>
 
                     <div className="flex items-center gap-4 bg-white/5 rounded-xl border border-white/10 p-1">
@@ -154,30 +154,30 @@ export default function CartPage() {
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-bold">Rs. {subtotal.toFixed(2)}</span>
+                  <span className="font-bold">₦{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Estimated Tax</span>
-                  <span className="font-bold">Rs. {tax.toFixed(2)}</span>
+                  <span className="font-bold">₦{tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Delivery Fee</span>
-                  <span className="font-bold">Rs. {deliveryFee.toFixed(2)}</span>
+                  <span className="font-bold">₦{deliveryFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Wallet Discount</span>
-                  <span className="font-bold text-rose-400">-Rs. {walletDiscount.toFixed(2)}</span>
+                  <span className="font-bold text-rose-400">-₦{walletDiscount.toFixed(2)}</span>
                 </div>
               </div>
 
               <div className="pt-6 border-t border-white/5 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-headline font-bold">Total</span>
-                  <span className="text-2xl font-headline font-bold text-primary neon-text-glow">Rs. {total.toFixed(2)}</span>
+                  <span className="text-2xl font-headline font-bold text-primary neon-text-glow">₦{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">Wallet Balance</span>
-                  <span className="font-bold">Rs. 500.50</span>
+                  <span className="font-bold">₦500.50</span>
                 </div>
               </div>
 

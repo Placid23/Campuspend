@@ -30,9 +30,9 @@ import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const recentActivity = [
-  { name: "QDBurger Bundle", time: "15 mins ago", price: "Rs. +450", desc: "Rs. 300 to - Abok corner", image: "https://picsum.photos/seed/burger-act/100/100" },
-  { name: "Pepperoni Pizza", time: "40 mins ago", price: "Rs. +925", desc: "Rs. 230 to - Prajo nach", image: "https://picsum.photos/seed/pizza-act/100/100" },
-  { name: "Classic Burger", time: "1 hour ago", price: "Rs. +500", desc: "Rs. 300 to - Analys wiente", image: "https://picsum.photos/seed/user-act/100/100", isUser: true, userAvatar: "https://picsum.photos/seed/u1/100/100" },
+  { name: "QDBurger Bundle", time: "15 mins ago", price: "₦ +450", desc: "₦300 to - Abok corner", image: "https://picsum.photos/seed/burger-act/100/100" },
+  { name: "Pepperoni Pizza", time: "40 mins ago", price: "₦ +925", desc: "₦230 to - Prajo nach", image: "https://picsum.photos/seed/pizza-act/100/100" },
+  { name: "Classic Burger", time: "1 hour ago", price: "₦ +500", desc: "₦300 to - Analys wiente", image: "https://picsum.photos/seed/user-act/100/100", isUser: true, userAvatar: "https://picsum.photos/seed/u1/100/100" },
 ]
 
 export default function VendorProfilePage() {
@@ -78,7 +78,7 @@ export default function VendorProfilePage() {
                 <div className="h-16 w-full rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center px-4">
                   <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Balance</p>
                   <div className="flex items-center gap-3">
-                    <span className="text-xl font-bold text-white">Rs. 12,950</span>
+                    <span className="text-xl font-bold text-white">₦12,950</span>
                     <div className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[8px] font-bold uppercase flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div> Open
                     </div>
@@ -92,7 +92,7 @@ export default function VendorProfilePage() {
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
                     <Phone className="w-3 h-3 text-primary" />
-                    <span>+92 300 1234567</span>
+                    <span>+234 800 1234567</span>
                   </div>
                 </div>
 
@@ -133,7 +133,7 @@ export default function VendorProfilePage() {
                   <div className="space-y-2">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Contact Number</Label>
                     <Input 
-                      defaultValue="+92 300 1234567"
+                      defaultValue="+234 800 1234567"
                       className="h-12 bg-white/5 border-white/10 rounded-xl px-6 focus:border-primary/50 transition-all text-sm"
                     />
                   </div>
@@ -142,7 +142,7 @@ export default function VendorProfilePage() {
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Address</Label>
                     <textarea 
                       className="w-full min-h-[100px] bg-white/5 border border-white/10 rounded-xl p-6 focus:border-primary/50 transition-all text-sm outline-none resize-none text-white/80"
-                      defaultValue="Science Block, Campus University, Karachi, Pakistan"
+                      defaultValue="Lagos Campus, University Way, Nigeria"
                     />
                   </div>
                 </div>
@@ -160,7 +160,7 @@ export default function VendorProfilePage() {
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Bank Account</p>
                     <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-bold text-white/80">My Bank</span>
+                        <span className="text-sm font-bold text-white/80">Nigerian Bank</span>
                         <Badge className="bg-primary/20 text-primary border-none text-[8px] uppercase">Default</Badge>
                       </div>
                       <p className="text-base font-bold text-white/60 tracking-[0.2em]">**** **** **** 3456</p>

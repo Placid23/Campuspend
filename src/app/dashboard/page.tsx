@@ -1,3 +1,4 @@
+
 "use client"
 
 import { DashboardShell } from "@/components/layout/Shell"
@@ -79,7 +80,7 @@ export default function DashboardPage() {
                     <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Available Funds</p>
                   </div>
                   <div className="text-center sm:text-right">
-                    <span className="text-xs text-muted-foreground mr-2">Rs.</span>
+                    <span className="text-xs text-muted-foreground mr-2">₦</span>
                     <span className="text-3xl font-bold">{profile?.walletBalance?.toLocaleString() || '0.00'}</span>
                   </div>
                 </div>
@@ -88,7 +89,7 @@ export default function DashboardPage() {
                     <div className="h-full w-[100%] bg-gradient-to-r from-primary to-secondary absolute left-0 top-0 shadow-[0_0_20px_rgba(239,26,184,0.5)]"></div>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-                    <p className="text-xs text-muted-foreground">Budget Limit: Rs. <span className="text-foreground font-bold">{profile?.monthlyBudget?.toLocaleString() || '0'}</span></p>
+                    <p className="text-xs text-muted-foreground">Budget Limit: ₦<span className="text-foreground font-bold">{profile?.monthlyBudget?.toLocaleString() || '0'}</span></p>
                     <Badge className="bg-emerald-500/20 text-emerald-500 border-none px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Active Wallet</Badge>
                   </div>
                 </div>
@@ -99,14 +100,14 @@ export default function DashboardPage() {
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-sm uppercase tracking-tight">Today's Spending</h3>
                     <div className="text-right">
-                       <span className="text-xs text-muted-foreground mr-1">Rs.</span>
+                       <span className="text-xs text-muted-foreground mr-1">₦</span>
                        <span className="font-bold">0.00</span>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <Progress value={0} className="h-2 bg-white/5 [&>div]:bg-primary" />
                     <div className="flex justify-between items-center">
-                      <p className="text-[10px] text-muted-foreground">Daily Limit Estimate: Rs. 500</p>
+                      <p className="text-[10px] text-muted-foreground">Daily Limit Estimate: ₦500</p>
                       <Badge className="bg-emerald-500/10 text-emerald-400 border-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5">Healthy</Badge>
                     </div>
                   </div>
