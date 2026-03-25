@@ -15,7 +15,8 @@ import {
   Zap,
   Navigation,
   Loader2,
-  Store
+  Store,
+  ArrowRight
 } from "lucide-react"
 import Image from 'next/image'
 import Link from 'next/link'
@@ -27,66 +28,40 @@ export default function VendorListPage() {
   const [activeCategory, setActiveCategory] = useState("All")
   const db = useFirestore()
 
+  // Fetch real vendors from Firestore
   const vendorsQuery = useMemoFirebase(() => {
     return query(collection(db, "vendors"), orderBy("name", "asc"))
   }, [db])
 
-  const { data: vendors, isLoading } = useCollection(vendorsQuery)
+  const { data: vendors, isLoading, error } = useCollection(vendorsQuery)
 
   return (
     <DashboardShell>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom duration-700">
         <div className="space-y-4">
-          <h1 className="text-4xl font-headline font-bold">Vendors</h1>
-          <p className="text-muted-foreground text-sm">Browse campus vendors and find the best deals.</p>
+          <h1 className="text-4xl font-headline font-bold text-white">Campus <span className="text-primary neon-text-glow">Vendors</span></h1>
+          <p className="text-muted-foreground text-sm">Discover and order from verified merchants across campus.</p>
         </div>
 
-        {/* High-Fidelity Search Bar */}
+        {/* Search Bar */}
         <div className="relative group max-w-4xl">
           <div className="absolute inset-0 bg-primary/20 blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
           <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl h-14 px-6 gap-4">
             <Search className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input 
-              className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground/50" 
+              className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground/50 text-white" 
               placeholder="Search for vendors or products..." 
             />
             <div className="flex items-center gap-4 pl-4 border-l border-white/10">
-               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hidden sm:inline">Filter Vendors</span>
-               <Button variant="ghost" size="sm" className="h-8 rounded-xl bg-white/5 text-[10px] font-bold flex gap-2">
-                 <Navigation className="w-3 h-3 text-primary" /> Nearest <ChevronDown className="w-3 h-3" />
-               </Button>
                <Button size="icon" className="h-10 w-10 rounded-xl bg-primary shadow-[0_0_15px_rgba(239,26,184,0.4)]">
-                 <Search className="w-4 h-4" />
+                 <Search className="w-4 h-4 text-white" />
                </Button>
             </div>
           </div>
         </div>
 
-        {/* Filter Row */}
-        <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/5">
-           <div className="flex items-center gap-4">
-             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Filter Vendors</span>
-             <div className="flex gap-2">
-               {["All", "Fast Food", "Stationery"].map(cat => (
-                 <Badge key={cat} onClick={() => setActiveCategory(cat)} className={cn(
-                   "rounded-xl px-4 py-1.5 text-[10px] font-bold cursor-pointer transition-all border",
-                   activeCategory === cat ? "bg-primary/20 border-primary text-white" : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10"
-                 )}>{cat}</Badge>
-               ))}
-             </div>
-           </div>
-
-           <div className="flex items-center gap-4 ml-auto">
-              <div className="flex items-center gap-2">
-                 <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Campus:</span>
-                 <div className="h-8 w-12 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-xs font-bold">Main</div>
-              </div>
-              <Button variant="link" className="text-[10px] font-bold uppercase text-muted-foreground p-0 h-auto" onClick={() => setActiveCategory("All")}>Clear Filter: <span className="text-white">Reset</span></Button>
-           </div>
-        </div>
-
         {/* Vendor Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {isLoading ? (
             <div className="col-span-full py-20 flex flex-col items-center gap-4">
               <Loader2 className="w-10 h-10 text-primary animate-spin" />
@@ -97,60 +72,59 @@ export default function VendorListPage() {
               <GlassCard key={vendor.id} className="p-0 border-white/10 group overflow-hidden flex flex-col hover:border-primary/40 transition-all">
                 <div className="relative aspect-[16/9] overflow-hidden bg-white/5">
                   <Image 
-                    src={`https://picsum.photos/seed/${vendor.id}/400/225`}
+                    src={vendor.imageUrl || `https://picsum.photos/seed/${vendor.id}/600/400`}
                     alt={vendor.name} 
                     fill 
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                  <div className="absolute bottom-4 left-6">
+                    <h3 className="text-2xl font-headline font-bold text-white truncate">{vendor.name}</h3>
+                  </div>
                 </div>
-                <div className="p-6 space-y-4">
-                  <h3 className="text-xl font-headline font-bold truncate">{vendor.name}</h3>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-primary/10 text-primary border-none px-3 py-0.5 text-[8px] font-bold rounded-lg uppercase">
-                      {vendor.description || "Campus Vendor"}
-                    </Badge>
+                <div className="p-6 space-y-6">
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                      {vendor.description || "Official campus merchant providing quality products and services to students."}
+                    </p>
+                    <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Open Now</span>
+                       <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" /> Main Campus</span>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                        <Clock className="w-3 h-3 text-primary" /> Open Now • 300m
-                     </div>
-                     <div className="flex items-center gap-1">
-                        {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 fill-primary text-primary" />)}
-                        <span className="text-[10px] font-bold text-muted-foreground ml-2">4.8 (120+)</span>
-                     </div>
-                  </div>
-
-                  <Link href={`/vendors/${vendor.id}`}>
-                    <Button className="w-full h-11 rounded-2xl bg-gradient-to-r from-primary to-secondary text-xs font-bold text-white shadow-[0_0_20px_rgba(239,26,184,0.3)] hover:opacity-90">
-                      Browse Items
-                    </Button>
-                  </Link>
-
-                  <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                     <span className="text-xs font-bold text-white">₦100 Starting</span>
-                     <div className="flex items-center gap-1.5 text-primary text-[10px] font-bold">
-                        <Zap className="w-3 h-3" /> Featured
-                     </div>
+                  <div className="flex gap-3">
+                    <Link href={`/vendors/${vendor.id}`} className="flex-1">
+                      <Button className="w-full h-12 rounded-2xl bg-primary/20 hover:bg-primary/30 border border-primary/40 text-xs font-bold text-white transition-all shadow-[0_0_20px_rgba(239,26,184,0.2)] group/btn">
+                        Browse Items <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </GlassCard>
             ))
           ) : (
-            <div className="col-span-full py-20 text-center space-y-4">
-              <Store className="w-16 h-16 text-muted-foreground/20 mx-auto" />
-              <p className="text-muted-foreground">No active vendors found on campus yet.</p>
+            <div className="col-span-full py-20 text-center space-y-6">
+              <div className="w-20 h-20 rounded-full bg-white/5 border border-dashed border-white/10 flex items-center justify-center mx-auto">
+                <Store className="w-10 h-10 text-muted-foreground/20" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-headline font-bold text-white">No Vendors Found</h3>
+                <p className="text-muted-foreground max-w-xs mx-auto">It looks like there aren't any active vendors on campus yet.</p>
+              </div>
+              {/* Optional: Add a button for vendors to register if they see this */}
             </div>
           )}
         </div>
 
-        {/* Pagination Footer */}
-        <div className="flex justify-between items-center pt-8 pb-12">
-           <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-             {vendors?.length || 0} Vendors found
-           </p>
-        </div>
+        {/* Stats Footer */}
+        {!isLoading && vendors && (
+          <div className="flex justify-center pt-8 pb-12 border-t border-white/5">
+             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+               Currently tracking {vendors.length} verified campus merchants
+             </p>
+          </div>
+        )}
       </div>
     </DashboardShell>
   )

@@ -4,57 +4,44 @@ service cloud.firestore {
 
     // --- HELPER FUNCTIONS ---
 
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
     }
 
     // --- COLLECTION RULES ---
 
     /**
-     * @path /userProfiles/{userId}
+     * @path /userProfiles/{uid}
+     * Users can manage their own profile data.
      */
-    match /userProfiles/{userId} {
-      // Allow creation if the user is signing up as themselves
-      // We check the ID matches and the role is valid.
-      allow create: if isOwner(userId) 
-        && request.resource.data.role in ['student', 'vendor'];
-      
-      // Owners and Admins can read/update profiles
-      allow get: if isOwner(userId) || isAdmin();
-      allow update: if isOwner(userId);
-      
-      // Only admins can list all users or delete them
-      allow list, delete: if isAdmin();
+    match /userProfiles/{uid} {
+      allow read, write: if isOwner(uid);
     }
 
     /**
      * @path /vendors/{vendorId}
-     * Publicly readable, writeable only by the vendor owner.
+     * Anyone signed in can view vendors. Vendors can manage their own profile.
      */
     match /vendors/{vendorId} {
-      allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow delete: if isAdmin();
+      allow read: if signedIn();
+      allow create: if signedIn() && isOwner(request.resource.data.userId);
+      allow update: if signedIn() && isOwner(resource.data.userId);
+      allow delete: if false; // Only via admin panel (future)
     }
 
     /**
      * @path /products/{productId}
-     * Publicly readable, managed by vendor owners.
+     * Anyone signed in can view products. Vendors manage their own products.
      */
     match /products/{productId} {
-      allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.vendorOwnerId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.vendorOwnerId == request.auth.uid;
-      allow delete: if (isSignedIn() && resource.data.vendorOwnerId == request.auth.uid) || isAdmin();
+      allow read: if signedIn();
+      allow create: if signedIn() && isOwner(request.resource.data.vendorOwnerId);
+      allow update: if signedIn() && isOwner(resource.data.vendorOwnerId);
+      allow delete: if signedIn() && isOwner(resource.data.vendorOwnerId);
     }
 
     /**
@@ -62,7 +49,7 @@ service cloud.firestore {
      * Path-based ownership for orders.
      */
     match /users/{studentId}/orders/{orderId} {
-      allow read, write: if isOwner(studentId) || isAdmin();
+      allow read, write: if isOwner(studentId);
     }
 
     /**
@@ -70,22 +57,14 @@ service cloud.firestore {
      * Path-based ownership for expense tracking.
      */
     match /users/{studentId}/expenses/{expenseId} {
-      allow read, write: if isOwner(studentId) || isAdmin();
+      allow read, write: if isOwner(studentId);
     }
 
     /**
-     * @path /users/{studentId}/budgets/{budgetId}
+     * @path /categories/{categoryId}
      */
-    match /users/{studentId}/budgets/{budgetId} {
-      allow read, write: if isOwner(studentId) || isAdmin();
-    }
-
-    /**
-     * @path /roles_admin/{userId}
-     */
-    match /roles_admin/{userId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+    match /categories/{categoryId} {
+      allow read: if signedIn();
     }
   }
 }
