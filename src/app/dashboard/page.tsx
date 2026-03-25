@@ -51,8 +51,13 @@ export default function DashboardPage() {
   const { data: expenses } = useCollection(expensesQuery)
 
   const todaySpending = React.useMemo(() => {
-    return expenses?.filter(e => isToday(new Date(e.expenseDate)))
-      .reduce((sum, e) => sum + e.amount, 0) || 0
+    return expenses?.filter(e => {
+      try {
+        return isToday(new Date(e.expenseDate))
+      } catch {
+        return false
+      }
+    }).reduce((sum, e) => sum + e.amount, 0) || 0
   }, [expenses])
 
   if (isProfileLoading) {
