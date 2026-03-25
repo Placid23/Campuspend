@@ -6,20 +6,14 @@ import { usePathname, useRouter } from "next/navigation"
 import { 
   Zap, 
   LayoutDashboard, 
-  ShoppingBag, 
-  Calendar as CalendarIcon, 
-  BrainCircuit, 
   Store, 
   Settings, 
   LogOut, 
-  Search,
-  Bell,
   ChevronRight,
-  ClipboardList,
   CreditCard,
   ShoppingCart,
-  MessageSquare,
-  History
+  History,
+  Menu
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -27,16 +21,14 @@ import {
   Sidebar, 
   SidebarContent, 
   SidebarFooter, 
-  SidebarGroup, 
-  SidebarGroupContent, 
-  SidebarGroupLabel, 
   SidebarHeader, 
   SidebarInset, 
   SidebarMenu, 
   SidebarMenuButton, 
   SidebarMenuItem, 
-  SidebarProvider, 
-  SidebarTrigger 
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
@@ -55,18 +47,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full nebula-bg p-4 md:p-8">
+      <div className="flex min-h-screen w-full nebula-bg p-0 md:p-8 relative">
         
-        {/* Main Wrapper Box to match the contained image style */}
-        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+        {/* Main Wrapper Box */}
+        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-none md:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
           
-          <Sidebar className="border-r-0 bg-transparent w-72">
+          <Sidebar className="border-r-0 bg-transparent w-72 hidden md:flex">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.5)] group-hover:scale-110 transition-transform">
                   <Zap className="text-white w-6 h-6" />
                 </div>
-                <span className="font-headline font-bold text-2xl tracking-tighter">CampusSpend</span>
+                <span className="font-headline font-bold text-2xl tracking-tighter text-white">CampusSpend</span>
               </Link>
             </SidebarHeader>
             <SidebarContent className="px-6 py-8">
@@ -107,9 +99,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </SidebarFooter>
           </Sidebar>
 
-          <SidebarInset className="bg-transparent overflow-hidden">
-            {/* Custom Header from image */}
-            <header className="flex h-24 items-center gap-8 px-10 border-b border-white/5 sticky top-0 z-40 bg-transparent backdrop-blur-xl">
+          {/* Mobile Sidebar (Sheet content handled by Sidebar component automatically if trigger exists) */}
+          <Sidebar side="left" className="md:hidden" collapsible="offcanvas" />
+
+          <SidebarInset className="bg-transparent overflow-hidden pb-20 md:pb-0">
+            {/* Header */}
+            <header className="flex h-20 md:h-24 items-center gap-4 px-6 md:px-10 border-b border-white/5 sticky top-0 z-40 bg-background/20 backdrop-blur-xl">
+              <SidebarTrigger className="md:hidden text-white h-10 w-10" />
+              
+              <div className="flex md:hidden items-center gap-2 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
+                  <Zap className="text-white w-5 h-5" />
+                </div>
+                <span className="font-headline font-bold text-lg tracking-tighter text-white">CampusSpend</span>
+              </div>
+
               <div className="hidden md:flex items-center gap-10">
                 <Link href="/" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">Home</Link>
                 <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">How it Works</Link>
@@ -118,29 +122,57 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">About</Link>
               </div>
 
-              <div className="ml-auto flex items-center gap-6">
-                <div className="flex items-center gap-4 group cursor-pointer">
-                  <Avatar className="w-10 h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
+              <div className="ml-auto flex items-center gap-4 md:gap-6">
+                <div className="flex items-center gap-3 md:gap-4 group cursor-pointer">
+                  <Avatar className="w-8 h-8 md:w-10 md:h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
                     <AvatarImage src="https://picsum.photos/seed/gentuu/100/100" />
                     <AvatarFallback>G</AvatarFallback>
                   </Avatar>
                   <div className="text-right hidden sm:block">
                     <p className="text-sm font-bold tracking-wide">Gentuu</p>
-                    <p className="text-[10px] text-muted-foreground font-medium">S. STU1234001</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase">STU1234001</p>
                   </div>
                 </div>
-                <div className="h-10 px-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shadow-inner">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rs.</span>
-                   <span className="text-sm font-headline font-bold text-primary">53.62</span>
+                <div className="h-9 md:h-10 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 md:gap-3 shadow-inner">
+                   <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rs.</span>
+                   <span className="text-xs md:text-sm font-headline font-bold text-primary">53.62</span>
                 </div>
               </div>
             </header>
 
-            <main className="p-10 h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
+            <main className="p-6 md:p-10 h-[calc(100vh-80px)] md:h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
               {children}
             </main>
           </SidebarInset>
         </div>
+
+        {/* Surprise Element: Mobile Bottom Navigation Bar */}
+        <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+          <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl h-16 flex items-center justify-around px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+            {[
+              { icon: Store, label: "Vendors", href: "/vendors" },
+              { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
+              { icon: CreditCard, label: "Bills", href: "/calendar" },
+              { icon: History, label: "Orders", href: "/orders" },
+            ].map((item) => (
+              <Link 
+                key={item.href} 
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center w-14 h-12 rounded-2xl transition-all active:scale-90",
+                  pathname === item.href ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                <item.icon className={cn("w-5 h-5", pathname === item.href && "neon-text-glow")} />
+                <span className="text-[8px] font-bold uppercase mt-1 tracking-tighter">{item.label}</span>
+                {pathname === item.href && (
+                  <div className="w-1 h-1 rounded-full bg-primary mt-0.5 shadow-[0_0_5px_rgba(239,26,184,1)]" />
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+
       </div>
     </SidebarProvider>
   )
