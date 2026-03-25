@@ -20,7 +20,8 @@ import {
   LayoutDashboard,
   Store,
   ClipboardList,
-  Loader2
+  Loader2,
+  ShoppingCart
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
@@ -35,8 +36,6 @@ import { isToday } from 'date-fns'
 export default function DashboardPage() {
   const { user, profile, isProfileLoading } = useUser()
   const db = useFirestore()
-  const days = Array.from({ length: 30 }, (_, i) => i + 1);
-  const categories = ["All", "Food", "Books", "Stationery"];
 
   // Fetch real orders count
   const ordersQuery = useMemoFirebase(() => {
@@ -150,7 +149,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Spending Tracker (Simplified Calendar) */}
+            {/* Recent History */}
             <GlassCard className="p-6 md:p-8 border-white/5">
                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
                  <h3 className="text-xl font-headline font-bold">Recent History</h3>
@@ -201,7 +200,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Suggested For You */}
+              {/* Quick Tray Access */}
               <div className="space-y-4">
                 <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Quick Tray Access</h4>
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
