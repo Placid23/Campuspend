@@ -16,26 +16,27 @@ service cloud.firestore {
 
     /**
      * @path /userProfiles/{uid}
-     * Users can manage their own profile data.
+     * Users manage their own profile. Wallet balance and budget are stored here.
      */
     match /userProfiles/{uid} {
-      allow read, write: if isOwner(uid);
+      allow create: if isOwner(uid);
+      allow read: if signedIn(); // Allow others to read name for vendor/order context
+      allow update: if isOwner(uid);
     }
 
     /**
      * @path /vendors/{vendorId}
-     * Anyone signed in can view vendors. Vendors can manage their own profile.
+     * Publicly readable. Managed by vendor users.
      */
     match /vendors/{vendorId} {
       allow read: if signedIn();
       allow create: if signedIn() && isOwner(request.resource.data.userId);
       allow update: if signedIn() && isOwner(resource.data.userId);
-      allow delete: if false; // Only via admin panel (future)
     }
 
     /**
      * @path /products/{productId}
-     * Anyone signed in can view products. Vendors manage their own products.
+     * Publicly readable. Managed by vendors.
      */
     match /products/{productId} {
       allow read: if signedIn();
@@ -46,15 +47,26 @@ service cloud.firestore {
 
     /**
      * @path /users/{studentId}/orders/{orderId}
-     * Path-based ownership for orders.
+     * Path-based ownership for orders and their nested items.
      */
     match /users/{studentId}/orders/{orderId} {
       allow read, write: if isOwner(studentId);
+      
+      match /orderItems/{itemId} {
+        allow read, write: if isOwner(studentId);
+      }
+    }
+
+    /**
+     * @path collectionGroup orderItems
+     * Allows vendors to see items belonging to them across all student orders.
+     */
+    match /{path=**}/orderItems/{itemId} {
+      allow read: if signedIn() && isOwner(resource.data.vendorOwnerId);
     }
 
     /**
      * @path /users/{studentId}/expenses/{expenseId}
-     * Path-based ownership for expense tracking.
      */
     match /users/{studentId}/expenses/{expenseId} {
       allow read, write: if isOwner(studentId);
