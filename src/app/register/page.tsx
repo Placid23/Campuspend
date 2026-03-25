@@ -1,11 +1,21 @@
+
 "use client"
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select"
+import { useToast } from "@/hooks/use-toast"
 import { 
   Zap, 
   Mail, 
@@ -13,9 +23,12 @@ import {
   User,
   Eye, 
   EyeOff, 
-  ChevronDown,
-  UserPlus
+  UserPlus,
+  Loader2
 } from "lucide-react"
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
+import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase'
 
 // Social Icons
 const GoogleIcon = () => (
@@ -35,6 +48,100 @@ const FacebookIcon = () => (
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "student" as "student" | "vendor"
+  })
+
+  const { toast } = useToast()
+  const router = useRouter()
+  const auth = useAuth()
+  const db = useFirestore()
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData(prev => ({ ...prev, [id]: value }))
+  }
+
+  const handleRoleChange = (value: string) => {
+    setFormData(prev => ({ ...prev, role: value as "student" | "vendor" }))
+  }
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Passwords do not match",
+        description: "Please ensure both password fields are identical."
+      })
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      // 1. Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        formData.email, 
+        formData.password
+      )
+      const user = userCredential.user
+
+      // 2. Prepare profile data for Firestore
+      const profileData = {
+        id: user.uid,
+        firebaseUid: user.uid,
+        email: user.email,
+        name: formData.fullName,
+        role: formData.role,
+        walletBalance: formData.role === 'student' ? 5000 : 0,
+        monthlyBudget: formData.role === 'student' ? 8000 : 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+
+      // 3. Write to Firestore userProfiles collection (Non-blocking pattern)
+      const profileRef = doc(db, "userProfiles", user.uid)
+      setDoc(profileRef, profileData)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: profileRef.path,
+            operation: 'create',
+            requestResourceData: profileData,
+          })
+          errorEmitter.emit('permission-error', permissionError)
+        })
+
+      toast({
+        title: "Account Created!",
+        description: `Welcome to CampusSpend, ${formData.fullName}.`
+      })
+
+      // 4. Redirect based on role
+      if (formData.role === 'student') {
+        router.push("/dashboard")
+      } else {
+        router.push("/vendor/dashboard")
+      }
+
+    } catch (error: any) {
+      console.error("Registration error:", error)
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: error.message || "An unexpected error occurred during registration."
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen nebula-bg flex flex-col font-body">
@@ -44,18 +151,18 @@ export default function RegisterPage() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
             <Zap className="text-white w-5 h-5" />
           </div>
-          <span className="font-headline font-bold text-xl tracking-tighter">CampusSpend</span>
+          <span className="font-headline font-bold text-xl tracking-tighter text-white">CampusSpend</span>
         </div>
         <div className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">Home</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">How It Works</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">Vendors</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
+          <Link href="/" className="text-sm font-medium hover:text-primary transition-colors text-white">Home</Link>
+          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors text-white">How It Works</Link>
+          <Link href="/vendors" className="text-sm font-medium hover:text-primary transition-colors text-white">Vendors</Link>
+          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors text-white">Features</Link>
+          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors text-white">About</Link>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/login">
-            <Button variant="ghost" className="text-sm font-medium px-6 border border-white/10 rounded-full hover:bg-white/5">Log in</Button>
+            <Button variant="ghost" className="text-sm font-medium px-6 border border-white/10 rounded-full hover:bg-white/5 text-white">Log in</Button>
           </Link>
           <Button className="glow-button rounded-full px-8 bg-gradient-to-r from-primary to-secondary hover:opacity-90">Get Started</Button>
         </div>
@@ -67,7 +174,7 @@ export default function RegisterPage() {
           
           {/* Left Side: Join Text */}
           <div className="space-y-6 animate-in fade-in slide-in-from-left duration-700">
-            <h1 className="text-5xl font-headline font-bold leading-tight">
+            <h1 className="text-5xl font-headline font-bold leading-tight text-white">
               Join <span className="text-primary neon-text-glow">CampusSpend</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
@@ -87,76 +194,122 @@ export default function RegisterPage() {
               </div>
 
               <div className="flex flex-col items-center text-center space-y-3 mb-10 pt-2">
-                <h2 className="text-3xl font-headline font-bold tracking-tight">Join <span className="text-primary">CampusSpend</span></h2>
+                <h2 className="text-3xl font-headline font-bold tracking-tight text-white">Join <span className="text-primary">CampusSpend</span></h2>
                 <p className="text-sm text-muted-foreground max-w-[280px]">
                   Create your account to start ordering from campus vendors and track your expenses.
                 </p>
               </div>
 
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleRegister}>
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullname" className="text-xs font-bold text-muted-foreground/80">Full Name</Label>
+                  <Label htmlFor="fullName" className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
                     <Input 
-                      id="fullname"
+                      id="fullName"
                       placeholder="Full Name" 
-                      className="h-12 bg-white/5 border-white/10 rounded-xl pl-12 pr-4 focus:border-primary/50 transition-all text-sm"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      className="h-12 bg-white/5 border-white/10 rounded-xl pl-12 pr-4 focus:border-primary/50 transition-all text-sm text-white"
+                      required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs font-bold text-muted-foreground/80">Email</Label>
+                  <Label htmlFor="email" className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest">Email</Label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
                     <Input 
                       id="email"
-                      type={showPassword ? "text" : "password"} 
-                      placeholder="Password" 
-                      className="h-12 bg-white/5 border-white/10 rounded-xl pl-12 pr-12 focus:border-primary/50 transition-all text-sm"
+                      type="email"
+                      placeholder="Email" 
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="h-12 bg-white/5 border-white/10 rounded-xl pl-12 pr-4 focus:border-primary/50 transition-all text-sm text-white"
+                      required
                     />
-                    <button 
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="role" className="text-xs font-bold text-muted-foreground/80">Confirm Password</Label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-                    <div className="h-12 w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 flex items-center justify-between cursor-pointer hover:border-white/20 transition-all group">
-                      <span className="text-sm text-muted-foreground/70">I'm a Student</span>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                      <Input 
+                        id="password"
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="h-12 bg-white/5 border-white/10 rounded-xl pl-12 pr-12 focus:border-primary/50 transition-all text-sm text-white"
+                        required
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="confirmPassword" className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest">Confirm</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                      <Input 
+                        id="confirmPassword"
+                        type="password" 
+                        placeholder="••••••••" 
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        className="h-12 bg-white/5 border-white/10 rounded-xl pl-12 pr-4 focus:border-primary/50 transition-all text-sm text-white"
+                        required
+                      />
                     </div>
                   </div>
                 </div>
 
+                <div className="space-y-1.5">
+                  <Label htmlFor="role" className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest">Register As</Label>
+                  <Select value={formData.role} onValueChange={handleRoleChange}>
+                    <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl px-6 focus:ring-primary/30 text-white">
+                      <SelectValue placeholder="Select Role" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-white/10">
+                      <SelectItem value="student">I'm a Student</SelectItem>
+                      <SelectItem value="vendor">I'm a Vendor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <p className="text-[10px] text-center text-muted-foreground/60 py-2">
-                  By signing up, you agree to the <Link href="#" className="underline">Terms of Service</Link> and <Link href="#" className="underline">Privacy Policy</Link>
+                  By signing up, you agree to the <Link href="#" className="underline hover:text-primary">Terms of Service</Link> and <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>
                 </p>
 
-                <Button className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-secondary text-base font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all">
-                  Sign Up
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-secondary text-base font-bold shadow-[0_0_25px_rgba(239,26,184,0.3)] hover:opacity-90 active:scale-[0.98] transition-all text-white"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign Up"}
                 </Button>
 
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground">
-                    Already have an account? <Link href="/login" className="text-foreground font-bold hover:text-primary transition-colors">Log in</Link>
+                    Already have an account? <Link href="/login" className="text-foreground font-bold hover:text-primary transition-colors text-white">Log in</Link>
                   </p>
                 </div>
 
                 <div className="flex items-center gap-4 pt-4">
-                  <Button variant="outline" className="flex-1 h-10 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 text-xs font-medium">
-                    <GoogleIcon /> Sign up with Google
+                  <Button type="button" variant="outline" className="flex-1 h-10 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 text-xs font-medium text-white">
+                    <GoogleIcon /> Google
                   </Button>
-                  <Button variant="outline" className="flex-1 h-10 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 text-xs font-medium">
-                    <FacebookIcon /> Sign up with Facebook
+                  <Button type="button" variant="outline" className="flex-1 h-10 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 text-xs font-medium text-white">
+                    <FacebookIcon /> Facebook
                   </Button>
                 </div>
               </form>
@@ -166,7 +319,7 @@ export default function RegisterPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6 mt-auto text-center">
+      <footer className="py-12 px-6 mt-auto text-center border-t border-white/5">
         <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground/60 font-medium mb-4">
           <Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link>
           <Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link>
