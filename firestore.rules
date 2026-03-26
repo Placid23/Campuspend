@@ -18,7 +18,7 @@ service cloud.firestore {
      * Users can manage their own profile.
      */
     match /userProfiles/{uid} {
-      allow read: if signedIn(); // Allow reading profile for greetings
+      allow read: if signedIn();
       allow create: if isOwner(uid);
       allow update: if isOwner(uid);
     }
@@ -73,7 +73,10 @@ service cloud.firestore {
      * This is critical for Vendor Order Tracking.
      */
     match /{path=**}/orderItems/{itemId} {
-      allow read, list: if signedIn() && resource.data.vendorOwnerId == request.auth.uid;
+      allow read, list: if signedIn() && (
+        resource.data.vendorOwnerId == request.auth.uid || 
+        resource.data.studentId == request.auth.uid
+      );
     }
   }
 }
