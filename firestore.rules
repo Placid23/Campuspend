@@ -7,21 +7,24 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
     // --- COLLECTION RULES ---
 
     /**
-     * @path /userProfiles/{uid}
-     * Users manage their own profile.
+     * @path /userProfiles/{userId}
      */
-    match /userProfiles/{uid} {
-      allow read: if signedIn();
-      allow create: if signedIn() && request.auth.uid == uid;
-      allow update: if signedIn() && request.auth.uid == uid;
+    match /userProfiles/{userId} {
+      allow get: if signedIn();
+      allow list: if signedIn(); 
+      allow create: if signedIn() && request.auth.uid == userId;
+      allow update: if signedIn() && request.auth.uid == userId;
     }
 
     /**
      * @path /vendors/{vendorId}
-     * Marketplace discovery. Managed by vendor users.
      */
     match /vendors/{vendorId} {
       allow read: if signedIn();
@@ -31,7 +34,6 @@ service cloud.firestore {
 
     /**
      * @path /products/{productId}
-     * Marketplace products. Publicly readable, managed by vendors.
      */
     match /products/{productId} {
       allow read: if signedIn();
@@ -41,7 +43,7 @@ service cloud.firestore {
 
     /**
      * @path /users/{studentId}/*
-     * Private student data (orders, expenses, budgets).
+     * Covers subcollections: orders, expenses, budgets, orderItems (direct)
      */
     match /users/{studentId}/{document=**} {
       allow read, write: if signedIn() && request.auth.uid == studentId;
@@ -49,13 +51,13 @@ service cloud.firestore {
 
     /**
      * @path collectionGroup orderItems
-     * CRITICAL: Enables vendors to query their specific sales across all orders.
-     * Use where("vendorOwnerId", "==", auth.uid) in the query.
+     * REQUIRED for Vendors to query their specific sales.
+     * The query MUST include: where("vendorOwnerId", "==", auth.uid)
      */
     match /{path=**}/orderItems/{itemId} {
       allow list: if signedIn() && (
-        request.auth.uid == resource.data.vendorOwnerId ||
-        request.auth.uid == resource.data.studentId
+        resource.data.vendorOwnerId == request.auth.uid ||
+        resource.data.studentId == request.auth.uid
       );
       allow get: if signedIn();
     }

@@ -31,10 +31,13 @@ export default function VendorDashboardPage() {
   }, [db, user])
   const { data: products, isLoading: productsLoading } = useCollection(productsQuery)
 
-  // Fetch real order items for stats
+  // Fetch real order items for stats - CRITICAL: Filtered by vendorOwnerId to match security rules
   const itemsQuery = useMemoFirebase(() => {
     if (!user) return null
-    return query(collectionGroup(db, "orderItems"), where("vendorOwnerId", "==", user.uid))
+    return query(
+      collectionGroup(db, "orderItems"), 
+      where("vendorOwnerId", "==", user.uid)
+    )
   }, [db, user])
   const { data: orderItems, isLoading: itemsLoading } = useCollection(itemsQuery)
 
