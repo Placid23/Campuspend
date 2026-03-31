@@ -27,7 +27,7 @@ service cloud.firestore {
      * @path /vendors/{vendorId}
      */
     match /vendors/{vendorId} {
-      allow read: if signedIn();
+      allow get, list: if signedIn();
       allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if signedIn() && resource.data.userId == request.auth.uid;
     }
@@ -36,7 +36,7 @@ service cloud.firestore {
      * @path /products/{productId}
      */
     match /products/{productId} {
-      allow read: if signedIn();
+      allow get, list: if signedIn();
       allow create: if signedIn() && request.resource.data.vendorOwnerId == request.auth.uid;
       allow update, delete: if signedIn() && resource.data.vendorOwnerId == request.auth.uid;
     }
@@ -57,8 +57,8 @@ service cloud.firestore {
      */
     match /{path=**}/orderItems/{itemId} {
       allow list: if signedIn() && (
-        resource.data.vendorOwnerId == request.auth.uid ||
-        resource.data.studentId == request.auth.uid
+        request.auth.uid == resource.data.vendorOwnerId ||
+        request.auth.uid == resource.data.studentId
       );
       allow get: if signedIn() && (
         resource.data.vendorOwnerId == request.auth.uid ||
