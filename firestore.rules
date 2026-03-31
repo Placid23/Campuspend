@@ -51,14 +51,13 @@ service cloud.firestore {
 
     /**
      * @path collectionGroup orderItems
-     * CRITICAL for Vendor Sales visibility.
-     * This rule allows vendors to see items where they are the owner,
-     * provided the query uses .where("vendorOwnerId", "==", auth.uid)
+     * This rule is CRITICAL for Vendor Order visibility.
+     * It allows vendors to list items only if they filter by their own vendorOwnerId.
      */
     match /{path=**}/orderItems/{itemId} {
       allow list: if signedIn() && (
-        request.auth.uid == resource.data.vendorOwnerId ||
-        request.auth.uid == resource.data.studentId
+        resource.data.vendorOwnerId == request.auth.uid ||
+        resource.data.studentId == request.auth.uid
       );
       allow get: if signedIn() && (
         resource.data.vendorOwnerId == request.auth.uid ||
