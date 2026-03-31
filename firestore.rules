@@ -1,64 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // --- HELPER FUNCTIONS ---
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return signedIn() && request.auth.uid == userId;
-    }
-
-    // --- COLLECTION RULES ---
-
     /**
-     * User Profiles: Secure account data.
-     * Publicly visible so marketplace can show names, but only owner can edit.
+     * DEVELOPMENT MODE RULES
+     * Warning: These rules allow anyone with your database reference to read or write data.
+     * Use this for starting from scratch and testing connectivity.
      */
-    match /userProfiles/{userId} {
-      allow get, list: if signedIn();
-      allow create, update: if isOwner(userId);
-    }
-
-    /**
-     * Vendors: Store identity management.
-     */
-    match /vendors/{vendorId} {
-      allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if signedIn() && resource.data.userId == request.auth.uid;
-    }
-
-    /**
-     * Products: Marketplace inventory.
-     */
-    match /products/{productId} {
-      allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.vendorOwnerId == request.auth.uid;
-      allow update, delete: if signedIn() && resource.data.vendorOwnerId == request.auth.uid;
-    }
-
-    /**
-     * User Private Branch: Orders, Expenses, Budgets.
-     * Path-based ownership ensures privacy.
-     */
-    match /users/{studentId}/{document=**} {
-      allow read, write: if isOwner(studentId);
-    }
-
-    /**
-     * Order Items: Collection Group for Vendor Sales Tracking.
-     * Allows 'list' if signedIn, relying on frontend 'where' filters 
-     * to satisfy security constraints (query-as-filter).
-     */
-    match /{path=**}/orderItems/{itemId} {
-      allow list: if signedIn();
-      allow get: if signedIn() && (
-        resource.data.vendorOwnerId == request.auth.uid ||
-        resource.data.studentId == request.auth.uid
-      );
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
