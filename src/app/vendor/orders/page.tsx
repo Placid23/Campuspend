@@ -38,7 +38,7 @@ export default function VendorOrdersPage() {
   const { user } = useUser()
   const db = useFirestore()
 
-  // Fetch real order items for this vendor using collectionGroup
+  // Fetch real order items for this vendor using collectionGroup - REQUIRED: Filtered by vendorOwnerId
   const itemsQuery = useMemoFirebase(() => {
     if (!user) return null
     return query(
