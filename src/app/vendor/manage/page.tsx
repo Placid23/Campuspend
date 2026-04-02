@@ -36,19 +36,30 @@ import { collection, query, where } from 'firebase/firestore'
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase'
 
 export default function ManageProductsPage() {
-  const { user } = useUser()
+  const { user, isProfileLoading } = useUser()
   const db = useFirestore()
 
+  // 1. Hooks first
   const productsQuery = useMemoFirebase(() => {
     if (!user) return null
-    // Simple query without ordering to avoid immediate need for composite indexes
     return query(
       collection(db, "products"),
       where("vendorOwnerId", "==", user.uid)
     )
-  }, [db, user])
+  }, [db, user?.uid])
 
   const { data: products, isLoading } = useCollection(productsQuery)
+
+  // 2. Early return
+  if (isProfileLoading || !user) {
+    return (
+      <VendorShell>
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+      </VendorShell>
+    )
+  }
 
   return (
     <VendorShell>

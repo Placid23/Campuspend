@@ -34,26 +34,18 @@ export default function VendorOrdersPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  // Guard: Auth must be ready
-  if (isProfileLoading || !user) {
-    return (
-      <VendorShell>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
-        </div>
-      </VendorShell>
-    )
-  }
-
+  // 1. Hooks first
   const itemsQuery = useMemoFirebase(() => {
+    if (!user) return null
     return query(
       collectionGroup(db, "orderItems"),
       where("vendorOwnerId", "==", user.uid)
     )
-  }, [db, user.uid])
+  }, [db, user?.uid])
 
   const { data: orderItems, isLoading } = useCollection(itemsQuery)
 
+  // 2. Status updater
   const updateStatus = async (itemPath: string, newStatus: string) => {
     try {
       const itemRef = doc(db, itemPath)
@@ -82,6 +74,17 @@ export default function VendorOrdersPage() {
       case 'completed': return { color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", label: "Completed" }
       default: return { color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", label: "Placed" }
     }
+  }
+
+  // 3. Early return
+  if (isProfileLoading || !user) {
+    return (
+      <VendorShell>
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+      </VendorShell>
+    )
   }
 
   return (

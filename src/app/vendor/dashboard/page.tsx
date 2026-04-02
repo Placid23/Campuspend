@@ -23,7 +23,31 @@ export default function VendorDashboardPage() {
   const { user, profile, isProfileLoading } = useUser()
   const db = useFirestore()
 
-  // Guard: Wait for Auth and Profile
+  // 1. Define all hooks first (never after an early return)
+  const productsQuery = useMemoFirebase(() => {
+    if (!user) return null
+    return query(collection(db, "products"), where("vendorOwnerId", "==", user.uid))
+  }, [db, user?.uid])
+
+  const itemsQuery = useMemoFirebase(() => {
+    if (!user) return null
+    return query(
+      collectionGroup(db, "orderItems"), 
+      where("vendorOwnerId", "==", user.uid)
+    )
+  }, [db, user?.uid])
+
+  const { data: products, isLoading: productsLoading } = useCollection(productsQuery)
+  const { data: orderItems, isLoading: itemsLoading } = useCollection(itemsQuery)
+
+  // 2. Derive derived data
+  const totalSales = React.useMemo(() => {
+    return orderItems?.reduce((sum, item) => sum + item.subtotal, 0) || 0
+  }, [orderItems])
+
+  const pendingCount = orderItems?.filter(i => !i.status || i.status === 'placed' || i.status === 'preparing').length || 0
+
+  // 3. Early return for UI state (loading/auth) after hooks are registered
   if (isProfileLoading || !user) {
     return (
       <VendorShell>
@@ -33,25 +57,6 @@ export default function VendorDashboardPage() {
       </VendorShell>
     )
   }
-
-  const productsQuery = useMemoFirebase(() => {
-    return query(collection(db, "products"), where("vendorOwnerId", "==", user.uid))
-  }, [db, user.uid])
-  const { data: products } = useCollection(productsQuery)
-
-  const itemsQuery = useMemoFirebase(() => {
-    return query(
-      collectionGroup(db, "orderItems"), 
-      where("vendorOwnerId", "==", user.uid)
-    )
-  }, [db, user.uid])
-  const { data: orderItems } = useCollection(itemsQuery)
-
-  const totalSales = React.useMemo(() => {
-    return orderItems?.reduce((sum, item) => sum + item.subtotal, 0) || 0
-  }, [orderItems])
-
-  const pendingCount = orderItems?.filter(i => !i.status || i.status === 'placed').length || 0
 
   return (
     <VendorShell>

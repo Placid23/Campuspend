@@ -35,20 +35,21 @@ export default function DashboardPage() {
   const { user, profile, isProfileLoading } = useUser()
   const db = useFirestore()
 
-  // Fetch real orders count
+  // 1. Hooks first
   const ordersQuery = useMemoFirebase(() => {
     if (!user) return null
     return query(collection(db, "users", user.uid, "orders"))
-  }, [db, user])
-  const { data: orders } = useCollection(ordersQuery)
+  }, [db, user?.uid])
 
-  // Fetch today's spending
   const expensesQuery = useMemoFirebase(() => {
     if (!user) return null
     return query(collection(db, "users", user.uid, "expenses"))
-  }, [db, user])
+  }, [db, user?.uid])
+
+  const { data: orders } = useCollection(ordersQuery)
   const { data: expenses } = useCollection(expensesQuery)
 
+  // 2. Derived data
   const todaySpending = React.useMemo(() => {
     return expenses?.filter(e => {
       try {
@@ -59,7 +60,8 @@ export default function DashboardPage() {
     }).reduce((sum, e) => sum + e.amount, 0) || 0
   }, [expenses])
 
-  if (isProfileLoading) {
+  // 3. Early return
+  if (isProfileLoading || !user) {
     return (
       <DashboardShell>
         <div className="flex items-center justify-center h-[60vh]">
