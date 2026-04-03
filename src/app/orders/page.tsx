@@ -18,6 +18,7 @@ import {
   Loader2,
   Calendar
 } from "lucide-react"
+import Link from "next/link"
 import { collection, query, orderBy } from 'firebase/firestore'
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase'
 import { format } from 'date-fns'
