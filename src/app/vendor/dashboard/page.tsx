@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { collection, query, where, collectionGroup } from 'firebase/firestore'
+import { collection, query, where, collectionGroup, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase'
 
 export default function VendorDashboardPage() {
@@ -39,6 +39,30 @@ export default function VendorDashboardPage() {
 
   const { data: products, isLoading: productsLoading } = useCollection(productsQuery)
   const { data: orderItems, isLoading: itemsLoading, error: queryError } = useCollection(itemsQuery)
+
+  // Auto-list Vendor in Marketplace if missing
+  React.useEffect(() => {
+    if (user && profile && profile.role === 'vendor') {
+      const checkVendorProfile = async () => {
+        const vendorRef = doc(db, "vendors", user.uid)
+        const snap = await getDoc(vendorRef)
+        
+        if (!snap.exists()) {
+          await setDoc(vendorRef, {
+            id: user.uid,
+            name: profile.name || "New Vendor",
+            description: "Official campus merchant providing quality products.",
+            userId: user.uid,
+            contactEmail: user.email,
+            imageUrl: `https://picsum.photos/seed/${user.uid}/600/400`,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          })
+        }
+      }
+      checkVendorProfile()
+    }
+  }, [user, profile, db])
 
   // 2. Derive derived data
   const totalSales = React.useMemo(() => {
