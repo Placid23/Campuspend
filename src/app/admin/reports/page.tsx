@@ -40,7 +40,8 @@ import {
   Laptop,
   Leaf,
   MoreVertical,
-  Loader2
+  Loader2,
+  Store
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
@@ -69,8 +70,12 @@ export default function AdminReportsPage() {
     // Group by date
     const groups: Record<string, number> = {}
     orders.forEach(o => {
-      const date = format(new Date(o.orderDate), 'MMM d')
-      groups[date] = (groups[date] || 0) + o.totalAmount
+      try {
+        const date = format(new Date(o.orderDate), 'MMM d')
+        groups[date] = (groups[date] || 0) + o.totalAmount
+      } catch (e) {
+        console.error("Invalid date in order", o)
+      }
     })
     return Object.entries(groups).map(([name, value]) => ({ name, value }))
   }, [orders])
