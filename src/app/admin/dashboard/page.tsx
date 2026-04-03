@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -25,7 +24,8 @@ import {
   GraduationCap,
   Store,
   DollarSign,
-  ClipboardList
+  ClipboardList,
+  Loader2
 } from "lucide-react"
 import { 
   BarChart, 
@@ -43,36 +43,49 @@ import {
   Pie
 } from 'recharts'
 import Image from "next/image"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
-
-const salesData = [
-  { name: 'Jan', revenue: 200000, orders: 1200 },
-  { name: 'Feb', revenue: 280000, orders: 1980 },
-  { name: 'Mar', revenue: 250000, orders: 1500 },
-  { name: 'Apr', revenue: 320000, orders: 2400 },
-]
-
-const userDistribution = [
-  { name: 'Students', value: 32850, color: '#ef1ab8' },
-  { name: 'Vendors', value: 128, color: '#bc66eb' },
-  { name: 'Admins', value: 22, color: '#f59e0b' },
-]
-
-const recentOrders = [
-  { id: "#00140", student: "Priya Lashi", vendor: "QfoodHub Café", amount: "₦600" },
-  { id: "#00139", student: "Ishaan Kapoor", vendor: "CALCULOS", amount: "₦660" },
-  { id: "#00138", student: "Tanvi Patel", vendor: "Print & Spital", amount: "₦480" },
-  { id: "#00137", student: "Alex Carter", vendor: "QfoodHub Café", amount: "₦250" },
-]
-
-const recentReports = [
-  { id: "IR0035", type: "Vendor Issue", from: "Tanvi Patel", date: "Apr 24, 2024" },
-  { id: "IR0034", type: "Inappropriate Content", from: "Ananya Mehta", date: "Apr 22, 2024" },
-  { id: "IR0033", type: "Order Dispute", from: "Rohit Sharma", date: "Apr 21, 2024" },
-  { id: "IR0032", type: "Payment Issue", from: "Ishaan Kapoor", date: "Apr 20, 2024" },
-]
+import { useFirestore, useUser, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, query, where, collectionGroup } from 'firebase/firestore'
 
 export default function AdminDashboardPage() {
+  const db = useFirestore()
+  const { user, isProfileLoading } = useUser()
+
+  // 1. Define Queries
+  const studentsQuery = useMemoFirebase(() => query(collection(db, "userProfiles"), where("role", "==", "student")), [db])
+  const vendorsQuery = useMemoFirebase(() => collection(db, "vendors"), [db])
+  const ordersQuery = useMemoFirebase(() => collectionGroup(db, "orders"), [db])
+  const productsQuery = useMemoFirebase(() => collection(db, "products"), [db])
+
+  // 2. Fetch Data
+  const { data: students, isLoading: studentsLoading } = useCollection(studentsQuery)
+  const { data: vendors, isLoading: vendorsLoading } = useCollection(vendorsQuery)
+  const { data: orders, isLoading: ordersLoading } = useCollection(ordersQuery)
+  const { data: products, isLoading: productsLoading } = useCollection(productsQuery)
+
+  // 3. Derived Data
+  const totalRevenue = React.useMemo(() => orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0) || 0, [orders])
+  
+  const salesData = React.useMemo(() => [
+    { name: 'Total', revenue: totalRevenue, orders: orders?.length || 0 }
+  ], [totalRevenue, orders])
+
+  const userDistribution = React.useMemo(() => [
+    { name: 'Students', value: students?.length || 0, color: '#ef1ab8' },
+    { name: 'Vendors', value: vendors?.length || 0, color: '#bc66eb' },
+  ], [students, vendors])
+
+  if (isProfileLoading || studentsLoading || vendorsLoading || ordersLoading || productsLoading) {
+    return (
+      <AdminShell>
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+      </AdminShell>
+    )
+  }
+
   return (
     <AdminShell>
       <div className="space-y-8 animate-in fade-in duration-1000">
@@ -86,14 +99,14 @@ export default function AdminDashboardPage() {
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Students</p>
-                <h3 className="text-2xl font-bold text-white">32,850</h3>
+                <h3 className="text-2xl font-bold text-white">{students?.length || 0}</h3>
               </div>
               <div className="p-2 rounded-xl bg-primary/10 text-primary">
                 <GraduationCap className="w-5 h-5" />
               </div>
             </div>
             <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3" /> 120 (this month)
+              Active Marketplace
             </p>
           </GlassCard>
 
@@ -101,14 +114,14 @@ export default function AdminDashboardPage() {
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Vendors</p>
-                <h3 className="text-2xl font-bold text-white">128</h3>
+                <h3 className="text-2xl font-bold text-white">{vendors?.length || 0}</h3>
               </div>
               <div className="p-2 rounded-xl bg-secondary/10 text-secondary">
                 <Store className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3" /> 12 (this month)
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-1">
+              Verified Merchants
             </p>
           </GlassCard>
 
@@ -116,14 +129,14 @@ export default function AdminDashboardPage() {
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Orders</p>
-                <h3 className="text-2xl font-bold text-white">8.5K</h3>
+                <h3 className="text-2xl font-bold text-white">{orders?.length || 0}</h3>
               </div>
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
                 <ShoppingBag className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[10px] text-rose-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3 rotate-90" /> -3.5% (this month)
+            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
+              Live Transactions
             </p>
           </GlassCard>
 
@@ -131,56 +144,15 @@ export default function AdminDashboardPage() {
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Revenue</p>
-                <h3 className="text-2xl font-bold text-white">₦980,000</h3>
+                <h3 className="text-2xl font-bold text-white">₦{totalRevenue.toLocaleString()}</h3>
               </div>
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
                 <DollarSign className="w-5 h-5" />
               </div>
             </div>
             <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3" /> + 2.8%
+              Gross Volume
             </p>
-          </GlassCard>
-        </div>
-
-        {/* Secondary Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <GlassCard className="p-6 border-white/5 flex items-center justify-between group cursor-pointer hover:border-primary/20 transition-all">
-             <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-white/5 text-muted-foreground group-hover:text-primary transition-colors">
-                   <ShoppingBag className="w-6 h-6" />
-                </div>
-                <div>
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Orders</p>
-                   <h3 className="text-xl font-bold">8.5K</h3>
-                </div>
-             </div>
-             <div className="flex items-center gap-2 text-rose-400 text-xs font-bold">
-                -3.5% <ChevronRight className="w-4 h-4" />
-             </div>
-          </GlassCard>
-
-          <GlassCard className="p-6 border-white/5 flex items-center gap-4 group cursor-pointer hover:border-primary/20 transition-all">
-             <div className="p-3 rounded-2xl bg-white/5 text-muted-foreground group-hover:text-primary transition-colors">
-                <Package className="w-6 h-6" />
-             </div>
-             <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Products Listed</p>
-                <h3 className="text-xl font-bold">742</h3>
-             </div>
-          </GlassCard>
-
-          <GlassCard className="p-6 border-white/5 flex items-center justify-between group cursor-pointer hover:border-primary/20 transition-all">
-             <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-white/5 text-muted-foreground group-hover:text-primary transition-colors">
-                   <ClipboardList className="w-6 h-6" />
-                </div>
-                <div>
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Reports</p>
-                   <h3 className="text-xl font-bold">24</h3>
-                </div>
-             </div>
-             <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">+ 2.9% (this month)</p>
           </GlassCard>
         </div>
 
@@ -188,12 +160,7 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <GlassCard className="lg:col-span-7 p-8 border-white/10 space-y-8">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-headline font-bold text-white">Sales Overview</h3>
-              <div className="flex gap-1 p-1 bg-white/5 rounded-xl border border-white/5">
-                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold uppercase bg-white/5">Monthly</Button>
-                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold uppercase text-muted-foreground">Weekly</Button>
-                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold uppercase text-muted-foreground">Daily</Button>
-              </div>
+              <h3 className="text-lg font-headline font-bold text-white">Platform Performance</h3>
             </div>
             <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -211,23 +178,15 @@ export default function AdminDashboardPage() {
                     contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(239,26,184,0.3)', borderRadius: '16px' }}
                     itemStyle={{ fontSize: '12px' }}
                   />
-                  <Bar dataKey="orders" barSize={20} fill="#bc66eb" radius={[4, 4, 0, 0]} opacity={0.6} />
+                  <Bar dataKey="orders" barSize={40} fill="#bc66eb" radius={[4, 4, 0, 0]} opacity={0.6} />
                   <Line type="monotone" dataKey="revenue" stroke="#ef1ab8" strokeWidth={3} dot={{ fill: '#ef1ab8', r: 4 }} activeDot={{ r: 6 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex items-center gap-6 justify-center pt-4">
-               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white">
-                  <div className="w-2 h-2 rounded-full bg-primary" /> Revenue
-               </div>
-               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  <div className="w-2 h-2 rounded-full bg-secondary" /> Orders
-               </div>
-            </div>
           </GlassCard>
 
           <GlassCard className="lg:col-span-5 p-8 border-white/10 space-y-8">
-            <h3 className="text-lg font-headline font-bold text-white">Users Overview</h3>
+            <h3 className="text-lg font-headline font-bold text-white">Users Distribution</h3>
             <div className="relative h-[220px] flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <RePieChart>
@@ -248,7 +207,7 @@ export default function AdminDashboardPage() {
                 </RePieChart>
               </ResponsiveContainer>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="text-2xl font-bold text-white">3286</p>
+                <p className="text-2xl font-bold text-white">{(students?.length || 0) + (vendors?.length || 0)}</p>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Total Members</p>
               </div>
             </div>
@@ -261,94 +220,11 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-white">{item.value.toLocaleString()}</span>
-                    <span className="text-muted-foreground/40">({i === 0 ? "99.3%" : i === 1 ? "0.3%" : "0.1%"})</span>
                   </div>
                 </div>
               ))}
             </div>
           </GlassCard>
-        </div>
-
-        {/* Data Tables Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-headline font-bold text-white">Recent Orders</h3>
-              <Button variant="link" className="text-primary text-xs font-bold uppercase tracking-widest p-0 h-auto">View All</Button>
-            </div>
-            <GlassCard className="p-0 border-white/5 bg-white/5 overflow-hidden">
-              <table className="w-full text-left">
-                <thead className="bg-white/5">
-                  <tr className="text-[8px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                    <th className="px-6 py-4">Order ID</th>
-                    <th className="px-6 py-4">Student</th>
-                    <th className="px-6 py-4">Vendor</th>
-                    <th className="px-6 py-4 text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {recentOrders.map((order, i) => (
-                    <tr key={i} className="group hover:bg-white/5 transition-colors cursor-pointer">
-                      <td className="px-6 py-4 text-xs font-bold text-white/80">{order.id}</td>
-                      <td className="px-6 py-4 text-xs text-muted-foreground">{order.student}</td>
-                      <td className="px-6 py-4 text-xs font-bold text-primary/80 uppercase tracking-widest">{order.vendor}</td>
-                      <td className="px-6 py-4 text-xs font-bold text-white text-right flex items-center justify-end gap-2">
-                        {order.amount} <ChevronRight className="w-3 h-3 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </GlassCard>
-          </div>
-
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-headline font-bold text-white">Recent Reports</h3>
-              <Button variant="link" className="text-primary text-xs font-bold uppercase tracking-widest p-0 h-auto">View All</Button>
-            </div>
-            <GlassCard className="p-0 border-white/5 bg-white/5 overflow-hidden">
-              <table className="w-full text-left">
-                <thead className="bg-white/5">
-                  <tr className="text-[8px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                    <th className="px-6 py-4">Report ID</th>
-                    <th className="px-6 py-4">Report Type</th>
-                    <th className="px-6 py-4">From</th>
-                    <th className="px-6 py-4">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {recentReports.map((report, i) => (
-                    <tr key={i} className="group hover:bg-white/5 transition-colors cursor-pointer">
-                      <td className="px-6 py-4 text-xs font-bold text-white/80">{report.id}</td>
-                      <td className="px-6 py-4 text-xs text-rose-400 font-medium">{report.type}</td>
-                      <td className="px-6 py-4 text-xs text-muted-foreground">{report.from}</td>
-                      <td className="px-6 py-4 text-xs text-muted-foreground/60">{report.date}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </GlassCard>
-          </div>
-        </div>
-
-        {/* Floating Bottom Nav */}
-        <div className="flex justify-center pt-8 pb-12">
-           <GlassCard className="inline-flex gap-10 px-12 py-4 rounded-full border-white/10 bg-black/20 backdrop-blur-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-              {[
-                { label: "Budget", id: "budget", icon: DollarSign },
-                { label: "Plans", id: "plans", icon: Zap },
-                { label: "Books", id: "books", icon: Box },
-                { label: "Stats", id: "stats", icon: TrendingUp }
-              ].map((nav, i) => (
-                <div key={i} className="flex flex-col items-center gap-2 group cursor-pointer opacity-60 hover:opacity-100 transition-all hover:scale-110">
-                   <div className="w-10 h-10 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-primary/50 group-hover:bg-primary/10 transition-all">
-                      <nav.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                   </div>
-                   <span className="text-[8px] font-bold uppercase tracking-[0.2em]">{nav.label}</span>
-                </div>
-              ))}
-           </GlassCard>
         </div>
 
         {/* Footer */}

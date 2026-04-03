@@ -23,10 +23,11 @@ import {
   Eye, 
   EyeOff, 
   UserPlus,
-  Loader2
+  Loader2,
+  ShieldAlert
 } from "lucide-react"
 import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase'
 
 export default function RegisterPage() {
@@ -37,7 +38,8 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "student" as "student" | "vendor"
+    role: "student" as "student" | "vendor" | "admin",
+    adminCode: ""
   })
 
   const { toast } = useToast()
@@ -51,7 +53,7 @@ export default function RegisterPage() {
   }
 
   const handleRoleChange = (value: string) => {
-    setFormData(prev => ({ ...prev, role: value as "student" | "vendor" }))
+    setFormData(prev => ({ ...prev, role: value as any }))
   }
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -62,6 +64,15 @@ export default function RegisterPage() {
         variant: "destructive",
         title: "Passwords do not match",
         description: "Please ensure both password fields are identical."
+      })
+      return
+    }
+
+    if (formData.role === 'admin' && formData.adminCode !== "377899") {
+      toast({
+        variant: "destructive",
+        title: "Invalid Admin Code",
+        description: "You are not authorized to create an Administrator account."
       })
       return
     }
@@ -93,30 +104,20 @@ export default function RegisterPage() {
       // 3. Create the profile document
       const profileRef = doc(db, "userProfiles", user.uid)
       
-      // Use standard setDoc without await for non-blocking pattern
-      setDoc(profileRef, profileData)
-        .then(() => {
-          toast({
-            title: "Account Created!",
-            description: `Welcome to CampusSpend, ${formData.fullName}.`
-          })
-          // Redirection happens automatically via Shell guards or manual push
-          if (formData.role === 'student') {
-            router.push("/dashboard")
-          } else {
-            // Vendors might need to create a Vendor record too, but let's get them to dashboard first
-            router.push("/vendor/dashboard")
-          }
-        })
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: profileRef.path,
-            operation: 'create',
-            requestResourceData: profileData,
-          })
-          errorEmitter.emit('permission-error', permissionError)
-          setLoading(false)
-        })
+      await setDoc(profileRef, profileData)
+      
+      toast({
+        title: "Account Created!",
+        description: `Welcome to CampusSpend, ${formData.fullName}.`
+      })
+
+      if (formData.role === 'student') {
+        router.push("/dashboard")
+      } else if (formData.role === 'vendor') {
+        router.push("/vendor/dashboard")
+      } else {
+        router.push("/admin/dashboard")
+      }
 
     } catch (error: any) {
       console.error("Auth error:", error)
@@ -254,9 +255,30 @@ export default function RegisterPage() {
                     <SelectContent className="bg-card border-white/10">
                       <SelectItem value="student">I'm a Student</SelectItem>
                       <SelectItem value="vendor">I'm a Vendor</SelectItem>
+                      <SelectItem value="admin">I'm an Administrator</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
+                {formData.role === 'admin' && (
+                  <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-300">
+                    <Label htmlFor="adminCode" className="text-xs font-bold text-primary uppercase tracking-widest flex items-center gap-2">
+                      <ShieldAlert className="w-3 h-3" /> Admin Verification Code
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/50" />
+                      <Input 
+                        id="adminCode"
+                        type="password"
+                        placeholder="Enter 6-digit code" 
+                        value={formData.adminCode}
+                        onChange={handleInputChange}
+                        className="h-12 bg-primary/5 border-primary/20 rounded-xl pl-12 pr-4 focus:border-primary/50 transition-all text-sm text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <Button 
                   type="submit" 
