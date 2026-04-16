@@ -9,12 +9,8 @@ import {
   Users, 
   Store, 
   Package, 
-  History, 
-  TrendingUp, 
-  Settings, 
-  LogOut, 
   ChevronRight,
-  Bell,
+  LogOut,
   Box,
   ClipboardList,
   AlertCircle,
@@ -53,7 +49,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const auth = useAuth()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
 
-  // Route Guard: Only admins can access this shell
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
       if (!user) {
@@ -70,7 +65,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     router.push("/login")
   }
 
-  // Show loading state
   if (isUserLoading || isProfileLoading) {
     return (
       <div className="min-h-screen nebula-bg flex items-center justify-center">
@@ -82,14 +76,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // Authorization check
   if (!user || profile?.role !== 'admin') {
     return null
   }
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full nebula-bg p-4 md:p-8">
+      <div className="flex min-h-screen w-full nebula-bg p-4 md:p-8 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
         <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)]">
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
@@ -140,10 +133,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <header className="flex h-24 items-center gap-8 px-10 border-b border-white/5 sticky top-0 z-40 bg-transparent backdrop-blur-xl">
               <div className="hidden md:flex items-center gap-10">
                 <Link href="/admin/dashboard" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/dashboard' ? "text-primary" : "text-muted-foreground hover:text-white")}>Dashboard</Link>
-                <Link href="/admin/students" className="text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Students</Link>
-                <Link href="/admin/vendors" className="text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Vendors</Link>
-                <Link href="/admin/products" className="text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Products</Link>
-                <Link href="/admin/reports" className="text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Reports</Link>
+                <Link href="/admin/reports" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/reports' ? "text-primary" : "text-muted-foreground hover:text-white")}>Reports</Link>
               </div>
 
               <div className="ml-auto flex items-center gap-6">
@@ -156,11 +146,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     <p className="text-sm font-bold tracking-wide text-white">{profile?.name || 'Admin'}</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{user?.email}</p>
                   </div>
-                </div>
-                <div className="h-10 px-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shadow-inner">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sys</span>
-                   <span className="text-sm font-headline font-bold text-primary">Active</span>
-                   <ChevronRight className="w-4 h-4 text-primary ml-2 rotate-90" />
                 </div>
               </div>
             </header>

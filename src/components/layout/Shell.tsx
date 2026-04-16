@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -57,7 +56,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       if (!user) {
         router.push("/login")
       } else if (profile && profile.role !== 'student') {
-        // Redirect to appropriate dashboard if role doesn't match
         if (profile.role === 'vendor') router.push("/vendor/dashboard")
         if (profile.role === 'admin') router.push("/admin/dashboard")
       }
@@ -69,7 +67,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.push("/login")
   }
 
-  // Show loading state while checking auth/profile
   if (isUserLoading || isProfileLoading) {
     return (
       <div className="min-h-screen nebula-bg flex items-center justify-center">
@@ -81,7 +78,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // Final check to prevent render if not authorized
   if (!user || profile?.role !== 'student') {
     return null
   }
@@ -90,7 +86,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <div className="flex min-h-screen w-full nebula-bg p-0 md:p-8 relative">
         
-        {/* Main Wrapper Box */}
         <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-none md:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
           
           <Sidebar className="border-r-0 bg-transparent w-72 hidden md:flex">
@@ -140,12 +135,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </SidebarFooter>
           </Sidebar>
 
-          {/* Mobile Sidebar */}
           <Sidebar side="left" className="md:hidden" collapsible="offcanvas" />
 
-          <SidebarInset className="bg-transparent overflow-hidden pb-20 md:pb-0">
-            {/* Header */}
-            <header className="flex h-20 md:h-24 items-center gap-4 px-6 md:px-10 border-b border-white/5 sticky top-0 z-40 bg-background/20 backdrop-blur-xl">
+          <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+            <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-white/5 sticky top-0 z-40 bg-background/20 backdrop-blur-xl">
               <SidebarTrigger className="md:hidden text-white h-10 w-10" />
               
               <div className="flex md:hidden items-center gap-2 flex-1">
@@ -157,10 +150,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
               <div className="hidden md:flex items-center gap-10">
                 <Link href="/" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">Home</Link>
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">How it Works</Link>
                 <Link href="/vendors" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">Vendors</Link>
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">Features</Link>
-                <Link href="#" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">About</Link>
               </div>
 
               <div className="ml-auto flex items-center gap-4 md:gap-6">
@@ -181,14 +171,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </div>
             </header>
 
-            <main className="p-6 md:p-10 h-[calc(100vh-80px)] md:h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
+            <main className="p-6 md:p-10 h-[calc(100vh-80px-env(safe-area-inset-top,0px))] md:h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
               {children}
             </main>
           </SidebarInset>
         </div>
 
-        {/* Mobile Bottom Navigation Bar */}
-        <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+        <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-50">
           <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl h-16 flex items-center justify-around px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
             {[
               { icon: Store, label: "Vendors", href: "/vendors" },

@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -8,16 +7,13 @@ import {
   Zap, 
   LayoutDashboard, 
   PlusCircle, 
-  Store, 
   ShoppingCart, 
   History, 
   TrendingUp, 
-  UserCircle,
   Settings, 
   LogOut, 
   ChevronRight,
   Bell,
-  Search,
   Loader2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -52,7 +48,6 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   const auth = useAuth()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
 
-  // Route Guard: Only vendors can access this shell
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
       if (!user) {
@@ -69,7 +64,6 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
     router.push("/login")
   }
 
-  // Show loading state
   if (isUserLoading || isProfileLoading) {
     return (
       <div className="min-h-screen nebula-bg flex items-center justify-center">
@@ -81,14 +75,13 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // Authorization check
   if (!user || profile?.role !== 'vendor') {
     return null
   }
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full nebula-bg p-4 md:p-8">
+      <div className="flex min-h-screen w-full nebula-bg p-4 md:p-8 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
         <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)]">
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
@@ -141,7 +134,6 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
                 <Link href="/vendor/dashboard" className={cn("text-sm font-bold tracking-widest uppercase transition-colors", pathname === '/vendor/dashboard' ? "text-primary" : "text-muted-foreground hover:text-white")}>Dashboard</Link>
                 <Link href="/vendor/manage" className="text-sm font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Inventory</Link>
                 <Link href="/vendor/orders" className="text-sm font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Orders</Link>
-                <Link href="/vendor/sales" className="text-sm font-bold tracking-widest uppercase text-muted-foreground hover:text-white transition-colors">Sales</Link>
               </div>
 
               <div className="ml-auto flex items-center gap-6">
@@ -154,11 +146,6 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
                     <p className="text-sm font-bold tracking-wide text-white">{profile?.name || 'Vendor'}</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{user?.email}</p>
                   </div>
-                </div>
-                <div className="h-10 px-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shadow-inner">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">₦</span>
-                   <span className="text-sm font-headline font-bold text-primary">12,850</span>
-                   <Bell className="w-4 h-4 text-primary ml-2" />
                 </div>
               </div>
             </header>

@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
@@ -6,6 +6,14 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 export const metadata: Metadata = {
   title: 'CampusSpend | Future of Student Finance',
   description: 'Manage your campus spending with AI-powered insights and luxury dark aesthetics.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
