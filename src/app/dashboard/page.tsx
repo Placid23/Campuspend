@@ -7,17 +7,9 @@ import {
   ArrowRight, 
   ShoppingBag, 
   Zap, 
-  Search,
   ChevronRight,
-  ChevronLeft,
-  Star,
-  Heart,
   TrendingUp,
   CreditCard,
-  Users,
-  BrainCircuit,
-  LayoutDashboard,
-  Store,
   ClipboardList,
   Loader2,
   ShoppingCart
@@ -28,28 +20,35 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, where, orderBy } from 'firebase/firestore'
+import { collection, query, limit, orderBy } from 'firebase/firestore'
 import { isToday } from 'date-fns'
 
 export default function DashboardPage() {
   const { user, profile, isProfileLoading } = useUser()
   const db = useFirestore()
 
-  // 1. Hooks first
+  // Optimization: Only fetch what is needed for the dashboard (limit results)
   const ordersQuery = useMemoFirebase(() => {
     if (!user) return null
-    return query(collection(db, "users", user.uid, "orders"))
+    return query(
+      collection(db, "users", user.uid, "orders"), 
+      orderBy("orderDate", "desc"),
+      limit(5)
+    )
   }, [db, user?.uid])
 
   const expensesQuery = useMemoFirebase(() => {
     if (!user) return null
-    return query(collection(db, "users", user.uid, "expenses"))
+    return query(
+      collection(db, "users", user.uid, "expenses"), 
+      orderBy("expenseDate", "desc"),
+      limit(5)
+    )
   }, [db, user?.uid])
 
   const { data: orders } = useCollection(ordersQuery)
   const { data: expenses } = useCollection(expensesQuery)
 
-  // 2. Derived data
   const todaySpending = React.useMemo(() => {
     return expenses?.filter(e => {
       try {
@@ -60,7 +59,6 @@ export default function DashboardPage() {
     }).reduce((sum, e) => sum + e.amount, 0) || 0
   }, [expenses])
 
-  // 3. Early return
   if (isProfileLoading || !user) {
     return (
       <DashboardShell>
@@ -141,7 +139,7 @@ export default function DashboardPage() {
                     {orders?.length || 0}
                   </h3>
                   <div className="flex items-center gap-1 text-[8px] text-muted-foreground font-bold uppercase">
-                    <TrendingUp className="w-3 h-3 text-muted-foreground" /> Recorded Transactions
+                    <TrendingUp className="w-3 h-3 text-muted-foreground" /> Recent Recorded
                   </div>
                 </GlassCard>
               </div>
@@ -155,7 +153,7 @@ export default function DashboardPage() {
                  </Link>
                </div>
                <div className="space-y-4">
-                  {expenses?.slice(0, 5).map((exp, i) => (
+                  {expenses?.map((exp, i) => (
                     <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/20 transition-all">
                        <div className="flex items-center gap-4">
                           <div className="p-2 rounded-lg bg-primary/10 text-primary"><CreditCard className="w-4 h-4" /></div>
@@ -182,7 +180,7 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 <h3 className="text-lg font-headline font-bold">Marketplace</h3>
                 <div className="bg-primary/5 border border-dashed border-primary/20 rounded-2xl p-8 text-center space-y-4">
-                  <Store className="w-8 h-8 text-primary mx-auto" />
+                  <ShoppingBag className="w-8 h-8 text-primary mx-auto" />
                   <p className="text-[10px] text-muted-foreground uppercase font-bold">Discover campus merchants</p>
                   <Link href="/vendors" className="block">
                     <Button size="sm" className="w-full bg-primary/20 text-primary border border-primary/40 text-[10px] font-bold uppercase">Explore Vendors</Button>

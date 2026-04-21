@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
-  Query,
   onSnapshot,
   DocumentData,
   QuerySnapshot,
+  Query,
 } from 'firebase/firestore';
 
 export interface UseCollectionResult<T> {
@@ -15,8 +15,8 @@ export interface UseCollectionResult<T> {
 }
 
 /**
- * Robust real-time collection hook.
- * Guards against null queries and includes document path for easy updates.
+ * Optimized real-time collection hook.
+ * Uses a ref to prevent unnecessary state updates and ensures clean unmounting.
  */
 export function useCollection<T = any>(
   queryRef: Query<DocumentData> | null | undefined
@@ -24,13 +24,21 @@ export function useCollection<T = any>(
   const [data, setData] = useState<(T & { id: string; path: string })[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<any | null>(null);
+  
+  // Track current query to avoid stale snapshots
+  const currentQueryRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!queryRef) {
       setData(null);
       setIsLoading(false);
+      setError(null);
       return;
     }
+
+    const queryKey = queryRef.toString();
+    if (currentQueryRef.current === queryKey) return;
+    currentQueryRef.current = queryKey;
 
     setIsLoading(true);
     setError(null);
@@ -43,14 +51,12 @@ export function useCollection<T = any>(
           id: doc.id,
           path: doc.ref.path
         }));
+        
         setData(results);
         setIsLoading(false);
       },
       (err) => {
-        // Specifically identify index errors for the user
-        if (err.code === 'failed-precondition' || err.message.includes('requires an index')) {
-          console.error("❌ Firestore Index Missing:", err.message);
-        } else {
+        if (err.code !== 'permission-denied') {
           console.error("Firestore useCollection Error:", err);
         }
         setError(err);
@@ -58,7 +64,10 @@ export function useCollection<T = any>(
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      currentQueryRef.current = null;
+    };
   }, [queryRef]);
 
   return { data, isLoading, error };
