@@ -1,7 +1,7 @@
-
 "use client"
 
-import { useState, useEffect, React } from 'react'
+import * as React from 'react'
+import { useState } from 'react'
 import { DashboardShell } from "@/components/layout/Shell"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ import { spendingInsightFeedback, type SpendingInsightFeedbackOutput } from "@/a
 import { Progress } from "@/components/ui/progress"
 import { cn } from '@/lib/utils'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, limit, where } from 'firebase/firestore'
+import { collection, query, orderBy, where } from 'firebase/firestore'
 import { subDays } from 'date-fns'
 
 export default function InsightsPage() {
@@ -30,7 +30,7 @@ export default function InsightsPage() {
   const [loading, setLoading] = useState(false)
   const [insight, setInsight] = useState<SpendingInsightFeedbackOutput | null>(null)
 
-  // Fetch real data for AI
+  // Fetch real data for AI: Last 30 days
   const thirtyDaysAgo = subDays(new Date(), 30).toISOString()
   const expensesQuery = useMemoFirebase(() => {
     if (!user) return null
@@ -57,12 +57,12 @@ export default function InsightsPage() {
 
       const result = await spendingInsightFeedback({
         timePeriod: "Last 30 days",
-        totalBudget: profile.monthlyBudget || 0,
+        totalBudget: profile.monthlyBudget || 8000,
         categoryBudgets: {
-          "Food": (profile.monthlyBudget || 0) * 0.4,
-          "Books": (profile.monthlyBudget || 0) * 0.2,
-          "Entertainment": (profile.monthlyBudget || 0) * 0.1,
-          "Other": (profile.monthlyBudget || 0) * 0.3
+          "Food": (profile.monthlyBudget || 8000) * 0.4,
+          "Books": (profile.monthlyBudget || 8000) * 0.2,
+          "Entertainment": (profile.monthlyBudget || 8000) * 0.1,
+          "Other": (profile.monthlyBudget || 8000) * 0.3
         },
         spendingRecords
       })

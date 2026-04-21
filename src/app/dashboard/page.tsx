@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -187,11 +186,11 @@ export default function DashboardPage() {
                   <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden relative">
                     <div 
                       className="h-full bg-gradient-to-r from-primary to-secondary absolute left-0 top-0 shadow-[0_0_20px_rgba(239,26,184,0.5)] transition-all duration-1000"
-                      style={{ width: `${Math.min((profile?.walletBalance / (profile?.monthlyBudget || 1)) * 100, 100)}%` }}
+                      style={{ width: `${Math.min(((profile?.walletBalance || 0) / (profile?.monthlyBudget || 8000)) * 100, 100)}%` }}
                     ></div>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-                    <p className="text-xs text-muted-foreground">Monthly Budget: ₦<span className="text-foreground font-bold">{profile?.monthlyBudget?.toLocaleString() || '0'}</span></p>
+                    <p className="text-xs text-muted-foreground">Monthly Budget: ₦<span className="text-foreground font-bold">{profile?.monthlyBudget?.toLocaleString() || '8,000'}</span></p>
                     <Badge className="bg-emerald-500/20 text-emerald-500 border-none px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Active Wallet</Badge>
                   </div>
                 </div>
