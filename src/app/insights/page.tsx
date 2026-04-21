@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, React } from 'react'
 import { DashboardShell } from "@/components/layout/Shell"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
@@ -14,34 +14,57 @@ import {
   Info,
   TrendingUp,
   Target,
-  Lightbulb
+  Lightbulb,
+  Loader2
 } from "lucide-react"
 import { spendingInsightFeedback, type SpendingInsightFeedbackOutput } from "@/ai/flows/spending-insight-feedback"
 import { Progress } from "@/components/ui/progress"
 import { cn } from '@/lib/utils'
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { collection, query, orderBy, limit, where } from 'firebase/firestore'
+import { subDays } from 'date-fns'
 
 export default function InsightsPage() {
+  const { user, profile } = useUser()
+  const db = useFirestore()
   const [loading, setLoading] = useState(false)
   const [insight, setInsight] = useState<SpendingInsightFeedbackOutput | null>(null)
 
+  // Fetch real data for AI
+  const thirtyDaysAgo = subDays(new Date(), 30).toISOString()
+  const expensesQuery = useMemoFirebase(() => {
+    if (!user) return null
+    return query(
+      collection(db, "users", user.uid, "expenses"),
+      where("expenseDate", ">=", thirtyDaysAgo),
+      orderBy("expenseDate", "desc")
+    )
+  }, [db, user, thirtyDaysAgo])
+
+  const { data: expenses, isLoading: expensesLoading } = useCollection(expensesQuery)
+
   const generateInsight = async () => {
+    if (!profile || !expenses) return
     setLoading(true)
     try {
-      // Mocking high fidelity student data
+      // Map Firestore data to AI Input Schema
+      const spendingRecords = expenses.map(e => ({
+        category: e.categoryId || "Other",
+        amount: e.amount,
+        date: e.expenseDate,
+        vendor: e.description?.split(' from ')[1] || "Unknown"
+      }))
+
       const result = await spendingInsightFeedback({
         timePeriod: "Last 30 days",
-        totalBudget: 800,
+        totalBudget: profile.monthlyBudget || 0,
         categoryBudgets: {
-          "Food": 300,
-          "Books": 150,
-          "Entertainment": 100,
-          "Other": 250
+          "Food": (profile.monthlyBudget || 0) * 0.4,
+          "Books": (profile.monthlyBudget || 0) * 0.2,
+          "Entertainment": (profile.monthlyBudget || 0) * 0.1,
+          "Other": (profile.monthlyBudget || 0) * 0.3
         },
-        spendingRecords: [
-          { category: "Food", amount: 350, date: new Date().toISOString(), vendor: "Campus Cafe" },
-          { category: "Books", amount: 45, date: new Date().toISOString(), vendor: "University Bookstore" },
-          { category: "Entertainment", amount: 120, date: new Date().toISOString(), vendor: "Student Hub" },
-        ]
+        spendingRecords
       })
       setInsight(result)
     } catch (error) {
@@ -60,19 +83,20 @@ export default function InsightsPage() {
           </div>
           <h1 className="text-4xl font-headline font-bold">CampusSpend AI Advisor</h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Our neural-powered advisor analyzes your campus spending patterns to give you tactical financial advantages.
+            Our neural-powered advisor analyzes your real transaction history to give you tactical financial advantages.
           </p>
           {!insight && (
             <Button 
               onClick={generateInsight} 
-              disabled={loading}
+              disabled={loading || expensesLoading || !expenses || expenses.length === 0}
               className="glow-button mt-4 rounded-2xl h-14 px-8 bg-primary hover:bg-primary/90 text-lg group"
             >
               {loading ? (
                 <>Analyzing Financial DNA...</>
               ) : (
                 <>
-                  Generate Intelligence Report <Sparkles className="ml-2 w-5 h-5 group-hover:animate-pulse" />
+                  {expenses && expenses.length > 0 ? "Generate Intelligence Report" : "No Transaction Data Found"} 
+                  <Sparkles className="ml-2 w-5 h-5 group-hover:animate-pulse" />
                 </>
               )}
             </Button>

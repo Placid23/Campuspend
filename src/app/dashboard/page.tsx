@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -12,22 +13,38 @@ import {
   CreditCard,
   ClipboardList,
   Loader2,
-  ShoppingCart
+  ShoppingCart,
+  Plus
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, limit, orderBy } from 'firebase/firestore'
+import { collection, query, limit, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { isToday } from 'date-fns'
+import { useToast } from "@/hooks/use-toast"
 
 export default function DashboardPage() {
   const { user, profile, isProfileLoading } = useUser()
   const db = useFirestore()
+  const { toast } = useToast()
+  
+  const [isTopUpOpen, setIsTopUpOpen] = React.useState(false)
+  const [topUpAmount, setTopUpAmount] = React.useState("1000")
+  const [isProcessing, setIsProcessing] = React.useState(false)
 
-  // Optimization: Only fetch what is needed for the dashboard (limit results)
   const ordersQuery = useMemoFirebase(() => {
     if (!user) return null
     return query(
@@ -58,6 +75,34 @@ export default function DashboardPage() {
       }
     }).reduce((sum, e) => sum + e.amount, 0) || 0
   }, [expenses])
+
+  const handleTopUp = async () => {
+    if (!user || !profile) return
+    const amount = parseFloat(topUpAmount)
+    if (isNaN(amount) || amount <= 0) return
+
+    setIsProcessing(true)
+    try {
+      const userRef = doc(db, "userProfiles", user.uid)
+      await updateDoc(userRef, {
+        walletBalance: (profile.walletBalance || 0) + amount,
+        updatedAt: new Date().toISOString()
+      })
+      toast({
+        title: "Funds Added!",
+        description: `₦${amount.toLocaleString()} has been added to your wallet.`
+      })
+      setIsTopUpOpen(false)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Top-up Failed",
+        description: "Could not update wallet balance."
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   if (isProfileLoading || !user) {
     return (
@@ -97,14 +142,53 @@ export default function DashboardPage() {
                     <h3 className="text-lg md:text-xl font-headline font-bold">Wallet Balance</h3>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Available Funds</p>
                   </div>
-                  <div className="text-center sm:text-right">
-                    <span className="text-xs text-muted-foreground mr-2">₦</span>
-                    <span className="text-3xl font-bold">{profile?.walletBalance?.toLocaleString() || '0.00'}</span>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center sm:text-right">
+                      <span className="text-xs text-muted-foreground mr-2">₦</span>
+                      <span className="text-3xl font-bold">{profile?.walletBalance?.toLocaleString() || '0.00'}</span>
+                    </div>
+                    
+                    <Dialog open={isTopUpOpen} onOpenChange={setIsTopUpOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="rounded-xl border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-bold h-10 px-4">
+                          <Plus className="w-4 h-4 mr-2" /> Top Up
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-card border-white/10">
+                        <DialogHeader>
+                          <DialogTitle className="text-white font-headline">Add Funds to Wallet</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Amount (₦)</Label>
+                            <Input 
+                              type="number" 
+                              value={topUpAmount}
+                              onChange={(e) => setTopUpAmount(e.target.value)}
+                              className="h-12 bg-white/5 border-white/10 text-lg font-bold"
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {["500", "1000", "5000"].map(val => (
+                              <Button key={val} variant="ghost" className="bg-white/5 border border-white/5 text-xs h-10" onClick={() => setTopUpAmount(val)}>₦{val}</Button>
+                            ))}
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button onClick={handleTopUp} disabled={isProcessing} className="w-full bg-primary font-bold h-12 rounded-xl">
+                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Top Up"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden relative">
-                    <div className="h-full w-full bg-gradient-to-r from-primary to-secondary absolute left-0 top-0 shadow-[0_0_20px_rgba(239,26,184,0.5)]"></div>
+                    <div 
+                      className="h-full bg-gradient-to-r from-primary to-secondary absolute left-0 top-0 shadow-[0_0_20px_rgba(239,26,184,0.5)] transition-all duration-1000"
+                      style={{ width: `${Math.min((profile?.walletBalance / (profile?.monthlyBudget || 1)) * 100, 100)}%` }}
+                    ></div>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
                     <p className="text-xs text-muted-foreground">Monthly Budget: ₦<span className="text-foreground font-bold">{profile?.monthlyBudget?.toLocaleString() || '0'}</span></p>
