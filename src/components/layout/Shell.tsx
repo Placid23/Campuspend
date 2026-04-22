@@ -88,7 +88,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         
         <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-none md:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
           
-          <Sidebar className="border-r-0 bg-transparent w-72 hidden md:flex">
+          {/* Main Responsive Sidebar */}
+          <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.5)] group-hover:scale-110 transition-transform">
@@ -135,8 +136,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </SidebarFooter>
           </Sidebar>
 
-          <Sidebar side="left" className="md:hidden" collapsible="offcanvas" />
-
           <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
             <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-white/5 sticky top-0 z-40 bg-background/20 backdrop-blur-xl">
               <SidebarTrigger className="md:hidden text-white h-10 w-10" />
@@ -177,6 +176,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </SidebarInset>
         </div>
 
+        {/* Mobile Bottom Nav */}
         <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-50">
           <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl h-16 flex items-center justify-around px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
             {[

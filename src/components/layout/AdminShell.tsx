@@ -14,7 +14,8 @@ import {
   Box,
   ClipboardList,
   AlertCircle,
-  Loader2
+  Loader2,
+  Menu
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -27,7 +28,8 @@ import {
   SidebarMenu, 
   SidebarMenuButton, 
   SidebarMenuItem, 
-  SidebarProvider 
+  SidebarProvider,
+  SidebarTrigger
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
@@ -82,8 +84,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full nebula-bg p-4 md:p-8 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
-        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+      <div className="flex min-h-screen w-full nebula-bg p-0 md:p-8 pt-[calc(0rem+env(safe-area-inset-top,0px))] pb-[calc(0rem+env(safe-area-inset-bottom,0px))]">
+        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-none md:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-3 group">
@@ -130,7 +132,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </Sidebar>
 
           <SidebarInset className="bg-transparent overflow-hidden">
-            <header className="flex h-24 items-center gap-8 px-10 border-b border-white/5 sticky top-0 z-40 bg-transparent backdrop-blur-xl">
+            <header className="flex h-20 md:h-24 items-center gap-4 px-6 md:px-10 border-b border-white/5 sticky top-0 z-40 bg-transparent backdrop-blur-xl pt-[env(safe-area-inset-top,0px)]">
+              <SidebarTrigger className="md:hidden text-white h-10 w-10" />
+              
               <div className="hidden md:flex items-center gap-10">
                 <Link href="/admin/dashboard" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/dashboard' ? "text-primary" : "text-muted-foreground hover:text-white")}>Dashboard</Link>
                 <Link href="/admin/reports" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/reports' ? "text-primary" : "text-muted-foreground hover:text-white")}>Reports</Link>
@@ -138,7 +142,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
               <div className="ml-auto flex items-center gap-6">
                 <div className="flex items-center gap-4 group cursor-pointer">
-                  <Avatar className="w-10 h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
+                  <Avatar className="w-8 h-8 md:w-10 md:h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
                     <AvatarImage src={`https://picsum.photos/seed/${user?.uid || 'admin'}/100/100`} />
                     <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
                   </Avatar>
@@ -150,7 +154,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </div>
             </header>
 
-            <main className="p-10 h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
+            <main className="p-6 md:p-10 h-[calc(100vh-80px)] md:h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
               {children}
             </main>
           </SidebarInset>
