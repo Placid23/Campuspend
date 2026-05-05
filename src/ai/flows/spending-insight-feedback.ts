@@ -1,39 +1,44 @@
 'use server';
 /**
- * @fileOverview A Genkit flow for providing AI-generated feedback and insights on student spending habits.
+ * @fileOverview A Genkit flow for providing Intelligent Financial Analysis using a Decision Tree model.
  *
- * - spendingInsightFeedback - A function that provides personalized financial feedback.
- * - SpendingInsightFeedbackInput - The input type for the spendingInsightFeedback function.
- * - SpendingInsightFeedbackOutput - The return type for the spendingInsightFeedback function.
+ * - spendingInsightFeedback - A function that provides analysis based on purchase-based logging.
+ * - SpendingInsightFeedbackInput - The input type for the function.
+ * - SpendingInsightFeedbackOutput - The return type for the function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SpendingInsightFeedbackInputSchema = z.object({
-  timePeriod: z.string().describe('The time period for which spending insights are requested (e.g., "monthly", "weekly", "last 30 days", "all-time").'),
-  totalBudget: z.number().describe('The student\'s total budget for the specified time period.'),
-  categoryBudgets: z.record(z.string(), z.number()).describe('An object mapping spending categories to their respective budget limits for the time period.'),
+  timePeriod: z.string().describe('The time period for analysis.'),
+  totalBudget: z.number().describe('The student\'s total budget allocation.'),
+  categoryBudgets: z.record(z.string(), z.number()).describe('Allocation mapping.'),
   spendingRecords: z.array(z.object({
-    category: z.string().describe('The category of the spending (e.g., "Food", "Books", "Entertainment").'),
-    amount: z.number().describe('The amount spent in this record.'),
-    date: z.string().datetime().describe('The date and time of the spending in ISO 8601 format.'),
-    vendor: z.string().optional().describe('The vendor where the spending occurred.'),
-  })).describe('An array of individual spending records for the specified time period.'),
+    category: z.string(),
+    amount: z.number(),
+    date: z.string().datetime(),
+    vendor: z.string().optional(),
+  })).describe('Real-time logs from purchase-based activity.'),
 });
 export type SpendingInsightFeedbackInput = z.infer<typeof SpendingInsightFeedbackInputSchema>;
 
 const SpendingInsightFeedbackOutputSchema = z.object({
-  overallFeedback: z.enum(['Excellent Control', 'Warning', 'Overspending']).describe('An overall assessment of the student\'s spending behavior.'),
-  explanation: z.string().describe('A detailed explanation of the student\'s spending patterns, highlighting strengths and weaknesses. Include analysis of spending frequency if patterns are visible.'),
-  suggestions: z.array(z.string()).describe('Actionable suggestions for improving financial decisions.'),
+  decisionTreePath: z.string().describe('The logical path taken through the analysis tree.'),
+  overallFeedback: z.enum(['Excellent Control', 'Warning', 'Overspending']),
+  classification: z.object({
+    essentialRatio: z.number().describe('Percentage of essential vs non-essential spending.'),
+    leakagePoints: z.array(z.string()).describe('Specific purchase logs identified as financial leakage.'),
+  }),
+  explanation: z.string(),
+  suggestions: z.array(z.string()),
   categoryInsights: z.array(z.object({
-    category: z.string().describe('The spending category.'),
-    spent: z.number().describe('Total amount spent in this category.'),
-    budget: z.number().optional().describe('Budget allocated for this category, if available.'),
-    status: z.enum(['Under Budget', 'On Budget', 'Slightly Over Budget', 'Significantly Over Budget']).describe('Status of spending relative to budget for this category.'),
-    comment: z.string().describe('Specific feedback or observations for this category.'),
-  })).describe('Specific insights and feedback for each spending category, including all categories with spending or a budget.'),
+    category: z.string(),
+    spent: z.number(),
+    budget: z.number().optional(),
+    status: z.enum(['Under Budget', 'On Budget', 'Slightly Over Budget', 'Significantly Over Budget']),
+    comment: z.string(),
+  })),
 });
 export type SpendingInsightFeedbackOutput = z.infer<typeof SpendingInsightFeedbackOutputSchema>;
 
@@ -45,7 +50,26 @@ const spendingInsightFeedbackPrompt = ai.definePrompt({
   name: 'spendingInsightFeedbackPrompt',
   input: {schema: SpendingInsightFeedbackInputSchema},
   output: {schema: SpendingInsightFeedbackOutputSchema},
-  prompt: `You are an expert financial advisor named CampusSpend AI, specialized in helping students manage their finances. Your goal is to analyze the provided spending data and offer personalized, actionable feedback and insights.\n\nAnalyze the student's spending habits for the {{timePeriod}} period.\n\nHere's the student's financial context:\nTotal Budget for {{timePeriod}}: {{totalBudget}}\nCategory Budgets: {{{json categoryBudgets}}}\n\nHere are the student's spending records for the {{timePeriod}}:\n{{{json spendingRecords}}}\n\nBased on this data, provide:\n1.  An \`overallFeedback\` that summarizes their spending behavior. Choose one from 'Excellent Control', 'Warning', or 'Overspending'.\n2.  A detailed \`explanation\` of their spending patterns, highlighting areas of strength and areas that need attention. Consider their total spending relative to their total budget, and category spending relative to category budgets. Also, analyze spending frequency if patterns emerge from the provided records.\n3.  A list of \`suggestions\` for improvement. These should be practical and actionable.\n4.  \`categoryInsights\` for each spending category, detailing actual spent vs. budget, status (e.g., 'Under Budget', 'Slightly Over Budget', 'Significantly Over Budget'), and specific comments. Ensure that all categories with spending or budget are included in the \`categoryInsights\` array.\n\nStrictly return the output in JSON format, conforming to the \`SpendingInsightFeedbackOutputSchema\`.`,
+  prompt: `You are the CampusSpend Intelligent Engine. Your goal is to apply a Decision Tree Analysis to the following Purchase-Based Logging (PBL) data.
+
+LOGICAL DECISION TREE STEPS:
+1. BUDGET NODE: Is total spending > budget? 
+2. VARIANCE NODE: Which categories show >15% variance from allocation?
+3. FREQUENCY NODE: Is there a pattern of daily high-frequency low-value purchases (leakage)?
+4. CLASSIFICATION NODE: Classify purchases as 'Survival' (Food/Books) or 'Lifestyle' (Entertainment).
+
+Input Data:
+Total Budget: {{totalBudget}}
+Allocations: {{{json categoryBudgets}}}
+Transaction Logs: {{{json spendingRecords}}}
+
+Based on this Decision Tree, provide:
+1. 'decisionTreePath': A summary of the logic used (e.g., 'Over-Budget -> Food Variance -> High Frequency Leakage').
+2. 'classification': Essentiality ratio and specific 'leakagePoints' where spending was irrational.
+3. 'overallFeedback': The final leaf node classification.
+4. 'suggestions': Strategic interventions to prune spending.
+
+Strictly return valid JSON.`,
 });
 
 const spendingInsightFeedbackFlow = ai.defineFlow(
@@ -57,7 +81,7 @@ const spendingInsightFeedbackFlow = ai.defineFlow(
   async input => {
     const {output} = await spendingInsightFeedbackPrompt(input);
     if (!output) {
-      throw new Error('No output received from AI for spending insights.');
+      throw new Error('No output received from intelligence engine.');
     }
     return output;
   }
