@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -13,7 +12,10 @@ import {
   CreditCard,
   ShoppingCart,
   History,
-  Menu
+  Menu,
+  Moon,
+  Sun,
+  Zap
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -37,12 +39,12 @@ import { PermissionPrompt } from "@/components/pwa/PWAHandler"
 import Image from "next/image"
 
 const navItems = [
-  { name: "Vendors", href: "/vendors", icon: Store },
+  { name: "Marketplace", href: "/vendors", icon: Store },
   { name: "My Tray", href: "/cart", icon: ShoppingCart },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Expenses", href: "/calendar", icon: CreditCard },
-  { name: "Orders", href: "/orders", icon: History },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Expenditure", href: "/calendar", icon: CreditCard },
+  { name: "Track Logs", href: "/orders", icon: History },
+  { name: "Preferences", href: "/settings", icon: Settings },
 ]
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -50,6 +52,20 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const auth = useAuth()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
+  const [theme, setTheme] = React.useState<'dark' | 'light'>('dark')
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('theme') || 'dark'
+    setTheme(saved as any)
+    document.documentElement.classList.toggle('dark', saved === 'dark')
+  }, [])
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('theme', next)
+    document.documentElement.classList.toggle('dark', next === 'dark')
+  }
 
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
@@ -82,15 +98,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full nebula-bg p-0 md:p-8 relative">
-        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-none md:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+        <div className="flex flex-1 w-full bg-card/40 backdrop-blur-3xl border-0 md:border md:border-border rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl">
           
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.5)] group-hover:scale-110 transition-transform">
-                  <Image src="/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform overflow-hidden relative">
+                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-125" />
                 </div>
-                <span className="font-headline font-bold text-2xl tracking-tighter text-white">CafePay</span>
+                <span className="font-headline font-bold text-2xl tracking-tighter">CafePay</span>
               </Link>
             </SidebarHeader>
             <SidebarContent className="px-6 py-8">
@@ -101,22 +117,30 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       asChild 
                       isActive={pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors'))}
                       className={cn(
-                        "h-12 px-6 rounded-2xl transition-all duration-300",
+                        "h-12 px-6 rounded-2xl transition-all duration-300 font-bold",
                         (pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors')))
-                          ? "bg-gradient-to-r from-primary to-secondary text-white shadow-[0_0_20px_rgba(239,26,184,0.3)]" 
-                          : "hover:bg-white/5 text-muted-foreground hover:text-foreground"
+                          ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" 
+                          : "hover:bg-accent text-muted-foreground hover:text-foreground"
                       )}
                     >
                       <Link href={item.href} className="flex items-center gap-4">
                         <item.icon className="w-5 h-5" />
-                        <span className="font-bold text-sm tracking-wide">{item.name}</span>
+                        <span className="text-sm tracking-wide">{item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
             </SidebarContent>
-            <SidebarFooter className="p-8">
+            <SidebarFooter className="p-8 space-y-4">
+              <Button 
+                variant="ghost" 
+                onClick={toggleTheme}
+                className="w-full justify-start text-muted-foreground hover:bg-accent rounded-2xl px-6 h-12"
+              >
+                {theme === 'dark' ? <Sun className="w-5 h-5 mr-4" /> : <Moon className="w-5 h-5 mr-4" />}
+                <span className="font-bold text-sm">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              </Button>
               <Button 
                 variant="ghost" 
                 onClick={handleLogout}
@@ -129,25 +153,20 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </Sidebar>
 
           <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
-            <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-white/5 sticky top-0 z-40 bg-background/20 backdrop-blur-xl">
-              <SidebarTrigger className="md:hidden text-white h-10 w-10 flex items-center justify-center" />
+            <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
+              <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center" />
               
               <div className="flex md:hidden items-center gap-2 flex-1">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
-                  <Image src="/logo.png" alt="Logo" width={16} height={16} className="object-contain" />
+                <div className="w-10 h-10 rounded-lg bg-primary relative flex items-center justify-center shadow-lg">
+                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-1 scale-125" />
                 </div>
-                <span className="font-headline font-bold text-lg tracking-tighter text-white">CafePay</span>
-              </div>
-
-              <div className="hidden md:flex items-center gap-10">
-                <Link href="/" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">Home</Link>
-                <Link href="/vendors" className="text-sm font-bold tracking-widest uppercase hover:text-primary transition-colors">Market</Link>
+                <span className="font-headline font-bold text-lg tracking-tighter">CafePay</span>
               </div>
 
               <div className="ml-auto flex items-center gap-4 md:gap-6">
-                <div className="h-9 md:h-10 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 md:gap-3 shadow-inner">
-                   <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">₦</span>
-                   <span className="text-xs md:text-sm font-headline font-bold text-primary">{profile?.walletBalance?.toLocaleString() || '0'}</span>
+                <div className="h-10 px-4 md:px-6 rounded-2xl bg-muted/50 border border-border flex items-center gap-3 shadow-inner">
+                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Balance</span>
+                   <span className="text-sm font-headline font-bold text-primary">₦{profile?.walletBalance?.toLocaleString() || '0'}</span>
                 </div>
               </div>
             </header>
@@ -162,7 +181,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         {/* Mobile Bottom Nav */}
         <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-40">
-          <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl h-16 flex items-center justify-around px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+          <div className="bg-card/80 backdrop-blur-3xl border border-border rounded-[2rem] h-16 flex items-center justify-around px-4 shadow-2xl">
             {[
               { icon: Store, label: "Market", href: "/vendors" },
               { icon: LayoutDashboard, label: "Home", href: "/dashboard" },

@@ -1,10 +1,34 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Refined Light Mode (Frost & Indigo) */
+    --background: 220 33% 98%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 310 90% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 262 83% 58%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 310 90% 55%;
+    --accent-foreground: 224 71% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 310 90% 55%;
+    --radius: 1.25rem;
+  }
+
+  .dark {
+    /* Premium Dark Mode (Nebula) */
     --background: 310 20% 6%;
     --foreground: 0 0% 98%;
     --card: 310 20% 10%;
@@ -24,36 +48,25 @@
     --border: 310 15% 20%;
     --input: 310 15% 20%;
     --ring: 310 90% 55%;
-    --radius: 1rem;
-    --chart-1: 310 90% 55%;
-    --chart-2: 280 80% 60%;
-    --chart-3: 320 100% 70%;
-    --chart-4: 260 90% 60%;
-    --chart-5: 340 100% 50%;
   }
 }
 
 @layer components {
   .glass-morphism {
-    @apply bg-card/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+    @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)];
   }
-
-  .neon-border {
-    @apply border border-primary/30 relative;
-    box-shadow: 0 0 15px rgba(239, 26, 184, 0.1);
+  
+  .dark .glass-morphism {
+    @apply bg-card/40 backdrop-blur-2xl border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
   }
 
   .neon-text-glow {
-    text-shadow: 0 0 10px rgba(239, 26, 184, 0.5);
+    text-shadow: 0 0 10px rgba(239, 26, 184, 0.4);
   }
 
   .glow-button {
     @apply relative overflow-hidden transition-all duration-300 active:scale-95;
     box-shadow: 0 0 20px rgba(239, 26, 184, 0.2);
-  }
-
-  .glow-button:hover {
-    box-shadow: 0 0 30px rgba(239, 26, 184, 0.4);
   }
 
   .nebula-bg {
@@ -68,14 +81,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-500;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-headline;
-  }
-}
-
-.energy-line {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
 }
