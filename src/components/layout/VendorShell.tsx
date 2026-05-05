@@ -62,8 +62,12 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   }, [user, isUserLoading, profile, isProfileLoading, router])
 
   const handleLogout = async () => {
-    await signOut(auth)
-    router.push("/login")
+    try {
+      await signOut(auth)
+      router.push("/login")
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
   }
 
   if (isUserLoading || isProfileLoading) {
@@ -132,7 +136,7 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
 
           <SidebarInset className="bg-transparent overflow-hidden">
             <header className="flex h-20 md:h-24 items-center gap-4 px-6 md:px-10 border-b border-white/5 sticky top-0 z-40 bg-transparent backdrop-blur-xl pt-[env(safe-area-inset-top,0px)]">
-              <SidebarTrigger className="md:hidden text-white h-10 w-10" />
+              <SidebarTrigger className="md:hidden text-white h-10 w-10 pointer-events-auto" />
               
               <div className="hidden md:flex items-center gap-10">
                 <Link href="/vendor/dashboard" className={cn("text-sm font-bold tracking-widest uppercase transition-colors", pathname === '/vendor/dashboard' ? "text-primary" : "text-muted-foreground hover:text-white")}>Dashboard</Link>

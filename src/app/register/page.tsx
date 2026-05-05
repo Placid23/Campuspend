@@ -149,9 +149,14 @@ export default function RegisterPage() {
                     <Input id="adminCode" type="password" value={formData.adminCode} onChange={handleInputChange} className="h-12 border-primary/20 rounded-xl" required />
                   </div>
                 )}
-                <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl bg-primary font-bold">
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign Up"}
-                </Button>
+                <div className="space-y-4 pt-2">
+                  <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl bg-primary font-bold">
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign Up"}
+                  </Button>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Already have an account? <Link href="/login" className="text-primary font-bold hover:underline">Sign in</Link>
+                  </p>
+                </div>
               </form>
             </GlassCard>
           </div>
