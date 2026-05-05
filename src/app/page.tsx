@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen nebula-bg">
       {/* Navbar with Upscaled Logo */}
-      <nav className="fixed top-0 w-full z-50 glass-morphism border-b-0 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-6 px-6 md:px-12 flex justify-between items-center bg-background/50">
+      <nav className="fixed top-0 w-full z-50 glass-morphism border-b-0 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-6 px-6 md:px-12 flex justify-between items-center bg-background/80">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shadow-2xl relative overflow-hidden p-1.5 border border-white/10">
-            <Image src="/logo.png" alt="CafePay Logo" width={64} height={64} className="object-contain scale-125" />
+          <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center shadow-2xl relative overflow-hidden p-1 border border-white/10">
+            <Image src="/logo.png" alt="CafePay Logo" width={80} height={80} className="object-contain scale-150" />
           </div>
-          <span className="font-headline font-bold text-2xl tracking-tighter hidden sm:block">CafePay Wallet</span>
+          <span className="font-headline font-bold text-3xl tracking-tighter hidden sm:block">CafePay Wallet</span>
         </div>
         <div className="hidden lg:flex items-center gap-10">
           <Link href="#features" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Features</Link>
@@ -117,10 +118,10 @@ export default function LandingPage() {
       <footer className="py-20 px-6 border-t border-white/5 bg-card/20 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-24">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center p-1 border border-white/10">
-                 <Image src="/logo.png" alt="Logo" width={48} height={48} className="object-contain scale-110" />
+              <div className="w-16 h-16 rounded-lg bg-white/5 flex items-center justify-center p-1 border border-white/10">
+                 <Image src="/logo.png" alt="Logo" width={64} height={64} className="object-contain scale-125" />
               </div>
-              <span className="font-headline font-bold text-xl tracking-tighter">CafePay Wallet</span>
+              <span className="font-headline font-bold text-2xl tracking-tighter">CafePay Wallet</span>
            </div>
            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em]">
              © 2024 CafePay Wallet. Engineered for Academic Excellence.
