@@ -15,7 +15,9 @@ import {
   Box,
   ClipboardList,
   AlertCircle,
-  Menu
+  Menu,
+  ShieldCheck,
+  User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -35,6 +37,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
 import { useAuth, useUser } from '@/firebase'
 import { AppLoader } from "@/components/ui/app-loader"
+import Image from "next/image"
 
 const adminNavItems = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -42,8 +45,8 @@ const adminNavItems = [
   { name: "Manage Vendors", href: "/admin/vendors", icon: Store },
   { name: "Manage Products", href: "/admin/products", icon: Package },
   { name: "Manage Categories", href: "/admin/categories", icon: Box },
-  { name: "Reports", href: "/admin/reports", icon: ClipboardList },
-  { name: "Threshold Settings", href: "/admin/settings", icon: AlertCircle },
+  { name: "System Reports", href: "/admin/reports", icon: ClipboardList },
+  { name: "Thresholds", href: "/admin/settings", icon: AlertCircle },
 ]
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -83,14 +86,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full nebula-bg p-0 md:p-8 pt-[calc(0rem+env(safe-area-inset-top,0px))] pb-[calc(0rem+env(safe-area-inset-bottom,0px))]">
-        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-none md:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl">
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
-              <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.5)] group-hover:scale-110 transition-transform">
-                  <Zap className="text-white w-6 h-6" />
+              <Link href="/" className="flex items-center gap-4 group">
+                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_25px_rgba(239,26,184,0.6)] group-hover:scale-110 transition-transform overflow-hidden relative p-1.5 border border-white/20">
+                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150 drop-shadow-md" />
                 </div>
-                <span className="font-headline font-bold text-2xl tracking-tighter text-white">CampusSpend</span>
+                <div className="flex flex-col">
+                  <span className="font-headline font-bold text-2xl tracking-tighter leading-none">CafePay</span>
+                  <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-primary mt-1">Admin Protocol</span>
+                </div>
               </Link>
             </SidebarHeader>
             <SidebarContent className="px-6 py-8">
@@ -101,23 +107,31 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                       asChild 
                       isActive={pathname === item.href}
                       className={cn(
-                        "h-12 px-6 rounded-2xl transition-all duration-300",
+                        "h-12 px-6 rounded-2xl transition-all duration-300 font-bold",
                         pathname === item.href
-                          ? "bg-gradient-to-r from-primary to-secondary text-white shadow-[0_0_20px_rgba(239,26,184,0.3)]" 
+                          ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" 
                           : "hover:bg-white/5 text-muted-foreground hover:text-foreground"
                       )}
                     >
                       <Link href={item.href} className="flex items-center gap-4">
                         <item.icon className="w-5 h-5" />
-                        <span className="font-bold text-sm tracking-wide">{item.name}</span>
-                        {pathname === item.href && <ChevronRight className="ml-auto w-4 h-4 opacity-50" />}
+                        <span className="text-sm tracking-wide">{item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
             </SidebarContent>
-            <SidebarFooter className="p-8">
+            <SidebarFooter className="p-8 space-y-4">
+              <Link href="/admin/profile" className="block w-full">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-muted-foreground hover:bg-white/5 rounded-2xl px-6 h-12 group"
+                >
+                  <ShieldCheck className="w-5 h-5 mr-4 group-hover:text-primary transition-colors" />
+                  <span className="font-bold text-sm">Security Profile</span>
+                </Button>
+              </Link>
               <Button 
                 variant="ghost" 
                 onClick={handleLogout}
@@ -134,21 +148,21 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="md:hidden text-white h-10 w-10 pointer-events-auto" />
               
               <div className="hidden md:flex items-center gap-10">
-                <Link href="/admin/dashboard" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/dashboard' ? "text-primary" : "text-muted-foreground hover:text-white")}>Dashboard</Link>
-                <Link href="/admin/reports" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/reports' ? "text-primary" : "text-muted-foreground hover:text-white")}>Reports</Link>
+                <Link href="/admin/dashboard" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/dashboard' ? "text-primary" : "text-muted-foreground hover:text-white")}>Market Summary</Link>
+                <Link href="/admin/reports" className={cn("text-xs font-bold tracking-widest uppercase transition-colors", pathname === '/admin/reports' ? "text-primary" : "text-muted-foreground hover:text-white")}>Analytics Engine</Link>
               </div>
 
               <div className="ml-auto flex items-center gap-6">
-                <div className="flex items-center gap-4 group cursor-pointer">
-                  <Avatar className="w-8 h-8 md:w-10 md:h-10 border-2 border-primary/20 group-hover:border-primary transition-colors">
+                <Link href="/admin/profile" className="flex items-center gap-4 group cursor-pointer">
+                  <Avatar className="w-10 h-10 border-2 border-primary/20 group-hover:border-primary transition-colors shadow-xl">
                     <AvatarImage src={`https://picsum.photos/seed/${user?.uid || 'admin'}/100/100`} />
                     <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
                   </Avatar>
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold tracking-wide text-white">{profile?.name || 'Admin'}</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{user?.email}</p>
+                    <p className="text-sm font-bold tracking-wide text-white group-hover:text-primary transition-colors">{profile?.name || 'Admin'}</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Platform Overseer</p>
                   </div>
-                </div>
+                </Link>
               </div>
             </header>
 

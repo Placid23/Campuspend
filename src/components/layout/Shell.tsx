@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -15,7 +16,8 @@ import {
   Menu,
   Moon,
   Sun,
-  Zap
+  Zap,
+  User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -44,7 +46,7 @@ const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Expenditure", href: "/calendar", icon: CreditCard },
   { name: "Track Logs", href: "/orders", icon: History },
-  { name: "Preferences", href: "/settings", icon: Settings },
+  { name: "Settings", href: "/settings", icon: Settings },
 ]
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -102,11 +104,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
-              <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform overflow-hidden relative">
-                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-125" />
+              <Link href="/" className="flex items-center gap-4 group">
+                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.4)] group-hover:scale-110 transition-transform overflow-hidden relative p-1.5 border border-white/20">
+                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150 drop-shadow-md" />
                 </div>
-                <span className="font-headline font-bold text-2xl tracking-tighter">CafePay</span>
+                <div className="flex flex-col">
+                  <span className="font-headline font-bold text-2xl tracking-tighter leading-none">CafePay</span>
+                  <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-primary mt-1">Student Wallet</span>
+                </div>
               </Link>
             </SidebarHeader>
             <SidebarContent className="px-6 py-8">
@@ -133,14 +138,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter className="p-8 space-y-4">
-              <Button 
-                variant="ghost" 
-                onClick={toggleTheme}
-                className="w-full justify-start text-muted-foreground hover:bg-accent rounded-2xl px-6 h-12"
-              >
-                {theme === 'dark' ? <Sun className="w-5 h-5 mr-4" /> : <Moon className="w-5 h-5 mr-4" />}
-                <span className="font-bold text-sm">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-              </Button>
+              <Link href="/settings" className="block w-full">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-muted-foreground hover:bg-accent rounded-2xl px-6 h-12 group"
+                >
+                  <User className="w-5 h-5 mr-4 group-hover:text-primary transition-colors" />
+                  <span className="font-bold text-sm">Account Settings</span>
+                </Button>
+              </Link>
               <Button 
                 variant="ghost" 
                 onClick={handleLogout}
@@ -153,20 +159,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </Sidebar>
 
           <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
-            <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
-              <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center" />
+            <header className="flex h-[calc(6rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
+              <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-2" />
               
-              <div className="flex md:hidden items-center gap-2 flex-1">
-                <div className="w-10 h-10 rounded-lg bg-primary relative flex items-center justify-center shadow-lg">
-                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-1 scale-125" />
+              <div className="flex md:hidden items-center gap-3 flex-1">
+                <div className="w-12 h-12 rounded-xl bg-primary relative flex items-center justify-center shadow-lg border border-white/20 p-1">
+                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5 scale-125" />
                 </div>
-                <span className="font-headline font-bold text-lg tracking-tighter">CafePay</span>
+                <span className="font-headline font-bold text-xl tracking-tighter">CafePay</span>
               </div>
 
               <div className="ml-auto flex items-center gap-4 md:gap-6">
-                <div className="h-10 px-4 md:px-6 rounded-2xl bg-muted/50 border border-border flex items-center gap-3 shadow-inner">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Balance</span>
-                   <span className="text-sm font-headline font-bold text-primary">₦{profile?.walletBalance?.toLocaleString() || '0'}</span>
+                <div className="h-11 px-5 md:px-7 rounded-2xl bg-card border border-border flex items-center gap-4 shadow-inner relative overflow-hidden group">
+                   <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest relative">Balance</span>
+                   <span className="text-lg font-headline font-bold text-primary relative">₦{profile?.walletBalance?.toLocaleString() || '0'}</span>
                 </div>
               </div>
             </header>
@@ -180,23 +187,23 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <PermissionPrompt />
 
         {/* Mobile Bottom Nav */}
-        <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-40">
-          <div className="bg-card/80 backdrop-blur-3xl border border-border rounded-[2rem] h-16 flex items-center justify-around px-4 shadow-2xl">
+        <div className="md:hidden fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
+          <div className="bg-card/90 backdrop-blur-3xl border border-border rounded-[2.5rem] h-18 flex items-center justify-around px-6 shadow-2xl">
             {[
               { icon: Store, label: "Market", href: "/vendors" },
               { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
-              { icon: CreditCard, label: "Bills", href: "/calendar" },
+              { icon: CreditCard, label: "Expend", href: "/calendar" },
               { icon: ShoppingCart, label: "Tray", href: "/cart" },
             ].map((item) => (
               <Link 
                 key={item.href} 
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center w-14 h-12 rounded-2xl transition-all active:scale-90",
-                  pathname === item.href ? "text-primary" : "text-muted-foreground"
+                  "flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all active:scale-90",
+                  pathname === item.href ? "text-primary bg-primary/10" : "text-muted-foreground"
                 )}
               >
-                <item.icon className={cn("w-5 h-5", pathname === item.href && "neon-text-glow")} />
+                <item.icon className={cn("w-6 h-6", pathname === item.href && "neon-text-glow")} />
                 <span className="text-[8px] font-bold uppercase mt-1 tracking-tighter">{item.label}</span>
               </Link>
             ))}

@@ -10,67 +10,68 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen nebula-bg">
       {/* Navbar with Safe Area Support */}
-      <nav className="fixed top-0 w-full z-50 glass-morphism border-b-0 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-4 px-6 md:px-12 flex justify-between items-center bg-background/50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
-            <Image src="/logo.png" alt="CafePay Logo" width={20} height={20} className="object-contain" />
+      <nav className="fixed top-0 w-full z-50 glass-morphism border-b-0 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-6 px-6 md:px-12 flex justify-between items-center bg-background/50">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.6)] relative overflow-hidden p-1">
+            <Image src="/logo.png" alt="CafePay Logo" width={48} height={48} className="object-contain scale-125 drop-shadow-lg" />
           </div>
-          <span className="font-headline font-bold text-xl tracking-tighter">CafePay Wallet</span>
+          <span className="font-headline font-bold text-2xl tracking-tighter hidden sm:block">CafePay Wallet</span>
         </div>
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
-          <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
+        <div className="hidden lg:flex items-center gap-10">
+          <Link href="#features" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Features</Link>
+          <Link href="/dashboard" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Launch App</Link>
         </div>
         <div className="flex items-center gap-4">
           <PWAHandler />
           <Link href="/login">
-            <Button variant="ghost" className="hidden sm:inline-flex">Sign In</Button>
+            <Button variant="ghost" className="hidden sm:inline-flex font-bold uppercase tracking-widest text-xs">Sign In</Button>
           </Link>
           <Link href="/register">
-            <Button className="glow-button rounded-full px-6 bg-primary hover:bg-primary/90">Get Started</Button>
+            <Button className="glow-button rounded-full px-8 bg-primary hover:bg-primary/90 font-bold uppercase tracking-widest text-xs h-12">Get Started</Button>
           </Link>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-40 pb-20 px-6 overflow-hidden">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 animate-in fade-in slide-in-from-left duration-1000">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase">
+      <section className="pt-48 pb-20 px-6 overflow-hidden">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-10 animate-in fade-in slide-in-from-left duration-1000">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
               Intelligent Campus Finance
             </div>
-            <h1 className="text-5xl md:text-7xl font-headline font-bold leading-tight">
+            <h1 className="text-6xl md:text-8xl font-headline font-bold leading-[0.9] tracking-tighter">
               Smart Student <span className="text-primary neon-text-glow">Spending.</span><br />
-              Simplified <span className="text-secondary">Living.</span>
+              <span className="text-secondary">Simplified.</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-              Experience the luxury of automated expense tracking and Decision Tree-powered financial wisdom designed specifically for the modern student.
+            <p className="text-xl text-muted-foreground max-w-lg leading-relaxed font-medium">
+              Automated expense tracking and Decision Tree-powered financial wisdom designed specifically for the modern academic lifestyle.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-6">
               <Link href="/dashboard">
-                <Button size="lg" className="rounded-full px-8 bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(239,26,184,0.3)]">
-                  Launch Wallet <ArrowRight className="ml-2 w-4 h-4" />
+                <Button size="lg" className="rounded-2xl px-10 h-16 bg-primary hover:bg-primary/90 shadow-[0_0_30px_rgba(239,26,184,0.4)] text-lg font-bold">
+                  Launch Wallet <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             </div>
           </div>
 
           <div className="relative animate-in fade-in zoom-in duration-1000 delay-300">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 blur-3xl opacity-30 animate-pulse"></div>
-            <GlassCard className="relative z-10 p-2 overflow-hidden bg-white/5 border-white/5">
-              <Image 
-                src="https://picsum.photos/seed/cafepay-dash/1200/800" 
-                alt="CafePay Dashboard" 
-                width={1200} 
-                height={800} 
-                className="rounded-2xl"
-                priority
-                data-ai-hint="dashboard mobile"
-              />
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 blur-[100px] opacity-40 animate-pulse"></div>
+            <GlassCard className="relative z-10 p-3 overflow-hidden bg-white/5 border-white/10 rounded-[2.5rem]">
+              <div className="relative aspect-[12/8] rounded-[2rem] overflow-hidden">
+                <Image 
+                  src="https://picsum.photos/seed/cafepay-dash/1200/800" 
+                  alt="CafePay Dashboard" 
+                  fill
+                  className="object-cover"
+                  priority
+                  data-ai-hint="dashboard futuristic"
+                />
+              </div>
             </GlassCard>
           </div>
         </div>
@@ -78,12 +79,12 @@ export default function LandingPage() {
 
       {/* Features Grid */}
       <section id="features" className="py-32 px-6">
-        <div className="max-w-7xl mx-auto space-y-16">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl md:text-5xl font-headline font-bold">The CafePay AI Engine</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Our proprietary decision tree analysis converts every purchase log into actionable financial growth.</p>
+        <div className="max-w-7xl mx-auto space-y-20">
+          <div className="text-center space-y-6">
+            <h2 className="text-4xl md:text-6xl font-headline font-bold tracking-tight">The CafePay <span className="text-primary">AI Engine</span></h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg font-medium leading-relaxed">Our proprietary decision tree analysis converts every purchase log into actionable financial growth strategy.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-10">
             {[
               { 
                 icon: ShoppingBag, 
@@ -101,12 +102,12 @@ export default function LandingPage() {
                 desc: 'Your funds are protected with bank-grade Firebase infrastructure and role-based authorization.' 
               }
             ].map((feature, i) => (
-              <GlassCard key={i} className="group">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                  <feature.icon className="w-6 h-6" />
+              <GlassCard key={i} className="group p-10 border-white/5 hover:border-primary/20 transition-all duration-700">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+                  <feature.icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-headline font-bold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
+                <h3 className="text-2xl font-headline font-bold mb-4 tracking-tight">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed font-medium">{feature.desc}</p>
               </GlassCard>
             ))}
           </div>
@@ -114,9 +115,17 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-20 px-6 border-t border-white/5 bg-card/20 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-20">
-        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 text-center text-xs text-muted-foreground">
-          © 2024 CafePay Wallet. Designed for the futuristic campus.
+      <footer className="py-20 px-6 border-t border-white/5 bg-card/20 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-24">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+           <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center p-1.5 border border-primary/30">
+                 <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
+              </div>
+              <span className="font-headline font-bold text-xl tracking-tighter">CafePay Wallet</span>
+           </div>
+           <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em]">
+             © 2024 CafePay Wallet. Engineered for Academic Excellence.
+           </p>
         </div>
       </footer>
     </div>
