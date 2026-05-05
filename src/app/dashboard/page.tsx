@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from "@/firebase"
 import { collection, query, limit, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { isToday } from 'date-fns'
 import { useToast } from "@/hooks/use-toast"
@@ -43,6 +43,11 @@ export default function DashboardPage() {
   const [isTopUpOpen, setIsTopUpOpen] = React.useState(false)
   const [topUpAmount, setTopUpAmount] = React.useState("1000")
   const [isProcessing, setIsProcessing] = React.useState(false)
+
+  // 1. Fetch Global System Thresholds
+  const thresholdRef = useMemoFirebase(() => doc(db, "system_config", "thresholds"), [db])
+  const { data: thresholds } = useDoc(thresholdRef)
+  const dailyLimit = thresholds?.dailySpendingLimit || 2500
 
   const ordersQuery = useMemoFirebase(() => {
     if (!user) return null
@@ -58,7 +63,7 @@ export default function DashboardPage() {
     return query(
       collection(db, "users", user.uid, "expenses"), 
       orderBy("expenseDate", "desc"),
-      limit(5)
+      limit(50)
     )
   }, [db, user?.uid])
 
@@ -197,7 +202,7 @@ export default function DashboardPage() {
               </GlassCard>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <GlassCard className="p-6 border-white/5">
+                <GlassCard className="p-6 border-white/5 relative overflow-hidden">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-sm uppercase tracking-tight">Today's Spending</h3>
                     <div className="text-right">
@@ -206,11 +211,11 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <Progress value={Math.min((todaySpending / 1000) * 100, 100)} className="h-2 bg-white/5 [&>div]:bg-primary" />
+                    <Progress value={Math.min((todaySpending / dailyLimit) * 100, 100)} className="h-2 bg-white/5 [&>div]:bg-primary" />
                     <div className="flex justify-between items-center">
-                      <p className="text-[10px] text-muted-foreground">Daily Limit (Est): ₦1,000</p>
-                      <Badge className={cn("border-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5", todaySpending > 1000 ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400")}>
-                        {todaySpending > 1000 ? "Limit Exceeded" : "Healthy"}
+                      <p className="text-[10px] text-muted-foreground">Daily Limit (Admin Set): ₦{dailyLimit.toLocaleString()}</p>
+                      <Badge className={cn("border-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5", todaySpending > dailyLimit ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400")}>
+                        {todaySpending > dailyLimit ? "Limit Exceeded" : "Healthy"}
                       </Badge>
                     </div>
                   </div>
@@ -236,7 +241,7 @@ export default function DashboardPage() {
                  </Link>
                </div>
                <div className="space-y-4">
-                  {expenses?.map((exp, i) => (
+                  {expenses?.slice(0, 5).map((exp, i) => (
                     <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/20 transition-all">
                        <div className="flex items-center gap-4">
                           <div className="p-2 rounded-lg bg-primary/10 text-primary"><CreditCard className="w-4 h-4" /></div>
