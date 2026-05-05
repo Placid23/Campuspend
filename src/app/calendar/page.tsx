@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -38,6 +37,7 @@ import {
   Cell as PieCell
 } from 'recharts'
 import Image from "next/image"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { collection, query, orderBy, where } from 'firebase/firestore'
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase'
@@ -134,12 +134,12 @@ export default function SpendingSummaryPage() {
                            <span className="text-sm font-bold text-white">₦{totalSpent.toLocaleString()} Spent</span>
                          </div>
                          <div className="h-10 px-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400">
-                           ₦{(profile?.monthlyBudget - totalSpent).toLocaleString()} Left
+                           ₦{( (profile?.monthlyBudget || 8000) - totalSpent).toLocaleString()} Left
                          </div>
                       </div>
                       <Progress value={budgetProgress} className="h-2 bg-white/5 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-secondary" />
                       <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
-                        {budgetProgress >= 100 ? "You have exceeded your monthly budget!" : `Using ${budgetProgress.toFixed(1)}% of your ₦${profile?.monthlyBudget?.toLocaleString()} limit`}
+                        {budgetProgress >= 100 ? "You have exceeded your monthly budget!" : `Using ${budgetProgress.toFixed(1)}% of your ₦${profile?.monthlyBudget?.toLocaleString() || '8,000'} limit`}
                       </p>
                     </div>
                   </div>
@@ -239,7 +239,7 @@ export default function SpendingSummaryPage() {
                     </div>
                     <div className="space-y-2">
                        <p className="text-sm text-white/80 leading-relaxed font-medium">
-                          {totalSpent > (profile?.monthlyBudget * 0.8) 
+                          {totalSpent > ((profile?.monthlyBudget || 8000) * 0.8) 
                             ? "You are nearing your budget limit. Consider pausing non-essential purchases."
                             : "Your spending is currently within healthy limits. Keep it up!"}
                        </p>
