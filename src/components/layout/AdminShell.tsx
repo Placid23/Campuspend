@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -14,7 +15,6 @@ import {
   Box,
   ClipboardList,
   AlertCircle,
-  Loader2,
   Menu
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -34,6 +34,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
 import { useAuth, useUser } from '@/firebase'
+import { AppLoader } from "@/components/ui/app-loader"
 
 const adminNavItems = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -72,14 +73,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   if (isUserLoading || isProfileLoading) {
-    return (
-      <div className="min-h-screen nebula-bg flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
-          <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Authenticating Admin...</p>
-        </div>
-      </div>
-    )
+    return <AppLoader message="Authenticating Admin..." />
   }
 
   if (!user || profile?.role !== 'admin') {
