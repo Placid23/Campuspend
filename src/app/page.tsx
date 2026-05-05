@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { ArrowRight, Zap, Shield, ShoppingBag, BrainCircuit, CreditCard } from "lucide-react";
+import { PWAHandler } from "@/components/pwa/PWAHandler";
 
 export default function LandingPage() {
   return (
@@ -12,7 +13,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 w-full z-50 glass-morphism border-b-0 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-4 px-6 md:px-12 flex justify-between items-center bg-background/50">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
-            <CreditCard className="text-white w-5 h-5" />
+            <Image src="/logo.png" alt="CafePay Logo" width={20} height={20} className="object-contain" />
           </div>
           <span className="font-headline font-bold text-xl tracking-tighter">CafePay Wallet</span>
         </div>
@@ -21,6 +22,7 @@ export default function LandingPage() {
           <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
         </div>
         <div className="flex items-center gap-4">
+          <PWAHandler />
           <Link href="/login">
             <Button variant="ghost" className="hidden sm:inline-flex">Sign In</Button>
           </Link>

@@ -7,9 +7,13 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 export const metadata: Metadata = {
   title: 'CafePay Wallet | Intelligent Student Finance',
   description: 'Smart student spending with intelligent meal plan and expense management using Decision Tree Analysis.',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'CafePay',
   },
   formatDetection: {
@@ -23,7 +27,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#110B13',
+  themeColor: '#0D080E',
 };
 
 export default function RootLayout({

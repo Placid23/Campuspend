@@ -33,6 +33,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
 import { useAuth, useUser } from '@/firebase'
 import { AppLoader } from "@/components/ui/app-loader"
+import { PermissionPrompt } from "@/components/pwa/PWAHandler"
+import Image from "next/image"
 
 const navItems = [
   { name: "Vendors", href: "/vendors", icon: Store },
@@ -86,7 +88,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.5)] group-hover:scale-110 transition-transform">
-                  <CreditCard className="text-white w-6 h-6" />
+                  <Image src="/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
                 </div>
                 <span className="font-headline font-bold text-2xl tracking-tighter text-white">CafePay</span>
               </Link>
@@ -132,7 +134,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               
               <div className="flex md:hidden items-center gap-2 flex-1">
                 <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
-                  <CreditCard className="text-white w-5 h-5" />
+                  <Image src="/logo.png" alt="Logo" width={16} height={16} className="object-contain" />
                 </div>
                 <span className="font-headline font-bold text-lg tracking-tighter text-white">CafePay</span>
               </div>
@@ -155,6 +157,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </main>
           </SidebarInset>
         </div>
+
+        <PermissionPrompt />
 
         {/* Mobile Bottom Nav */}
         <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-40">

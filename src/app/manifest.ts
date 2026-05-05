@@ -8,13 +8,20 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Smart student spending with intelligent meal plan and expense management.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#110B13',
+    background_color: '#0D080E',
     theme_color: '#EF1AB8',
     icons: [
       {
-        src: '/favicon.ico',
-        sizes: 'any',
-        type: 'image/x-icon',
+        src: '/logo.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/logo.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
       },
     ],
   }
