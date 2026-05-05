@@ -41,7 +41,8 @@ import {
   Leaf,
   MoreVertical,
   Loader2,
-  Store
+  Store,
+  Package
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
