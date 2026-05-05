@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
@@ -9,11 +8,11 @@ import { PWAHandler } from "@/components/pwa/PWAHandler";
 export default function LandingPage() {
   return (
     <div className="min-h-screen nebula-bg">
-      {/* Navbar with Safe Area Support */}
+      {/* Navbar with Upscaled Logo */}
       <nav className="fixed top-0 w-full z-50 glass-morphism border-b-0 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-6 px-6 md:px-12 flex justify-between items-center bg-background/50">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.6)] relative overflow-hidden p-1">
-            <Image src="/logo.png" alt="CafePay Logo" width={48} height={48} className="object-contain scale-125 drop-shadow-lg" />
+          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shadow-2xl relative overflow-hidden p-1.5 border border-white/10">
+            <Image src="/logo.png" alt="CafePay Logo" width={64} height={64} className="object-contain scale-125" />
           </div>
           <span className="font-headline font-bold text-2xl tracking-tighter hidden sm:block">CafePay Wallet</span>
         </div>
@@ -118,8 +117,8 @@ export default function LandingPage() {
       <footer className="py-20 px-6 border-t border-white/5 bg-card/20 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-24">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center p-1.5 border border-primary/30">
-                 <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
+              <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center p-1 border border-white/10">
+                 <Image src="/logo.png" alt="Logo" width={48} height={48} className="object-contain scale-110" />
               </div>
               <span className="font-headline font-bold text-xl tracking-tighter">CafePay Wallet</span>
            </div>

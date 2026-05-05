@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -30,31 +29,31 @@ export function AppLoader({ message = "Initializing CafePay AI Engine..." }: App
 
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background">
-      {/* Animated Aura */}
+      {/* Animated Aura - Soft silver/white instead of magenta */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/10 blur-[150px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-secondary/10 blur-[150px] rounded-full animate-pulse delay-700" />
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-white/5 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-secondary/5 blur-[150px] rounded-full animate-pulse delay-700" />
       </div>
 
       <div className="relative flex flex-col items-center gap-16">
         <div className="relative group">
           {/* Rotating Rings */}
-          <div className="absolute -inset-16 border-2 border-primary/20 border-dashed rounded-full animate-[spin_15s_linear_infinite]" />
-          <div className="absolute -inset-20 border border-secondary/10 rounded-full animate-[spin_20s_linear_infinite_reverse]" />
+          <div className="absolute -inset-16 border-2 border-white/10 border-dashed rounded-full animate-[spin_15s_linear_infinite]" />
+          <div className="absolute -inset-20 border border-secondary/5 rounded-full animate-[spin_20s_linear_infinite_reverse]" />
           
-          {/* Logo Container - Enhanced visibility */}
-          <div className="relative w-48 h-48 md:w-64 md:h-56 flex items-center justify-center bg-card/80 backdrop-blur-2xl border-2 border-white/20 rounded-[3rem] shadow-[0_0_80px_rgba(239,26,184,0.2)] overflow-hidden animate-float">
-            <div className="relative w-full h-full p-8 scale-150 transition-transform duration-1000">
+          {/* Logo Container - Significantly upscaled and high-contrast */}
+          <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center bg-white/5 backdrop-blur-3xl border-2 border-white/20 rounded-[4rem] shadow-[0_0_80px_rgba(255,255,255,0.05)] overflow-hidden animate-float">
+            <div className="relative w-full h-full p-6 transition-transform duration-1000">
               <Image 
                 src="/logo.png" 
                 alt="CafePay Logo" 
                 fill
-                className="object-contain drop-shadow-[0_0_30px_rgba(239,26,184,0.8)]"
+                className="object-contain drop-shadow-2xl scale-125"
                 priority
               />
             </div>
             {/* Holographic Scan Line */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent h-1/2 w-full animate-energy-beam pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/10 to-transparent h-1/2 w-full animate-energy-beam pointer-events-none" />
           </div>
         </div>
 

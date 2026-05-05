@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -9,14 +8,9 @@ import {
   Store, 
   Settings, 
   LogOut, 
-  ChevronRight,
   CreditCard,
   ShoppingCart,
   History,
-  Menu,
-  Moon,
-  Sun,
-  Zap,
   User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -62,13 +56,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle('dark', saved === 'dark')
   }, [])
 
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark'
-    setTheme(next)
-    localStorage.setItem('theme', next)
-    document.documentElement.classList.toggle('dark', next === 'dark')
-  }
-
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
       if (!user) {
@@ -105,8 +92,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-4 group">
-                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(239,26,184,0.4)] group-hover:scale-110 transition-transform overflow-hidden relative p-1.5 border border-white/20">
-                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150 drop-shadow-md" />
+                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform overflow-hidden relative p-1.5 border border-white/10">
+                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-headline font-bold text-2xl tracking-tighter leading-none">CafePay</span>
@@ -163,7 +150,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-2" />
               
               <div className="flex md:hidden items-center gap-3 flex-1">
-                <div className="w-12 h-12 rounded-xl bg-primary relative flex items-center justify-center shadow-lg border border-white/20 p-1">
+                <div className="w-14 h-14 rounded-xl bg-white/5 relative flex items-center justify-center shadow-lg border border-white/10 p-1">
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5 scale-125" />
                 </div>
                 <span className="font-headline font-bold text-xl tracking-tighter">CafePay</span>

@@ -1,23 +1,18 @@
-
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { 
-  Zap, 
   LayoutDashboard, 
   Users, 
   Store, 
   Package, 
-  ChevronRight,
   LogOut,
   Box,
   ClipboardList,
   AlertCircle,
-  Menu,
-  ShieldCheck,
-  User
+  ShieldCheck
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -90,8 +85,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-4 group">
-                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_25px_rgba(239,26,184,0.6)] group-hover:scale-110 transition-transform overflow-hidden relative p-1.5 border border-white/20">
-                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150 drop-shadow-md" />
+                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform overflow-hidden relative p-1.5 border border-white/10">
+                  <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-headline font-bold text-2xl tracking-tighter leading-none">CafePay</span>

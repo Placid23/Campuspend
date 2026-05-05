@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -18,7 +17,8 @@ import {
   LogOut,
   Zap,
   Lock,
-  Smartphone
+  Smartphone,
+  Store
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useUser, useFirestore, useAuth } from "@/firebase"
