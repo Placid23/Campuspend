@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react'
@@ -8,16 +9,13 @@ import { Button } from "@/components/ui/button"
 import { 
   BrainCircuit, 
   Sparkles, 
-  ChevronRight, 
   AlertCircle, 
   CheckCircle2, 
-  Info,
-  TrendingUp,
   Target,
   Lightbulb,
-  Loader2,
   GitBranch,
-  SearchCode
+  SearchCode,
+  ShieldCheck
 } from "lucide-react"
 import { spendingInsightFeedback, type SpendingInsightFeedbackOutput } from "@/ai/flows/spending-insight-feedback"
 import { Progress } from "@/components/ui/progress"
@@ -32,7 +30,6 @@ export default function InsightsPage() {
   const [loading, setLoading] = useState(false)
   const [insight, setInsight] = useState<SpendingInsightFeedbackOutput | null>(null)
 
-  // Fetch real data for analysis: Last 30 days of Purchase-Based Logging
   const thirtyDaysAgo = subDays(new Date(), 30).toISOString()
   const expensesQuery = useMemoFirebase(() => {
     if (!user) return null
@@ -79,24 +76,24 @@ export default function InsightsPage() {
     <DashboardShell>
       <div className="space-y-8 max-w-5xl mx-auto">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(239,26,184,0.2)]">
-            <BrainCircuit className="w-8 h-8 text-primary" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
+            <ShieldCheck className="w-3 h-3" /> CafePay AI Engine Active
           </div>
-          <h1 className="text-4xl font-headline font-bold">Decision Tree <span className="text-primary neon-text-glow">Analysis</span></h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Intelligent classification of purchase logs using algorithmic decision paths to determine spending efficiency.
+          <h1 className="text-4xl font-headline font-bold text-white">Decision Tree <span className="text-primary neon-text-glow">Analysis</span></h1>
+          <p className="text-muted-foreground max-w-xl mx-auto text-sm leading-relaxed">
+            Academically aligned intelligent classification using purchase-based logging (PBL) and logical decision paths to determine spending efficiency.
           </p>
           {!insight && (
             <Button 
               onClick={generateInsight} 
               disabled={loading || expensesLoading || !expenses || expenses.length === 0}
-              className="glow-button mt-4 rounded-2xl h-14 px-8 bg-primary hover:bg-primary/90 text-lg group"
+              className="glow-button mt-6 rounded-2xl h-16 px-10 bg-primary hover:bg-primary/90 text-lg group font-bold"
             >
               {loading ? (
-                <>Traversing Decision Tree...</>
+                <>Traversing Logical Tree...</>
               ) : (
                 <>
-                  {expenses && expenses.length > 0 ? "Execute Logical Analysis" : "No Transaction Logs Found"} 
+                  {expenses && expenses.length > 0 ? "Execute AI Analysis" : "No Transaction Logs Found"} 
                   <Sparkles className="ml-2 w-5 h-5 group-hover:animate-pulse" />
                 </>
               )}
@@ -106,12 +103,11 @@ export default function InsightsPage() {
 
         {insight && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom duration-1000">
-            {/* Logic & Explanation */}
-            <GlassCard className="md:col-span-8 space-y-8">
+            <GlassCard className="md:col-span-8 space-y-8 border-white/10 bg-black/40">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 className="text-2xl font-headline font-bold flex items-center gap-3">
                   <GitBranch className="text-primary w-6 h-6" />
-                  Analysis Path
+                  Classification Path
                 </h2>
                 <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-primary uppercase tracking-tighter">
                   {insight.decisionTreePath}
@@ -127,7 +123,7 @@ export default function InsightsPage() {
                     </div>
                  </div>
                  <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Feedback Status</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tactical Status</p>
                     <div className={cn(
                       "text-xl font-bold uppercase tracking-widest",
                       insight.overallFeedback === 'Excellent Control' ? "text-emerald-400" :
@@ -141,22 +137,22 @@ export default function InsightsPage() {
               <div className="space-y-4">
                 <h3 className="text-lg font-headline font-bold flex items-center gap-2">
                   <SearchCode className="w-5 h-5 text-primary" />
-                  Classification Findings
+                  Engine Findings
                 </h3>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap text-sm">
+                <p className="text-muted-foreground leading-relaxed text-sm">
                   {insight.explanation}
                 </p>
               </div>
 
               <div className="space-y-4">
-                 <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Identified Financial Leakage</h3>
+                 <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Financial Leakage Identification</h3>
                  <div className="flex flex-wrap gap-2">
                     {insight.classification.leakagePoints.map((point, i) => (
                       <div key={i} className="px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium">
                         {point}
                       </div>
                     ))}
-                    {insight.classification.leakagePoints.length === 0 && <p className="text-xs text-muted-foreground italic">No leakage points detected in this tree traversal.</p>}
+                    {insight.classification.leakagePoints.length === 0 && <p className="text-xs text-muted-foreground italic">No irrational leakage detected in this traversal.</p>}
                  </div>
               </div>
 
@@ -172,12 +168,11 @@ export default function InsightsPage() {
               </div>
             </GlassCard>
 
-            {/* Sidebar Metrics */}
             <div className="md:col-span-4 space-y-6">
               <GlassCard className="bg-primary/5 border-primary/10">
                 <h3 className="text-lg font-headline font-bold mb-4 flex items-center gap-2">
                   <Target className="w-5 h-5 text-primary" />
-                  Category Variance
+                  Variance Audit
                 </h3>
                 <div className="space-y-6">
                   {insight.categoryInsights.map((cat, i) => (
@@ -204,7 +199,7 @@ export default function InsightsPage() {
                 className="w-full rounded-2xl h-12 border-white/10 hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest"
                 onClick={() => setInsight(null)}
               >
-                Reset Analysis Tree
+                Reset Engine Traversal
               </Button>
             </div>
           </div>
