@@ -6,16 +6,12 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { 
   Zap, 
-  Mail, 
-  Lock, 
   Eye, 
   EyeOff, 
-  ShieldCheck,
   Loader2
 } from "lucide-react"
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
@@ -30,7 +26,7 @@ export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
   const auth = useAuth()
-  const { user, profile, isProfileLoading, profileError } = useUser()
+  const { user, profile, isProfileLoading } = useUser()
 
   useEffect(() => {
     if (user && profile && !isProfileLoading) {
@@ -64,7 +60,7 @@ export default function LoginPage() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
             <Zap className="text-white w-5 h-5" />
           </div>
-          <span className="font-headline font-bold text-xl tracking-tighter text-white">CampusSpend</span>
+          <span className="font-headline font-bold text-xl tracking-tighter text-white">CafePay Wallet</span>
         </div>
       </nav>
 
@@ -85,27 +81,27 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input 
-                    id="email" type="email" placeholder="Email" value={email}
-                    onChange={(e) => setEmail(e.target.value)} className="h-14 rounded-2xl" required
+                    id="email" type="email" placeholder="student@university.edu" value={email}
+                    onChange={(e) => setEmail(e.target.value)} className="h-14 rounded-2xl bg-white/5" required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
                     <Input 
-                      id="password" type={showPassword ? "text" : "password"} placeholder="Password" value={password}
-                      onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl pr-12" required
+                      id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password}
+                      onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl pr-12 bg-white/5" required
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
-                <Button type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-primary font-bold">
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Login"}
+                <Button type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-primary font-bold shadow-lg hover:shadow-primary/20 transition-all">
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Authorize Access"}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
-                  Don't have an account? <Link href="/register" className="text-primary font-bold">Sign up</Link>
+                  Don't have an account? <Link href="/register" className="text-primary font-bold hover:underline">Register Identity</Link>
                 </p>
               </form>
             </GlassCard>
@@ -114,7 +110,7 @@ export default function LoginPage() {
       </main>
 
       <footer className="py-10 px-6 border-t border-white/5 mt-auto text-center text-muted-foreground/60 text-sm pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
-        <p>© 2024 CampusSpend. All rights reserved.</p>
+        <p>© 2024 CafePay Wallet. Academic Integrity Engine.</p>
       </footer>
     </div>
   )

@@ -7,8 +7,13 @@ export const metadata: Metadata = {
   title: 'CafePay Wallet | Intelligent Student Finance',
   description: 'Smart student spending with intelligent meal plan and expense management using Decision Tree Analysis.',
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: [
+      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   appleWebApp: {
     capable: true,
