@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/layout/AdminShell"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -20,6 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { 
   Search, 
   Trash2, 
@@ -28,11 +36,12 @@ import {
   UserX,
   UserCheck,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Plus
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -53,7 +62,15 @@ export default function ManageVendorsPage() {
   
   const [searchQuery, setSearchQuery] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState("all")
-  const [categoryFilter, setCategoryFilter] = React.useState("all")
+  
+  // Add Vendor State
+  const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
+  const [isSaving, setIsSaving] = React.useState(false)
+  const [newVendorData, setNewVendorData] = React.useState({
+    name: "",
+    email: "",
+    pickupLocation: "",
+  })
 
   const vendorsQuery = useMemoFirebase(() => {
     return query(collection(db, "vendors"), orderBy("name", "asc"))
@@ -76,6 +93,51 @@ export default function ManageVendorsPage() {
     }
     return result
   }, [allVendors, searchQuery, statusFilter])
+
+  const handleAddVendor = async () => {
+    if (!newVendorData.name || !newVendorData.email) return
+    setIsSaving(true)
+    try {
+      // For the prototype, we create a Vendor profile. 
+      // In a real app, this would also trigger a Firebase Auth user creation via Admin SDK.
+      const vendorId = `VND-${Date.now()}`
+      const vendorRef = doc(db, "vendors", vendorId)
+      const profileRef = doc(db, "userProfiles", vendorId)
+
+      const vendorDoc = {
+        id: vendorId,
+        userId: vendorId,
+        name: newVendorData.name,
+        contactEmail: newVendorData.email,
+        pickupLocation: newVendorData.pickupLocation,
+        status: "Active",
+        isVerified: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+
+      const profileDoc = {
+        id: vendorId,
+        firebaseUid: vendorId,
+        name: newVendorData.name,
+        email: newVendorData.email,
+        role: "vendor",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+
+      await setDoc(vendorRef, vendorDoc)
+      await setDoc(profileRef, profileDoc)
+
+      toast({ title: "Merchant Initialized", description: "New vendor profile created in registry." })
+      setIsAddDialogOpen(false)
+      setNewVendorData({ name: "", email: "", pickupLocation: "" })
+    } catch (error) {
+      toast({ variant: "destructive", title: "Registration Failed", description: "Could not initialize vendor account." })
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleToggleStatus = async (vendorId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Inactive' ? 'Active' : 'Inactive'
@@ -108,7 +170,8 @@ export default function ManageVendorsPage() {
   const handleDeleteVendor = async (vendorId: string) => {
     try {
       await deleteDoc(doc(db, "vendors", vendorId))
-      toast({ title: "Vendor Deleted", description: "Vendor record has been removed." })
+      await deleteDoc(doc(db, "userProfiles", vendorId))
+      toast({ title: "Vendor Deleted", description: "Vendor records purged from infrastructure." })
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: "Failed to delete vendor record." })
     }
@@ -117,7 +180,16 @@ export default function ManageVendorsPage() {
   return (
     <AdminShell>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom duration-1000">
-        <h1 className="text-3xl font-headline font-bold text-white tracking-tight">Manage Vendors</h1>
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <h1 className="text-3xl font-headline font-bold text-white tracking-tight">Manage Vendors</h1>
+          <Button 
+            onClick={() => setIsAddDialogOpen(true)}
+            className="h-12 px-8 rounded-2xl bg-gradient-to-r from-primary to-secondary font-bold shadow-[0_0_20px_rgba(239,26,184,0.3)]"
+          >
+            <Plus className="w-5 h-5 mr-2" /> Add New Vendor
+          </Button>
+        </div>
 
         <GlassCard className="p-8 border-white/10 bg-black/20 backdrop-blur-3xl overflow-hidden relative">
           <div className="flex flex-col md:flex-row gap-4 items-center mb-8">
@@ -227,12 +299,17 @@ export default function ManageVendorsPage() {
                             </AlertDialogTrigger>
                             <AlertDialogContent className="bg-card border-white/10">
                               <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white">Delete vendor?</AlertDialogTitle>
-                                <AlertDialogDescription>This will remove the store from the marketplace.</AlertDialogDescription>
+                                <AlertDialogTitle className="text-white font-headline">Delete vendor account?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-muted-foreground">This will permanently purge the store and merchant profile from the system infrastructure.</AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteVendor(vendor.id)}>Delete</AlertDialogAction>
+                                <AlertDialogCancel className="border-white/10 hover:bg-white/5">Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteVendor(vendor.id)}
+                                  className="bg-rose-500 hover:bg-rose-600 text-white"
+                                >
+                                  Purge Data
+                                </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -250,6 +327,54 @@ export default function ManageVendorsPage() {
             )}
           </div>
         </GlassCard>
+
+        {/* Add Vendor Dialog */}
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogContent className="bg-card border-white/10 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-headline font-bold text-white">Add New Merchant</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground/60 tracking-widest">Public Store Name</Label>
+                <Input 
+                  value={newVendorData.name}
+                  onChange={(e) => setNewVendorData({...newVendorData, name: e.target.value})}
+                  className="bg-white/5 border-white/10 h-12 rounded-xl"
+                  placeholder="e.g. Campus Bites"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground/60 tracking-widest">Official Email</Label>
+                <Input 
+                  value={newVendorData.email}
+                  onChange={(e) => setNewVendorData({...newVendorData, email: e.target.value})}
+                  className="bg-white/5 border-white/10 h-12 rounded-xl"
+                  placeholder="merchant@university.edu"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground/60 tracking-widest">Default Pickup Location</Label>
+                <Input 
+                  value={newVendorData.pickupLocation}
+                  onChange={(e) => setNewVendorData({...newVendorData, pickupLocation: e.target.value})}
+                  className="bg-white/5 border-white/10 h-12 rounded-xl"
+                  placeholder="e.g. Block A Cafeteria"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="rounded-xl">Cancel</Button>
+              <Button 
+                onClick={handleAddVendor} 
+                disabled={isSaving || !newVendorData.name || !newVendorData.email}
+                className="bg-primary hover:bg-primary/90 rounded-xl px-8 font-bold"
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Initialize Merchant"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminShell>
   )

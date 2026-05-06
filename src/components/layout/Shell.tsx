@@ -13,7 +13,8 @@ import {
   History,
   User,
   ChevronRight,
-  Bell
+  Bell,
+  Menu
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -54,14 +55,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
 
-  // Real-time Status Tracker for Students
+  const { areServicesAvailable, firestore } = useFirebase()
+
   const itemsQuery = useMemoFirebase(() => {
-    if (!user?.uid) return null
+    if (!user?.uid || !firestore) return null
     return query(
-      collectionGroup(useFirebase().firestore, "orderItems"),
+      collectionGroup(firestore, "orderItems"),
       where("studentId", "==", user.uid)
     )
-  }, [user?.uid])
+  }, [user?.uid, firestore])
 
   const { data: orderItems } = useCollection(itemsQuery)
   const statusCache = React.useRef<Record<string, string>>({})
@@ -182,21 +184,26 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </Sidebar>
 
           <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
-            <header className="flex h-[calc(6rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
-              <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-2" />
+            <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
+              <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-1" />
               
-              <div className="flex md:hidden items-center gap-3 flex-1">
-                <div className="w-14 h-14 rounded-xl bg-white/5 relative flex items-center justify-center shadow-lg border border-white/10 p-1">
+              <div className="flex md:hidden items-center gap-2 min-w-0 flex-1">
+                <div className="w-10 h-10 rounded-xl bg-white/5 relative flex items-center justify-center shadow-lg border border-white/10 p-1 shrink-0">
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5 scale-125" />
                 </div>
-                <span className="font-headline font-bold text-xl tracking-tighter">CafePay</span>
+                <span className="font-headline font-bold text-lg tracking-tighter truncate">CafePay</span>
               </div>
 
-              <div className="ml-auto flex items-center gap-4 md:gap-6">
-                <div className="h-11 px-5 md:px-7 rounded-2xl bg-card border border-border flex items-center gap-4 shadow-inner relative overflow-hidden group">
+              <div className="ml-auto flex items-center gap-3 shrink-0">
+                <div className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group">
                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest relative">Balance</span>
-                   <span className="text-lg font-headline font-bold text-primary relative">₦{profile?.walletBalance?.toLocaleString() || '0'}</span>
+                   <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest relative hidden sm:inline">Balance</span>
+                   <div className="flex items-center gap-1">
+                     <span className="text-[10px] md:text-sm font-bold text-primary">₦</span>
+                     <span className="text-base md:text-xl font-headline font-bold text-primary relative">
+                       {profile?.walletBalance?.toLocaleString() || '0'}
+                     </span>
+                   </div>
                 </div>
               </div>
             </header>
@@ -210,8 +217,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <PermissionPrompt />
 
         {/* Mobile Bottom Nav */}
-        <div className="md:hidden fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
-          <div className="bg-card/90 backdrop-blur-3xl border border-border rounded-[2.5rem] h-18 flex items-center justify-around px-6 shadow-2xl">
+        <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
+          <div className="bg-card/90 backdrop-blur-3xl border border-border rounded-[2rem] h-16 flex items-center justify-around px-4 shadow-2xl">
             {[
               { icon: Store, label: "Market", href: "/vendors" },
               { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
@@ -222,12 +229,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 key={item.href} 
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all active:scale-90",
+                  "flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all active:scale-90",
                   pathname === item.href ? "text-primary bg-primary/10" : "text-muted-foreground"
                 )}
               >
-                <item.icon className={cn("w-6 h-6", pathname === item.href && "neon-text-glow")} />
-                <span className="text-[8px] font-bold uppercase mt-1 tracking-tighter">{item.label}</span>
+                <item.icon className={cn("w-5 h-5", pathname === item.href && "neon-text-glow")} />
+                <span className="text-[7px] font-bold uppercase mt-1 tracking-tighter">{item.label}</span>
               </Link>
             ))}
           </div>
