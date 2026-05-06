@@ -1,9 +1,8 @@
-
 "use client"
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { Download, Bell, Info } from "lucide-react"
+import { Download, Bell } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import {
   Dialog,
@@ -28,6 +27,13 @@ export function PWAHandler() {
       setIsInstalled(true)
     }
 
+    // Register Service Worker for Background Tasks
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('CafePay ServiceWorker registered:', reg.scope))
+        .catch(err => console.warn('ServiceWorker failed:', err))
+    }
+
     // Detect iOS
     const userAgent = window.navigator.userAgent.toLowerCase()
     setIsIOS(/iphone|ipad|ipod/.test(userAgent))
@@ -38,15 +44,11 @@ export function PWAHandler() {
     }
 
     window.addEventListener('beforeinstallprompt', handler)
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler)
-    }
+    return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
-    
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
     if (outcome === 'accepted') {
@@ -57,7 +59,6 @@ export function PWAHandler() {
 
   if (isInstalled) return null
 
-  // If standard PWA prompt is supported (Chrome/Android)
   if (deferredPrompt) {
     return (
       <Button 
@@ -69,7 +70,6 @@ export function PWAHandler() {
     )
   }
 
-  // If on iOS, show manual instructions
   if (isIOS) {
     return (
       <Dialog>
@@ -79,41 +79,16 @@ export function PWAHandler() {
           </Button>
         </DialogTrigger>
         <DialogContent className="bg-card border-white/10 max-w-sm rounded-[2rem]">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-headline font-bold text-center">Install on iOS</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle className="text-xl font-headline font-bold text-center">Install on iOS</DialogTitle></DialogHeader>
           <div className="space-y-6 py-4 text-center">
-            <div className="flex justify-center">
-               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Download className="w-8 h-8" />
-               </div>
-            </div>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                To install <strong>CafePay Wallet</strong> on your iPhone:
-              </p>
-              <ol className="text-left text-sm space-y-3 px-4">
-                <li className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
-                  <span>Tap the <strong>Share</strong> button in Safari (box with up arrow).</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
-                  <span>Scroll down and tap <strong>"Add to Home Screen"</strong>.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
-                  <span>Tap <strong>Add</strong> in the top right corner.</span>
-                </li>
-              </ol>
-            </div>
+            <div className="flex justify-center"><div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary"><Download className="w-8 h-8" /></div></div>
+            <p className="text-sm text-muted-foreground leading-relaxed">Tap <strong>Share</strong> then <strong>"Add to Home Screen"</strong>.</p>
           </div>
         </DialogContent>
       </Dialog>
     )
   }
 
-  // Generic fallback if neither prompt nor iOS is detected (manual desktop install or hidden)
   return null
 }
 
@@ -121,10 +96,14 @@ export function PermissionPrompt() {
   const { toast } = useToast()
 
   const ask = async () => {
-    if ("Notification" in window && Notification.permission !== "granted") {
-      const res = await Notification.requestPermission()
-      if (res === "granted") {
-        toast({ title: "Notifications Enabled", description: "You will now receive transaction alerts." })
+    if (!("Notification" in window)) return
+    
+    const permission = await Notification.requestPermission()
+    if (permission === "granted") {
+      toast({ title: "Notifications Enabled", description: "You will receive background alerts even when app is closed." })
+      // Trigger a test local notification via SW if registered
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'TEST_NOTIFY' })
       }
     }
   }
@@ -134,7 +113,7 @@ export function PermissionPrompt() {
       <Button 
         onClick={ask}
         size="icon" 
-        className="w-12 h-12 rounded-full bg-primary/20 border border-primary/40 backdrop-blur-xl text-primary"
+        className="w-12 h-12 rounded-full bg-primary/20 border border-primary/40 backdrop-blur-xl text-primary shadow-[0_0_20px_rgba(239,26,184,0.3)]"
       >
         <Bell className="w-5 h-5" />
       </Button>
