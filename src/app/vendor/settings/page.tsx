@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -7,32 +6,28 @@ import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { 
   Mail, 
-  Phone, 
   MapPin, 
   Zap, 
-  CreditCard,
-  Settings,
   Loader2,
   Save,
   LogOut,
   Bell,
   Volume2,
-  Store
+  Store,
+  Image as ImageIcon
 } from "lucide-react"
 import Image from "next/image"
-import { cn } from "@/lib/utils"
 import { useFirestore, useUser, useDoc, useMemoFirebase, useAuth } from "@/firebase"
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { useToast } from "@/hooks/use-toast"
 import { signOut } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 
 export default function VendorProfilePage() {
-  const { user, profile } = useUser()
+  const { user } = useUser()
   const db = useFirestore()
   const auth = useAuth()
   const router = useRouter()
@@ -49,7 +44,8 @@ export default function VendorProfilePage() {
     name: "",
     contactEmail: "",
     description: "",
-    contactPhone: ""
+    pickupLocation: "",
+    bannerUrl: ""
   })
   
   const [notifications, setNotifications] = React.useState({
@@ -64,7 +60,8 @@ export default function VendorProfilePage() {
         name: vendor.name || "",
         contactEmail: vendor.contactEmail || "",
         description: vendor.description || "",
-        contactPhone: vendor.contactPhone || ""
+        pickupLocation: vendor.pickupLocation || "",
+        bannerUrl: vendor.bannerUrl || ""
       })
       if (vendor.settings?.notifications) {
         setNotifications(vendor.settings.notifications)
@@ -77,15 +74,21 @@ export default function VendorProfilePage() {
     if (!user) return
     setIsSaving(true)
     try {
-      await updateDoc(doc(db, "vendors", user.uid), {
+      // Use setDoc with merge to handle new vendors
+      await setDoc(doc(db, "vendors", user.uid), {
         ...formData,
+        userId: user.uid,
         settings: { notifications },
-        updatedAt: serverTimestamp()
-      })
+        updatedAt: serverTimestamp(),
+        // Add default image if not set
+        imageUrl: vendor?.imageUrl || `https://picsum.photos/seed/${user.uid}/400/400`
+      }, { merge: true })
+
       await updateDoc(doc(db, "userProfiles", user.uid), {
         name: formData.name,
         updatedAt: serverTimestamp()
       })
+      
       toast({ title: "Merchant Profile Updated", description: "Changes synced across the marketplace." })
     } catch (err) {
       toast({ variant: "destructive", title: "Update Failed", description: "Could not save merchant settings." })
@@ -115,7 +118,7 @@ export default function VendorProfilePage() {
         
         <div className="space-y-2">
           <h1 className="text-5xl font-headline font-bold text-white tracking-tight">Store <span className="text-primary neon-text-glow">HQ</span></h1>
-          <p className="text-muted-foreground font-medium">Configure your shop identity, alert triggers, and business status.</p>
+          <p className="text-muted-foreground font-medium">Configure your shop identity, pickup locations, and business status.</p>
         </div>
 
         <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -134,7 +137,7 @@ export default function VendorProfilePage() {
               </div>
 
               <div className="space-y-3">
-                <h2 className="text-3xl font-headline font-bold text-white leading-tight">{vendor?.name || 'My Shop'}</h2>
+                <h2 className="text-3xl font-headline font-bold text-white leading-tight">{formData.name || 'My Shop'}</h2>
                 <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest">
                   Verified Merchant
                 </div>
@@ -146,19 +149,20 @@ export default function VendorProfilePage() {
                   <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 group-hover:text-primary transition-colors">
                      <Mail className="w-4 h-4" />
                   </div>
-                  <span className="truncate">{vendor?.contactEmail}</span>
+                  <span className="truncate">{user?.email}</span>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium group">
                   <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 group-hover:text-primary transition-colors">
-                     <Zap className="w-4 h-4" />
+                     <MapPin className="w-4 h-4" />
                   </div>
-                  <span>Naira (₦) Ready</span>
+                  <span className="truncate">{formData.pickupLocation || 'No location set'}</span>
                 </div>
               </div>
 
               <Button 
                 variant="destructive" 
                 onClick={handleLogout}
+                type="button"
                 className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-500 hover:text-white transition-all"
               >
                 <LogOut className="w-4 h-4 mr-2" /> Deactivate Session
@@ -180,6 +184,7 @@ export default function VendorProfilePage() {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Public Store Name</Label>
                   <Input 
+                    required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="h-14 bg-white/5 border-white/10 rounded-xl px-6 focus:border-primary/50 transition-all font-bold"
@@ -187,12 +192,37 @@ export default function VendorProfilePage() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Pickup Location Description</Label>
+                  <Input 
+                    placeholder="e.g. TU Cafeteria, Olarunke"
+                    value={formData.pickupLocation}
+                    onChange={(e) => setFormData({...formData, pickupLocation: e.target.value})}
+                    className="h-14 bg-white/5 border-white/10 rounded-xl px-6 focus:border-primary/50 transition-all"
+                  />
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Official Support Email</Label>
                   <Input 
                     value={formData.contactEmail}
                     onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
                     className="h-14 bg-white/5 border-white/10 rounded-xl px-6 focus:border-primary/50 transition-all"
                   />
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Store Banner Image (URL)</Label>
+                  <div className="flex gap-4">
+                    <Input 
+                      placeholder="https://images.unsplash.com/..."
+                      value={formData.bannerUrl}
+                      onChange={(e) => setFormData({...formData, bannerUrl: e.target.value})}
+                      className="h-14 bg-white/5 border-white/10 rounded-xl px-6 focus:border-primary/50 transition-all"
+                    />
+                    <Button type="button" variant="outline" className="h-14 w-14 rounded-xl border-white/10" title="Auto-generate banner">
+                      <ImageIcon className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="md:col-span-2 space-y-2">
@@ -220,7 +250,7 @@ export default function VendorProfilePage() {
                  {[
                    { key: 'newOrders', icon: Zap, label: 'Real-time Orders', desc: 'Notify me instantly when a student places an order.' },
                    { key: 'soundAlerts', icon: Volume2, label: 'Kitchen Sounders', desc: 'Play audible chimes when an order enters preparation.' },
-                   { key: 'inventoryLow', icon: Settings, label: 'Inventory Triggers', desc: 'Alert me when stock falls below global thresholds.' },
+                   { key: 'inventoryLow', icon: Store, label: 'Inventory Triggers', desc: 'Alert me when stock falls below global thresholds.' },
                  ].map((item) => (
                     <div key={item.key} className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 group hover:border-amber-500/20 transition-all">
                        <div className="flex items-center gap-5">
@@ -245,6 +275,7 @@ export default function VendorProfilePage() {
             <div className="flex justify-end pt-4">
               <Button 
                 disabled={isSaving}
+                type="submit"
                 className="h-16 px-20 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-[0_0_40px_rgba(239,26,184,0.4)] hover:scale-[1.02] active:scale-95 transition-all"
               >
                 {isSaving ? <Loader2 className="w-6 h-6 animate-spin mr-3" /> : <Save className="w-6 h-6 mr-3" />}

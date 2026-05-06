@@ -10,7 +10,6 @@ import {
   MapPin, 
   Clock, 
   ChevronDown, 
-  Star, 
   Heart,
   Zap,
   Loader2,
@@ -34,8 +33,8 @@ export default function VendorProductPage({ params }: { params: Promise<{ id: st
 
   // Fetch Products for this Vendor
   const productsQuery = useMemoFirebase(() => {
-    return query(collection(db, "products"), where("vendorOwnerId", "==", vendor?.userId || "none"))
-  }, [db, vendor?.userId])
+    return query(collection(db, "products"), where("vendorOwnerId", "==", vendor?.userId || vendorId))
+  }, [db, vendor?.userId, vendorId])
 
   const { data: products, isLoading: productsLoading } = useCollection(productsQuery)
 
@@ -63,9 +62,9 @@ export default function VendorProductPage({ params }: { params: Promise<{ id: st
             </Link>
             <div className="space-y-2">
               <h1 className="text-4xl font-headline font-bold">{vendor?.name || "Vendor Store"}</h1>
-              <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> 300m from Main Campus</span>
-                <span className="text-primary">+</span>
+              <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> {vendor?.pickupLocation || 'Main Campus'}</span>
+                <span className="text-primary hidden sm:inline">+</span>
                 <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-primary" /> Open Until 10:30 PM</span>
               </div>
             </div>
@@ -79,6 +78,20 @@ export default function VendorProductPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
+        {/* Store Banner */}
+        <div className="relative h-48 md:h-64 w-full rounded-[2.5rem] overflow-hidden border border-white/10">
+          <Image 
+            src={vendor?.bannerUrl || `https://picsum.photos/seed/${vendorId}-banner/1200/400`} 
+            alt="Store Banner" 
+            fill 
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          <div className="absolute bottom-6 left-8">
+             <p className="text-sm text-white/80 font-medium max-w-lg line-clamp-2">{vendor?.description || "Welcome to our official campus store."}</p>
+          </div>
+        </div>
+
         {/* Search & Category Tabs */}
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="relative flex-1 w-full group">
@@ -88,7 +101,7 @@ export default function VendorProductPage({ params }: { params: Promise<{ id: st
               placeholder="Search for items..." 
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide w-full md:w-auto">
             {categories.map(cat => (
               <button 
                 key={cat} 
@@ -141,9 +154,11 @@ export default function VendorProductPage({ params }: { params: Promise<{ id: st
                         View Details
                       </Button>
                     </Link>
-                    <Button variant="outline" className="h-11 rounded-2xl bg-white/5 border-white/10 text-[10px] font-bold px-4">
-                      Add to Cart
-                    </Button>
+                    <Link href={`/products/${product.id}`} className="flex-1">
+                      <Button variant="outline" className="w-full h-11 rounded-2xl bg-white/5 border-white/10 text-[10px] font-bold px-4">
+                        Quick Add
+                      </Button>
+                    </Link>
                   </div>
                 </div>
                 

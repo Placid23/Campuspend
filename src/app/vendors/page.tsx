@@ -1,27 +1,20 @@
 "use client"
 
+import * as React from 'react'
 import { useState } from 'react'
 import { DashboardShell } from "@/components/layout/Shell"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { 
   Search, 
   MapPin, 
   Clock, 
-  ChevronDown, 
-  Star, 
-  Heart,
-  Zap,
-  Navigation,
-  Loader2,
-  Store,
+  Store, 
   ArrowRight
 } from "lucide-react"
 import Image from 'next/image'
 import Link from 'next/link'
-import { cn } from "@/lib/utils"
 import { collection, query, orderBy, limit } from 'firebase/firestore'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 
@@ -40,7 +33,8 @@ export default function VendorListPage() {
     if (!vendors) return []
     return vendors.filter(v => 
       v.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      v.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      v.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      v.pickupLocation?.toLowerCase().includes(searchQuery.toLowerCase())
     )
   }, [vendors, searchQuery])
 
@@ -61,12 +55,12 @@ export default function VendorListPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground/50 text-white" 
-              placeholder="Search for vendors or products..." 
+              placeholder="Search by store name, menu, or location..." 
             />
           </div>
         </div>
 
-        {/* Optimized Content with Skeleton fallback for instant feel */}
+        {/* Optimized Content with Skeleton fallback */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
@@ -84,7 +78,7 @@ export default function VendorListPage() {
               <GlassCard key={vendor.id} className="p-0 border-white/10 group overflow-hidden flex flex-col hover:border-primary/40 transition-all">
                 <div className="relative aspect-[16/9] overflow-hidden bg-white/5">
                   <Image 
-                    src={vendor.imageUrl || `https://picsum.photos/seed/${vendor.id}/600/400`}
+                    src={vendor.bannerUrl || `https://picsum.photos/seed/${vendor.id}/600/400`}
                     alt={vendor.name} 
                     fill 
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -100,9 +94,15 @@ export default function VendorListPage() {
                     <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed font-medium">
                       {vendor.description || "Official campus merchant providing quality products and services to students."}
                     </p>
-                    <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Open Now</span>
-                       <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" /> Main Campus</span>
+                    <div className="flex flex-col gap-2">
+                       <div className="flex items-center gap-1.5 text-[10px] text-primary font-bold uppercase tracking-widest">
+                          <MapPin className="w-3.5 h-3.5" /> 
+                          <span className="truncate">{vendor.pickupLocation || 'Main Campus'}</span>
+                       </div>
+                       <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                          <Clock className="w-3.5 h-3.5" /> 
+                          <span>Open Until 10:30 PM</span>
+                       </div>
                     </div>
                   </div>
 
