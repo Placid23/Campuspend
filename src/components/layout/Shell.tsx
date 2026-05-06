@@ -12,7 +12,8 @@ import {
   ShoppingCart,
   History,
   User,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -30,9 +31,11 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
-import { useAuth, useUser } from '@/firebase'
+import { useAuth, useUser, useCollection, useMemoFirebase } from '@/firebase'
+import { collectionGroup, query, where } from 'firebase/firestore'
 import { AppLoader } from "@/components/ui/app-loader"
 import { PermissionPrompt } from "@/components/pwa/PWAHandler"
+import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
 const navItems = [
@@ -48,7 +51,46 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const auth = useAuth()
+  const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
+
+  // Real-time Status Tracker for Students
+  const itemsQuery = useMemoFirebase(() => {
+    if (!user?.uid) return null
+    return query(
+      collectionGroup(useFirebase().firestore, "orderItems"),
+      where("studentId", "==", user.uid)
+    )
+  }, [user?.uid])
+
+  const { data: orderItems } = useCollection(itemsQuery)
+  const statusCache = React.useRef<Record<string, string>>({})
+  const isFirstLoad = React.useRef(true)
+
+  React.useEffect(() => {
+    if (!orderItems || !profile?.settings?.notifications?.transactions) return
+
+    if (isFirstLoad.current) {
+      orderItems.forEach(item => {
+        statusCache.current[item.id] = item.status || 'placed'
+      })
+      isFirstLoad.current = false
+      return
+    }
+
+    orderItems.forEach(item => {
+      const prevStatus = statusCache.current[item.id]
+      const currentStatus = item.status || 'placed'
+
+      if (prevStatus && prevStatus !== currentStatus) {
+        toast({
+          title: "Order Update",
+          description: `Your order for "${item.name}" is now ${currentStatus.toUpperCase()}.`,
+        })
+        statusCache.current[item.id] = currentStatus
+      }
+    })
+  }, [orderItems, profile, toast])
 
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
@@ -70,7 +112,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Use AppLoader only for INITIAL load to prevent "laggy" sub-navigation
   if (isUserLoading || (isProfileLoading && !profile)) {
     return <AppLoader message="Syncing Wallet..." />
   }
@@ -194,4 +235,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </div>
     </SidebarProvider>
   )
+}
+
+function useFirebase() {
+  const context = React.useContext(require('@/firebase/provider').FirebaseContext);
+  if (!context) throw new Error('useFirebase must be used within a FirebaseProvider.');
+  return context;
 }

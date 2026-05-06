@@ -11,7 +11,8 @@ import {
   TrendingUp, 
   Settings, 
   LogOut, 
-  User
+  User,
+  Bell
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -29,8 +30,10 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
-import { useAuth, useUser } from '@/firebase'
+import { useAuth, useUser, useCollection, useMemoFirebase } from '@/firebase'
+import { collectionGroup, query, where } from 'firebase/firestore'
 import { AppLoader } from "@/components/ui/app-loader"
+import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
 const vendorNavItems = [
@@ -46,7 +49,74 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const auth = useAuth()
+  const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
+
+  // Helper to play synthesized notification chime
+  const playChime = React.useCallback(() => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5);
+      
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+    } catch (e) {
+      console.error("Audio chime failed", e);
+    }
+  }, []);
+
+  // Real-time Order Listener for Vendors
+  const itemsQuery = useMemoFirebase(() => {
+    if (!user?.uid) return null
+    return query(
+      collectionGroup(useFirebase().firestore, "orderItems"),
+      where("vendorOwnerId", "==", user.uid)
+    )
+  }, [user?.uid])
+
+  const { data: orderItems } = useCollection(itemsQuery)
+  const seenItems = React.useRef<Set<string>>(new Set())
+  const isFirstLoad = React.useRef(true)
+
+  React.useEffect(() => {
+    if (!orderItems || !profile?.settings?.notifications?.newOrders) return
+
+    if (isFirstLoad.current) {
+      orderItems.forEach(item => seenItems.current.add(item.id))
+      isFirstLoad.current = false
+      return
+    }
+
+    orderItems.forEach(item => {
+      if (!seenItems.current.has(item.id) && (item.status === 'placed' || !item.status)) {
+        // Trigger auditory chime
+        if (profile.settings.notifications.soundAlerts) {
+          playChime()
+        }
+        
+        // Trigger visual toast
+        toast({
+          title: "New Order Received!",
+          description: `Student just ordered: ${item.name}`,
+        })
+        
+        seenItems.current.add(item.id)
+      }
+    })
+  }, [orderItems, profile, toast, playChime])
 
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
@@ -167,4 +237,10 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
       </div>
     </SidebarProvider>
   )
+}
+
+function useFirebase() {
+  const context = React.useContext(require('@/firebase/provider').FirebaseContext);
+  if (!context) throw new Error('useFirebase must be used within a FirebaseProvider.');
+  return context;
 }
