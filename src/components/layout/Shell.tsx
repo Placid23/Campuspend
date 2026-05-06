@@ -11,7 +11,8 @@ import {
   CreditCard,
   ShoppingCart,
   History,
-  User
+  User,
+  ChevronRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -48,13 +49,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const auth = useAuth()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
-  const [theme, setTheme] = React.useState<'dark' | 'light'>('dark')
-
-  React.useEffect(() => {
-    const saved = localStorage.getItem('theme') || 'dark'
-    setTheme(saved as any)
-    document.documentElement.classList.toggle('dark', saved === 'dark')
-  }, [])
 
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
@@ -76,7 +70,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     }
   }
 
-  if (isUserLoading || isProfileLoading) {
+  // Use AppLoader only for INITIAL load to prevent "laggy" sub-navigation
+  if (isUserLoading || (isProfileLoading && !profile)) {
     return <AppLoader message="Syncing Wallet..." />
   }
 
