@@ -14,7 +14,8 @@ import {
   User,
   ChevronRight,
   Bell,
-  Menu
+  Menu,
+  AlertTriangle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -32,7 +33,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
-import { useAuth, useUser, useCollection, useMemoFirebase } from '@/firebase'
+import { useAuth, useUser, useCollection, useMemoFirebase, useFirebase } from '@/firebase'
 import { collectionGroup, query, where } from 'firebase/firestore'
 import { AppLoader } from "@/components/ui/app-loader"
 import { PermissionPrompt } from "@/components/pwa/PWAHandler"
@@ -54,21 +55,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const auth = useAuth()
   const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
-
   const { firestore } = useFirebase()
 
+  // Stabilized query for order items
   const itemsQuery = useMemoFirebase(() => {
     if (!user?.uid || !firestore) return null
     return query(
       collectionGroup(firestore, "orderItems"),
       where("studentId", "==", user.uid)
     )
-  }, [user?.uid, firestore])
+  }, [user?.uid, !!firestore])
 
-  const { data: orderItems } = useCollection(itemsQuery)
+  const { data: orderItems, error: queryError } = useCollection(itemsQuery)
   const statusCache = React.useRef<Record<string, string>>({})
   const isFirstLoad = React.useRef(true)
 
+  // Real-time status notification logic
   React.useEffect(() => {
     if (!orderItems || !profile?.settings?.notifications?.transactions) return
 
@@ -94,6 +96,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     })
   }, [orderItems, profile, toast])
 
+  // Authentication & Role guard
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
       if (!user) {
@@ -120,6 +123,31 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   if (!user || profile?.role !== 'student') {
     return null
+  }
+
+  // Handle Missing Index Error gracefully
+  if (queryError?.message?.includes('requires an index')) {
+    return (
+      <div className="min-h-screen nebula-bg flex items-center justify-center p-6 text-center">
+        <div className="max-w-md space-y-6 animate-in fade-in zoom-in duration-500">
+          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20 mx-auto shadow-[0_0_50px_rgba(245,158,11,0.2)]">
+            <AlertTriangle className="w-10 h-10 text-amber-500" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-headline font-bold text-white">Action Required: Enable Index</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              To track your order status in real-time, a cross-collection index is required for your project.
+            </p>
+          </div>
+          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-12 px-8 rounded-xl w-full">
+            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cltwcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvc3R1ZGVudElkEAIaDQoJc3R1ZGVudElkEAE" target="_blank" rel="noopener noreferrer">
+              Create studentId Index
+            </a>
+          </Button>
+          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-50">Estimated setup time: 1 minute</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -188,14 +216,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-1" />
               
               <div className="flex md:hidden items-center gap-2 min-w-0 flex-1">
-                <div className="w-9 h-9 rounded-xl bg-white/5 relative flex items-center justify-center shadow-lg border border-white/10 p-1 shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-white/5 relative flex items-center justify-center shadow-lg border border-white/10 p-1 shrink-0 overflow-hidden">
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5 scale-125" />
                 </div>
                 <span className="font-headline font-bold text-base tracking-tighter truncate xs:block hidden">CafePay</span>
               </div>
 
               <div className="ml-auto flex items-center gap-3 shrink-0 min-w-0">
-                <div className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group max-w-[140px] md:max-w-none">
+                <div className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group max-w-[150px] md:max-w-none">
                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                    <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest relative hidden sm:inline">Balance</span>
                    <div className="flex items-center gap-1 min-w-0">
@@ -242,10 +270,4 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </div>
     </SidebarProvider>
   )
-}
-
-function useFirebase() {
-  const context = React.useContext(require('@/firebase/provider').FirebaseContext);
-  if (!context) throw new Error('useFirebase must be used within a FirebaseProvider.');
-  return context;
 }

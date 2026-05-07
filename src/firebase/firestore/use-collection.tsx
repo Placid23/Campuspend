@@ -16,7 +16,7 @@ export interface UseCollectionResult<T> {
 
 /**
  * Optimized real-time collection hook.
- * Uses a ref to prevent unnecessary state updates and ensures clean unmounting.
+ * Uses a ref and stringified key to prevent unnecessary state updates and internal assertion errors.
  */
 export function useCollection<T = any>(
   queryRef: Query<DocumentData> | null | undefined
@@ -25,20 +25,22 @@ export function useCollection<T = any>(
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<any | null>(null);
   
-  // Track current query to avoid stale snapshots
-  const currentQueryRef = useRef<string | null>(null);
+  // Track current query to avoid stale snapshots or redundant listeners
+  const currentQueryKey = useRef<string | null>(null);
 
   useEffect(() => {
     if (!queryRef) {
       setData(null);
       setIsLoading(false);
       setError(null);
+      currentQueryKey.current = null;
       return;
     }
 
+    // Using query string representation to avoid unnecessary re-subscriptions on reference changes
     const queryKey = queryRef.toString();
-    if (currentQueryRef.current === queryKey) return;
-    currentQueryRef.current = queryKey;
+    if (currentQueryKey.current === queryKey) return;
+    currentQueryKey.current = queryKey;
 
     setIsLoading(true);
     setError(null);
@@ -54,21 +56,24 @@ export function useCollection<T = any>(
         
         setData(results);
         setIsLoading(false);
+        setError(null);
       },
       (err) => {
-        if (err.code !== 'permission-denied') {
+        // Standardize error reporting
+        if (err.code !== 'permission-denied' && !err.message?.includes('requires an index')) {
           console.error("Firestore useCollection Error:", err);
         }
         setError(err);
         setIsLoading(false);
+        setData(null);
       }
     );
 
     return () => {
       unsubscribe();
-      currentQueryRef.current = null;
+      currentQueryKey.current = null;
     };
-  }, [queryRef]);
+  }, [queryRef]); // Dependencies must be memoized by the caller
 
   return { data, isLoading, error };
 }

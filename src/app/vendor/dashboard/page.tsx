@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { collection, query, where, limit, orderBy, collectionGroup, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, where, limit, orderBy, collectionGroup } from 'firebase/firestore'
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase'
 
 export default function VendorDashboardPage() {
@@ -44,7 +44,7 @@ export default function VendorDashboardPage() {
   const { data: orderItems, error: queryError } = useCollection(itemsQuery)
 
   const totalSales = React.useMemo(() => {
-    return orderItems?.reduce((sum, item) => sum + item.subtotal, 0) || 0
+    return orderItems?.reduce((sum, item) => sum + (item.subtotal || 0), 0) || 0
   }, [orderItems])
 
   const pendingCount = orderItems?.filter(i => !i.status || i.status === 'placed' || i.status === 'preparing').length || 0
@@ -54,6 +54,30 @@ export default function VendorDashboardPage() {
       <VendorShell>
         <div className="flex items-center justify-center h-[60vh]">
           <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+      </VendorShell>
+    )
+  }
+
+  // Handle Missing Index Error locally for clarity if it occurs here
+  if (queryError?.message?.includes('requires an index')) {
+    return (
+      <VendorShell>
+        <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 text-center max-w-md mx-auto">
+          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <AlertTriangle className="w-10 h-10 text-amber-500" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-headline font-bold text-white">Action Required</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              We need to enable cross-collection indexing to track your sales.
+            </p>
+          </div>
+          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-12 px-8 rounded-xl">
+            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
+              Create vendorOwnerId Index
+            </a>
+          </Button>
         </div>
       </VendorShell>
     )
@@ -136,7 +160,7 @@ export default function VendorDashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold">₦{item.subtotal.toLocaleString()}</p>
-                    <p className="text-[10px] text-muted-foreground">{new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-[10px] text-muted-foreground">{item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
                   </div>
                 </div>
               ))}
