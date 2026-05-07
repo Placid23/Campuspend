@@ -6,48 +6,53 @@ import {
   DocumentData,
   QuerySnapshot,
   Query,
+  FirestoreError,
 } from 'firebase/firestore';
 
 export interface UseCollectionResult<T> {
   data: T[] | null;
   isLoading: boolean;
-  error: any | null;
+  error: FirestoreError | null;
 }
 
 /**
- * Optimized real-time collection hook.
- * Uses a ref and stringified key to prevent unnecessary state updates and internal assertion errors.
+ * Robust real-time collection hook with internal state protection.
+ * Prevents "INTERNAL ASSERTION FAILED" by strictly managing listener lifecycle.
  */
 export function useCollection<T = any>(
   queryRef: Query<DocumentData> | null | undefined
 ): UseCollectionResult<T & { id: string; path: string }> {
   const [data, setData] = useState<(T & { id: string; path: string })[] | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!!queryRef);
+  const [error, setError] = useState<FirestoreError | null>(null);
   
-  // Track current query to avoid stale snapshots or redundant listeners
-  const currentQueryKey = useRef<string | null>(null);
+  // Guard against updates on unmounted components
+  const isMounted = useRef(true);
+  // Prevent redundant listeners if the query identity hasn't truly changed
+  const lastQueryKey = useRef<string | null>(null);
 
   useEffect(() => {
+    isMounted.current = true;
+    
     if (!queryRef) {
       setData(null);
       setIsLoading(false);
       setError(null);
-      currentQueryKey.current = null;
+      lastQueryKey.current = null;
       return;
     }
 
-    // Using query string representation to avoid unnecessary re-subscriptions on reference changes
-    const queryKey = queryRef.toString();
-    if (currentQueryKey.current === queryKey) return;
-    currentQueryKey.current = queryKey;
+    const currentKey = queryRef.toString();
+    if (lastQueryKey.current === currentKey) return;
+    lastQueryKey.current = currentKey;
 
     setIsLoading(true);
-    setError(null);
 
     const unsubscribe = onSnapshot(
       queryRef,
       (snapshot: QuerySnapshot<DocumentData>) => {
+        if (!isMounted.current) return;
+        
         const results = snapshot.docs.map(doc => ({
           ...(doc.data() as T),
           id: doc.id,
@@ -58,11 +63,14 @@ export function useCollection<T = any>(
         setIsLoading(false);
         setError(null);
       },
-      (err) => {
-        // Standardize error reporting
-        if (err.code !== 'permission-denied' && !err.message?.includes('requires an index')) {
-          console.error("Firestore useCollection Error:", err);
+      (err: FirestoreError) => {
+        if (!isMounted.current) return;
+        
+        // Suppress common expected errors from console to prevent clutter
+        if (err.code !== 'permission-denied' && !err.message.includes('requires an index')) {
+          console.warn("Firestore Listener Error:", err.message);
         }
+        
         setError(err);
         setIsLoading(false);
         setData(null);
@@ -70,10 +78,10 @@ export function useCollection<T = any>(
     );
 
     return () => {
+      isMounted.current = false;
       unsubscribe();
-      currentQueryKey.current = null;
     };
-  }, [queryRef]); // Dependencies must be memoized by the caller
+  }, [queryRef]);
 
   return { data, isLoading, error };
 }

@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
-import { useAuth, useUser, useCollection, useMemoFirebase, useFirebase } from '@/firebase'
+import { useAuth, useUser, useCollection, useMemoFirebase, useFirestore } from '@/firebase'
 import { collectionGroup, query, where } from 'firebase/firestore'
 import { AppLoader } from "@/components/ui/app-loader"
 import { PermissionPrompt } from "@/components/pwa/PWAHandler"
@@ -53,24 +53,24 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const auth = useAuth()
+  const db = useFirestore()
   const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
-  const { firestore } = useFirebase()
 
-  // Stabilized query for order items
+  // 1. Stable Index Query
   const itemsQuery = useMemoFirebase(() => {
-    if (!user?.uid || !firestore) return null
+    if (!user?.uid) return null
     return query(
-      collectionGroup(firestore, "orderItems"),
+      collectionGroup(db, "orderItems"),
       where("studentId", "==", user.uid)
     )
-  }, [user?.uid, !!firestore])
+  }, [user?.uid, db])
 
   const { data: orderItems, error: queryError } = useCollection(itemsQuery)
   const statusCache = React.useRef<Record<string, string>>({})
   const isFirstLoad = React.useRef(true)
 
-  // Real-time status notification logic
+  // 2. Status Notifications
   React.useEffect(() => {
     if (!orderItems || !profile?.settings?.notifications?.transactions) return
 
@@ -96,7 +96,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     })
   }, [orderItems, profile, toast])
 
-  // Authentication & Role guard
+  // 3. Guards
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
       if (!user) {
@@ -108,15 +108,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     }
   }, [user, isUserLoading, profile, isProfileLoading, router])
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth)
-      router.push("/login")
-    } catch (error) {
-      console.error("Logout error:", error)
-    }
-  }
-
   if (isUserLoading || (isProfileLoading && !profile)) {
     return <AppLoader message="Syncing Wallet..." />
   }
@@ -125,7 +116,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return null
   }
 
-  // Handle Missing Index Error gracefully
+  // 4. Handle Missing Index Error gracefully
   if (queryError?.message?.includes('requires an index')) {
     return (
       <div className="min-h-screen nebula-bg flex items-center justify-center p-6 text-center">
