@@ -2,37 +2,43 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
-import { ArrowRight, Zap, Shield, ShoppingBag, BrainCircuit, CreditCard } from "lucide-react";
+import { ArrowRight, Zap, Shield, ShoppingBag, BrainCircuit, CreditCard, ChevronRight } from "lucide-react";
 import { PWAHandler } from "@/components/pwa/PWAHandler";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen nebula-bg">
-      {/* Navbar with Upscaled Logo */}
-      <nav className="fixed top-0 w-full z-50 glass-morphism border-b-0 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-6 px-6 md:px-12 flex justify-between items-center bg-background/80">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center shadow-2xl relative overflow-hidden p-1 border border-white/10">
-            <Image src="/logo.png" alt="CafePay Logo" width={80} height={80} className="object-contain scale-150" />
+      {/* Creative Floating Pill Navbar */}
+      <div className="fixed top-0 w-full z-50 px-4 md:px-8 pt-4 md:pt-6 pointer-events-none">
+        <nav className="max-w-7xl mx-auto h-16 md:h-20 glass-morphism rounded-[2rem] md:rounded-full flex items-center justify-between px-4 md:px-8 border-white/10 bg-background/40 backdrop-blur-2xl pointer-events-auto shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 opacity-50 group-hover:opacity-100 transition-opacity duration-1000"></div>
+          
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/5 flex items-center justify-center shadow-inner relative overflow-hidden border border-white/10 p-0.5">
+              <Image src="/logo.png" alt="Logo" width={48} height={48} className="object-contain scale-125" />
+            </div>
+            <span className="font-headline font-bold text-lg md:text-2xl tracking-tighter hidden xs:block">CafePay</span>
           </div>
-          <span className="font-headline font-bold text-3xl tracking-tighter hidden sm:block">CafePay Wallet</span>
-        </div>
-        <div className="hidden lg:flex items-center gap-10">
-          <Link href="#features" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Features</Link>
-          <Link href="/dashboard" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Launch App</Link>
-        </div>
-        <div className="flex items-center gap-4">
-          <PWAHandler />
-          <Link href="/login">
-            <Button variant="ghost" className="hidden sm:inline-flex font-bold uppercase tracking-widest text-xs">Sign In</Button>
-          </Link>
-          <Link href="/register">
-            <Button className="glow-button rounded-full px-8 bg-primary hover:bg-primary/90 font-bold uppercase tracking-widest text-xs h-12">Get Started</Button>
-          </Link>
-        </div>
-      </nav>
+
+          <div className="hidden lg:flex items-center gap-8 relative z-10">
+            <Link href="#features" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Features</Link>
+            <Link href="/dashboard" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Launch</Link>
+          </div>
+
+          <div className="flex items-center gap-2 md:gap-4 relative z-10">
+            <PWAHandler />
+            <Link href="/register">
+              <Button className="glow-button rounded-full px-4 md:px-8 bg-primary hover:bg-primary/90 font-bold uppercase tracking-widest text-[9px] md:text-xs h-10 md:h-12 border-none">
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Join</span>
+              </Button>
+            </Link>
+          </div>
+        </nav>
+      </div>
 
       {/* Hero Section */}
-      <section className="pt-48 pb-20 px-6 overflow-hidden">
+      <section className="pt-40 md:pt-56 pb-20 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-10 animate-in fade-in slide-in-from-left duration-1000">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase">
@@ -42,11 +48,11 @@ export default function LandingPage() {
               </span>
               Intelligent Campus Finance
             </div>
-            <h1 className="text-6xl md:text-8xl font-headline font-bold leading-[0.9] tracking-tighter">
+            <h1 className="text-5xl md:text-8xl font-headline font-bold leading-[0.9] tracking-tighter">
               Smart Student <span className="text-primary neon-text-glow">Spending.</span><br />
               <span className="text-secondary">Simplified.</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-lg leading-relaxed font-medium">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed font-medium">
               Automated expense tracking and Decision Tree-powered financial wisdom designed specifically for the modern academic lifestyle.
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
@@ -117,8 +123,8 @@ export default function LandingPage() {
       <footer className="py-20 px-6 border-t border-white/5 bg-card/20 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-24">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
            <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-lg bg-white/5 flex items-center justify-center p-1 border border-white/10">
-                 <Image src="/logo.png" alt="Logo" width={64} height={64} className="object-contain scale-125" />
+              <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center p-1 border border-white/10">
+                 <Image src="/logo.png" alt="Logo" width={48} height={48} className="object-contain scale-125" />
               </div>
               <span className="font-headline font-bold text-2xl tracking-tighter">CafePay Wallet</span>
            </div>

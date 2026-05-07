@@ -55,7 +55,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
 
-  const { areServicesAvailable, firestore } = useFirebase()
+  const { firestore } = useFirebase()
 
   const itemsQuery = useMemoFirebase(() => {
     if (!user?.uid || !firestore) return null
@@ -169,7 +169,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   className="w-full justify-start text-muted-foreground hover:bg-accent rounded-2xl px-6 h-12 group"
                 >
                   <User className="w-5 h-5 mr-4 group-hover:text-primary transition-colors" />
-                  <span className="font-bold text-sm">Account Settings</span>
+                  <span className="font-bold text-sm">Settings</span>
                 </Button>
               </Link>
               <Button 
@@ -184,23 +184,23 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </Sidebar>
 
           <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
-            <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
+            <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl overflow-hidden">
               <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-1" />
               
               <div className="flex md:hidden items-center gap-2 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-xl bg-white/5 relative flex items-center justify-center shadow-lg border border-white/10 p-1 shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-white/5 relative flex items-center justify-center shadow-lg border border-white/10 p-1 shrink-0">
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5 scale-125" />
                 </div>
-                <span className="font-headline font-bold text-lg tracking-tighter truncate">CafePay</span>
+                <span className="font-headline font-bold text-base tracking-tighter truncate xs:block hidden">CafePay</span>
               </div>
 
-              <div className="ml-auto flex items-center gap-3 shrink-0">
-                <div className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group">
+              <div className="ml-auto flex items-center gap-3 shrink-0 min-w-0">
+                <div className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group max-w-[140px] md:max-w-none">
                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                    <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest relative hidden sm:inline">Balance</span>
-                   <div className="flex items-center gap-1">
-                     <span className="text-[10px] md:text-sm font-bold text-primary">₦</span>
-                     <span className="text-base md:text-xl font-headline font-bold text-primary relative">
+                   <div className="flex items-center gap-1 min-w-0">
+                     <span className="text-[10px] md:text-sm font-bold text-primary shrink-0">₦</span>
+                     <span className="text-sm md:text-xl font-headline font-bold text-primary relative truncate">
                        {profile?.walletBalance?.toLocaleString() || '0'}
                      </span>
                    </div>
@@ -208,7 +208,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </div>
             </header>
 
-            <main className="p-6 md:p-10 h-[calc(100vh-80px-env(safe-area-inset-top,0px))] md:h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
+            <main className="p-4 md:p-10 h-[calc(100vh-80px-env(safe-area-inset-top,0px))] md:h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
               {children}
             </main>
           </SidebarInset>
