@@ -108,6 +108,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     }
   }, [user, isUserLoading, profile, isProfileLoading, router])
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      router.push("/login")
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
+  }
+
   if (isUserLoading || (isProfileLoading && !profile)) {
     return <AppLoader message="Syncing Wallet..." />
   }

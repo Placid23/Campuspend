@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from 'firebase/auth'
-import { useAuth, useUser, useCollection, useMemoFirebase } from '@/firebase'
+import { useAuth, useUser, useCollection, useMemoFirebase, useFirestore } from '@/firebase'
 import { collectionGroup, query, where } from 'firebase/firestore'
 import { AppLoader } from "@/components/ui/app-loader"
 import { useToast } from "@/hooks/use-toast"
@@ -49,6 +49,7 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const auth = useAuth()
+  const db = useFirestore()
   const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
 
@@ -82,10 +83,10 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   const itemsQuery = useMemoFirebase(() => {
     if (!user?.uid) return null
     return query(
-      collectionGroup(useFirebase().firestore, "orderItems"),
+      collectionGroup(db, "orderItems"),
       where("vendorOwnerId", "==", user.uid)
     )
-  }, [user?.uid])
+  }, [user?.uid, db])
 
   const { data: orderItems } = useCollection(itemsQuery)
   const seenItems = React.useRef<Set<string>>(new Set())
@@ -237,10 +238,4 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
       </div>
     </SidebarProvider>
   )
-}
-
-function useFirebase() {
-  const context = React.useContext(require('@/firebase/provider').FirebaseContext);
-  if (!context) throw new Error('useFirebase must be used within a FirebaseProvider.');
-  return context;
 }
