@@ -99,45 +99,72 @@ export default function CartPage() {
       updatedAt: now
     }
 
-    // 3. Batch Writes (Simplified)
-    try {
-      await setDoc(orderRef, orderData)
-      
-      // Write individual items for vendor visibility
-      for (const item of cart) {
-        const itemRef = doc(collection(db, "users", studentId, "orders", orderId, "orderItems"))
-        const itemData = {
-          id: itemRef.id,
-          orderId,
-          studentId,
-          productId: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          unitPrice: item.price,
-          subtotal: item.price * item.quantity,
-          vendorOwnerId: item.vendorOwnerId,
-          status: "placed",
-          createdAt: now,
-          updatedAt: now
-        }
-        await setDoc(itemRef, itemData)
-      }
-
-      await setDoc(expenseRef, expenseData)
-      await updateDoc(doc(db, "userProfiles", studentId), { 
-        walletBalance: profile.walletBalance - total,
+    // 3. Initiate Non-blocking writes
+    // DO NOT await mutation calls to avoid UI blocking and 10s timeouts
+    setDoc(orderRef, orderData).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: orderRef.path,
+        operation: 'create',
+        requestResourceData: orderData
+      }));
+    });
+    
+    // Process items in parallel
+    cart.forEach(item => {
+      const itemRef = doc(collection(db, "users", studentId, "orders", orderId, "orderItems"))
+      const itemData = {
+        id: itemRef.id,
+        orderId,
+        studentId,
+        productId: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        subtotal: item.price * item.quantity,
+        vendorOwnerId: item.vendorOwnerId,
+        status: "placed",
+        createdAt: now,
         updatedAt: now
-      })
+      }
+      setDoc(itemRef, itemData).catch(err => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: itemRef.path,
+          operation: 'create',
+          requestResourceData: itemData
+        }));
+      });
+    });
 
-      localStorage.removeItem('campus-spend-cart')
-      toast({ title: "Order Placed!", description: "Funds deducted from your wallet." })
-      router.push("/checkout")
-    } catch (err) {
-      console.error(err)
-      toast({ variant: "destructive", title: "Checkout Error", description: "Something went wrong during payment." })
-    } finally {
-      setIsProcessing(false)
+    setDoc(expenseRef, expenseData).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: expenseRef.path,
+        operation: 'create',
+        requestResourceData: expenseData
+      }));
+    });
+
+    const profileRef = doc(db, "userProfiles", studentId)
+    const profileUpdate = { 
+      walletBalance: profile.walletBalance - total,
+      updatedAt: now
     }
+    updateDoc(profileRef, profileUpdate).catch(err => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: profileRef.path,
+        operation: 'update',
+        requestResourceData: profileUpdate
+      }));
+    });
+
+    // Proceed to success screen optimistically
+    localStorage.removeItem('campus-spend-cart')
+    toast({ title: "Order Placed!", description: "Funds deducted from your wallet." })
+    
+    // Artificial delay for visual transition feedback
+    setTimeout(() => {
+      router.push("/checkout")
+      setIsProcessing(false)
+    }, 800)
   }
 
   return (

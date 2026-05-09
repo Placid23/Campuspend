@@ -35,7 +35,7 @@ import {
   AlertCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase"
 import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -97,41 +97,61 @@ export default function AdminManageCategoriesPage() {
   const handleSaveCategory = async () => {
     if (!formData.name.trim()) return
     setIsSaving(true)
-    try {
-      if (editingCategory) {
-        // Update
-        const categoryRef = doc(db, "categories", editingCategory.id)
-        await updateDoc(categoryRef, {
-          ...formData,
-          updatedAt: serverTimestamp()
+    
+    if (editingCategory) {
+      // Update
+      const categoryRef = doc(db, "categories", editingCategory.id)
+      const data = { ...formData, updatedAt: serverTimestamp() }
+      updateDoc(categoryRef, data)
+        .then(() => {
+          toast({ title: "Category Updated", description: "The category details have been saved." })
+          setIsDialogOpen(false)
         })
-        toast({ title: "Category Updated", description: "The category details have been saved." })
-      } else {
-        // Create
-        const categoryRef = doc(collection(db, "categories"))
-        await setDoc(categoryRef, {
-          id: categoryRef.id,
-          ...formData,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
+        .catch(async (error) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: categoryRef.path,
+            operation: 'update',
+            requestResourceData: data
+          }))
         })
-        toast({ title: "Category Created", description: "New category added to marketplace." })
+        .finally(() => setIsSaving(false))
+    } else {
+      // Create
+      const categoryRef = doc(collection(db, "categories"))
+      const data = {
+        id: categoryRef.id,
+        ...formData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       }
-      setIsDialogOpen(false)
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to save category." })
-    } finally {
-      setIsSaving(false)
+      setDoc(categoryRef, data)
+        .then(() => {
+          toast({ title: "Category Created", description: "New category added to marketplace." })
+          setIsDialogOpen(false)
+        })
+        .catch(async (error) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: categoryRef.path,
+            operation: 'create',
+            requestResourceData: data
+          }))
+        })
+        .finally(() => setIsSaving(false))
     }
   }
 
   const handleDeleteCategory = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "categories", id))
-      toast({ title: "Category Deleted", description: "Category removed from database." })
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to remove category." })
-    }
+    const categoryRef = doc(db, "categories", id)
+    deleteDoc(categoryRef)
+      .then(() => {
+        toast({ title: "Category Deleted", description: "Category removed from database." })
+      })
+      .catch(async (error) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: categoryRef.path,
+          operation: 'delete'
+        }))
+      })
   }
 
   const getProductCount = (categoryName: string) => {

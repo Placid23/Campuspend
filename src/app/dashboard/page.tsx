@@ -42,7 +42,7 @@ import {
 } from 'recharts'
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from "@/firebase"
+import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase"
 import { collection, query, limit, orderBy, doc, updateDoc } from 'firebase/firestore'
 import { isToday, format, subDays } from 'date-fns'
 import { useToast } from "@/hooks/use-toast"
@@ -97,18 +97,27 @@ export default function DashboardPage() {
     const amount = parseFloat(topUpAmount)
     if (isNaN(amount) || amount <= 0) return
     setIsProcessing(true)
-    try {
-      await updateDoc(doc(db, "userProfiles", user.uid), {
-        walletBalance: (profile.walletBalance || 0) + amount,
-        updatedAt: new Date().toISOString()
-      })
-      toast({ title: "Funds Added!", description: `₦${amount.toLocaleString()} added to wallet.` })
-      setIsTopUpOpen(false)
-    } catch (error) {
-      toast({ variant: "destructive", title: "Top-up Failed" })
-    } finally {
-      setIsProcessing(false)
+    
+    const profileRef = doc(db, "userProfiles", user.uid)
+    const data = {
+      walletBalance: (profile.walletBalance || 0) + amount,
+      updatedAt: new Date().toISOString()
     }
+    
+    // Non-blocking write
+    updateDoc(profileRef, data)
+      .then(() => {
+        toast({ title: "Funds Added!", description: `₦${amount.toLocaleString()} added to wallet.` })
+        setIsTopUpOpen(false)
+      })
+      .catch(async (error) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: profileRef.path,
+          operation: 'update',
+          requestResourceData: data
+        }))
+      })
+      .finally(() => setIsProcessing(false))
   }
 
   if (isProfileLoading || !user) {
