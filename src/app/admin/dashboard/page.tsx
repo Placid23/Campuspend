@@ -4,30 +4,17 @@ import * as React from "react"
 import { AdminShell } from "@/components/layout/AdminShell"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
-  TrendingUp, 
   ShoppingBag, 
-  Box, 
-  Plus, 
-  ChevronRight, 
-  MoreVertical,
-  Users,
-  CreditCard,
-  Zap,
-  ArrowUpRight,
-  Package,
-  Star,
-  AlertCircle,
-  History,
-  GraduationCap,
+  Users, 
+  DollarSign, 
+  Loader2, 
+  Database, 
+  RefreshCw,
   Store,
-  DollarSign,
-  ClipboardList,
-  Loader2,
-  Database,
-  RefreshCw
+  GraduationCap,
+  TrendingUp,
+  AlertTriangle
 } from "lucide-react"
 import { 
   BarChart, 
@@ -37,16 +24,12 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Cell,
-  LineChart,
   Line,
   ComposedChart,
   PieChart as RePieChart,
-  Pie
+  Pie,
+  Cell
 } from 'recharts'
-import Image from "next/image"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
 import { useFirestore, useUser, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, where, collectionGroup, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useToast } from "@/hooks/use-toast"
@@ -57,19 +40,19 @@ export default function AdminDashboardPage() {
   const { toast } = useToast()
   const [isSeeding, setIsSeeding] = React.useState(false)
 
-  // 1. Define Queries
+  // 1. Defined Queries with Memoization
   const studentsQuery = useMemoFirebase(() => query(collection(db, "userProfiles"), where("role", "==", "student")), [db])
   const vendorsQuery = useMemoFirebase(() => collection(db, "vendors"), [db])
   const ordersQuery = useMemoFirebase(() => collectionGroup(db, "orders"), [db])
   const productsQuery = useMemoFirebase(() => collection(db, "products"), [db])
 
-  // 2. Fetch Data
+  // 2. Data Streams
   const { data: students, isLoading: studentsLoading } = useCollection(studentsQuery)
   const { data: vendors, isLoading: vendorsLoading } = useCollection(vendorsQuery)
-  const { data: orders, isLoading: ordersLoading } = useCollection(ordersQuery)
+  const { data: orders, isLoading: ordersLoading, error: ordersError } = useCollection(ordersQuery)
   const { data: products, isLoading: productsLoading } = useCollection(productsQuery)
 
-  // 3. Derived Data
+  // 3. Derived Analytics
   const totalRevenue = React.useMemo(() => orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0) || 0, [orders])
   
   const salesData = React.useMemo(() => [
@@ -81,7 +64,7 @@ export default function AdminDashboardPage() {
     { name: 'Vendors', value: vendors?.length || 0, color: '#bc66eb' },
   ], [students, vendors])
 
-  // Demo Seeding Utility
+  // System Seeding Utility for Presentation
   const handleSeedData = async () => {
     if (!user) return
     setIsSeeding(true)
@@ -93,7 +76,7 @@ export default function AdminDashboardPage() {
 
       for (const v of demoVendors) {
         const vRef = doc(db, "vendors", v.id)
-        await setDoc(vRef, {
+        setDoc(vRef, {
           id: v.id,
           userId: v.id,
           name: v.name,
@@ -106,28 +89,7 @@ export default function AdminDashboardPage() {
         })
       }
 
-      const demoProducts = [
-        { name: "Academic Notebook", price: 850, cat: "Stationery", v: "VND-2" },
-        { name: "Premium Burger", price: 2500, cat: "Food", v: "VND-1" },
-        { name: "Logic & Philosophy Text", price: 4200, cat: "Books", v: "VND-2" },
-        { name: "Chilled Soda", price: 400, cat: "Drinks", v: "VND-1" },
-      ]
-
-      for (const p of demoProducts) {
-        const pRef = doc(collection(db, "products"))
-        await setDoc(pRef, {
-          id: pRef.id,
-          name: p.name,
-          price: p.price,
-          category: p.cat,
-          vendorOwnerId: p.v,
-          stock: 50,
-          isActive: true,
-          createdAt: serverTimestamp()
-        })
-      }
-
-      toast({ title: "Environment Synced", description: "Demo vendors and products initialized." })
+      toast({ title: "Environment Synced", description: "Demo registry initialized." })
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Failed" })
     } finally {
@@ -135,7 +97,29 @@ export default function AdminDashboardPage() {
     }
   }
 
-  if (isProfileLoading || studentsLoading || vendorsLoading || ordersLoading || productsLoading) {
+  // Graceful handling of missing index (common in new Firebase projects)
+  if (ordersError?.message?.includes('requires an index')) {
+    return (
+      <AdminShell>
+        <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 text-center max-w-md mx-auto">
+          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <AlertTriangle className="w-10 h-10 text-amber-500" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-headline font-bold text-white">Index Required</h2>
+            <p className="text-muted-foreground text-sm">Please enable the collectionGroup index to track platform-wide orders.</p>
+          </div>
+          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-12 px-8 rounded-xl">
+            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
+              Create Index Link
+            </a>
+          </Button>
+        </div>
+      </AdminShell>
+    )
+  }
+
+  if (isProfileLoading || studentsLoading || vendorsLoading || productsLoading) {
     return (
       <AdminShell>
         <div className="flex items-center justify-center h-[60vh]">
@@ -174,9 +158,6 @@ export default function AdminDashboardPage() {
                 <GraduationCap className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              Active Marketplace
-            </p>
           </GlassCard>
 
           <GlassCard className="p-6 border-white/5 bg-white/5 hover:border-primary/20 transition-all">
@@ -189,9 +170,6 @@ export default function AdminDashboardPage() {
                 <Store className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-1">
-              Verified Merchants
-            </p>
           </GlassCard>
 
           <GlassCard className="p-6 border-white/5 bg-white/5 hover:border-primary/20 transition-all">
@@ -204,9 +182,6 @@ export default function AdminDashboardPage() {
                 <ShoppingBag className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              Live Transactions
-            </p>
           </GlassCard>
 
           <GlassCard className="p-6 border-white/5 bg-white/5 hover:border-primary/20 transition-all">
@@ -219,27 +194,16 @@ export default function AdminDashboardPage() {
                 <DollarSign className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              Gross Volume
-            </p>
           </GlassCard>
         </div>
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <GlassCard className="lg:col-span-7 p-8 border-white/10 space-y-8">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-headline font-bold text-white">Platform Performance</h3>
-            </div>
+            <h3 className="text-lg font-headline font-bold text-white">Platform Performance</h3>
             <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={salesData}>
-                  <defs>
-                    <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef1ab8" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ef1ab8" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
@@ -280,25 +244,11 @@ export default function AdminDashboardPage() {
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Total Members</p>
               </div>
             </div>
-            <div className="space-y-4">
-              {userDistribution.map((item, i) => (
-                <div key={i} className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-muted-foreground">{item.name}</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-white">{item.value.toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </GlassCard>
         </div>
 
-        {/* Footer */}
         <div className="text-center py-8 border-t border-white/5">
-           <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em]">© 2024 CampusSpend: All rights reserved.</p>
+           <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em]">© 2024 CafePay: Admin Control Centre.</p>
         </div>
 
       </div>
