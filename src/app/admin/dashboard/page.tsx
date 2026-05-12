@@ -25,7 +25,9 @@ import {
   Store,
   DollarSign,
   ClipboardList,
-  Loader2
+  Loader2,
+  Database,
+  RefreshCw
 } from "lucide-react"
 import { 
   BarChart, 
@@ -46,11 +48,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useFirestore, useUser, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, where, collectionGroup } from 'firebase/firestore'
+import { collection, query, where, collectionGroup, doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { useToast } from "@/hooks/use-toast"
 
 export default function AdminDashboardPage() {
   const db = useFirestore()
   const { user, isProfileLoading } = useUser()
+  const { toast } = useToast()
+  const [isSeeding, setIsSeeding] = React.useState(false)
 
   // 1. Define Queries
   const studentsQuery = useMemoFirebase(() => query(collection(db, "userProfiles"), where("role", "==", "student")), [db])
@@ -76,6 +81,60 @@ export default function AdminDashboardPage() {
     { name: 'Vendors', value: vendors?.length || 0, color: '#bc66eb' },
   ], [students, vendors])
 
+  // Demo Seeding Utility
+  const handleSeedData = async () => {
+    if (!user) return
+    setIsSeeding(true)
+    try {
+      const demoVendors = [
+        { id: "VND-1", name: "Campus Cuisines", pickup: "Main Cafeteria", cat: "Food" },
+        { id: "VND-2", name: "Scholar Supplies", pickup: "Bookstore Block B", cat: "Stationery" },
+      ]
+
+      for (const v of demoVendors) {
+        const vRef = doc(db, "vendors", v.id)
+        await setDoc(vRef, {
+          id: v.id,
+          userId: v.id,
+          name: v.name,
+          pickupLocation: v.pickup,
+          isVerified: true,
+          status: "Active",
+          description: `Official campus provider for ${v.cat} items.`,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        })
+      }
+
+      const demoProducts = [
+        { name: "Academic Notebook", price: 850, cat: "Stationery", v: "VND-2" },
+        { name: "Premium Burger", price: 2500, cat: "Food", v: "VND-1" },
+        { name: "Logic & Philosophy Text", price: 4200, cat: "Books", v: "VND-2" },
+        { name: "Chilled Soda", price: 400, cat: "Drinks", v: "VND-1" },
+      ]
+
+      for (const p of demoProducts) {
+        const pRef = doc(collection(db, "products"))
+        await setDoc(pRef, {
+          id: pRef.id,
+          name: p.name,
+          price: p.price,
+          category: p.cat,
+          vendorOwnerId: p.v,
+          stock: 50,
+          isActive: true,
+          createdAt: serverTimestamp()
+        })
+      }
+
+      toast({ title: "Environment Synced", description: "Demo vendors and products initialized." })
+    } catch (e) {
+      toast({ variant: "destructive", title: "Sync Failed" })
+    } finally {
+      setIsSeeding(false)
+    }
+  }
+
   if (isProfileLoading || studentsLoading || vendorsLoading || ordersLoading || productsLoading) {
     return (
       <AdminShell>
@@ -90,8 +149,18 @@ export default function AdminDashboardPage() {
     <AdminShell>
       <div className="space-y-8 animate-in fade-in duration-1000">
         
-        {/* Page Title */}
-        <h1 className="text-3xl font-headline font-bold text-white tracking-tight">Admin Dashboard</h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <h1 className="text-3xl font-headline font-bold text-white tracking-tight">Admin Dashboard</h1>
+          <Button 
+            onClick={handleSeedData}
+            disabled={isSeeding}
+            variant="outline"
+            className="rounded-xl border-primary/20 bg-primary/5 text-primary h-12 px-6 font-bold uppercase tracking-widest text-[10px]"
+          >
+            {isSeeding ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Database className="w-4 h-4 mr-2" />}
+            Sync Demo Registry
+          </Button>
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
