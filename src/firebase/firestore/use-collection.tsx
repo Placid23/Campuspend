@@ -17,7 +17,6 @@ export interface UseCollectionResult<T> {
 
 /**
  * Robust real-time collection hook with internal state protection.
- * Prevents "INTERNAL ASSERTION FAILED" by strictly managing listener lifecycle.
  */
 export function useCollection<T = any>(
   queryRef: Query<DocumentData> | null | undefined
@@ -28,8 +27,6 @@ export function useCollection<T = any>(
   
   // Guard against updates on unmounted components
   const isMounted = useRef(true);
-  // Prevent redundant listeners if the query identity hasn't truly changed
-  const lastQueryKey = useRef<string | null>(null);
 
   useEffect(() => {
     isMounted.current = true;
@@ -38,14 +35,8 @@ export function useCollection<T = any>(
       setData(null);
       setIsLoading(false);
       setError(null);
-      lastQueryKey.current = null;
       return;
     }
-
-    // Stabilize by serializing the query state
-    const currentKey = queryRef.toString();
-    if (lastQueryKey.current === currentKey) return;
-    lastQueryKey.current = currentKey;
 
     setIsLoading(true);
 
@@ -67,7 +58,6 @@ export function useCollection<T = any>(
       (err: FirestoreError) => {
         if (!isMounted.current) return;
         
-        // Suppress common expected errors from console to prevent clutter
         if (err.code !== 'permission-denied' && !err.message.includes('requires an index')) {
           console.warn("Firestore Listener Error:", err.message);
         }

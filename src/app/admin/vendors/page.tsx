@@ -42,7 +42,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { collection, doc, updateDoc, deleteDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -73,7 +73,7 @@ export default function ManageVendorsPage() {
     pickupLocation: "",
   })
 
-  // Stability: Fetch collection directly and handle sorting in memo
+  // Stability: Fetch collection directly
   const vendorsQuery = useMemoFirebase(() => collection(db, "vendors"), [db])
   const { data: allVendors, isLoading, error } = useCollection(vendorsQuery)
 
@@ -84,8 +84,8 @@ export default function ManageVendorsPage() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       result = result.filter(v => 
-        v.name?.toLowerCase().includes(q) || 
-        v.contactEmail?.toLowerCase().includes(q)
+        (v.name || "").toLowerCase().includes(q) || 
+        (v.contactEmail || "").toLowerCase().includes(q)
       )
     }
     
@@ -122,10 +122,11 @@ export default function ManageVendorsPage() {
       name: newVendorData.name,
       email: newVendorData.email,
       role: "vendor",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
 
+    // Initiate non-blocking writes
     setDoc(vendorRef, vendorDoc)
       .then(() => setDoc(profileRef, profileDoc))
       .then(() => {
@@ -133,7 +134,10 @@ export default function ManageVendorsPage() {
         setIsAddDialogOpen(false)
         setNewVendorData({ name: "", email: "", pickupLocation: "" })
       })
-      .catch(() => toast({ variant: "destructive", title: "Registration Failed" }))
+      .catch((err) => {
+        console.error(err)
+        toast({ variant: "destructive", title: "Registration Failed" })
+      })
       .finally(() => setIsSaving(false))
   }
 
@@ -236,7 +240,7 @@ export default function ManageVendorsPage() {
                             <Store className="w-5 h-5 text-primary" />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">{vendor.name}</span>
+                            <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">{vendor.name || "Untitled Store"}</span>
                             <span className="text-[10px] text-muted-foreground font-mono">{vendor.id.substring(0, 8)}</span>
                           </div>
                         </div>
@@ -317,6 +321,7 @@ export default function ManageVendorsPage() {
               <div className="text-center py-20">
                 <Search className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
                 <h3 className="text-lg font-bold text-white">No vendors found</h3>
+                <p className="text-sm text-muted-foreground mt-2">Try syncing the demo registry from the dashboard.</p>
               </div>
             )}
           </div>
