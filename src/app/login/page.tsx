@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { useAuth, useUser } from '@/firebase'
+import { AppLoader } from "@/components/ui/app-loader"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -26,7 +27,7 @@ export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
   const auth = useAuth()
-  const { user, profile, isProfileLoading } = useUser()
+  const { user, profile, isProfileLoading, isUserLoading } = useUser()
 
   useEffect(() => {
     if (user && profile && !isProfileLoading) {
@@ -53,6 +54,11 @@ export default function LoginPage() {
     }
   }
 
+  // Show AppLoader during initial auth check or when waiting for profile after login
+  if (isUserLoading || (user && isProfileLoading)) {
+    return <AppLoader message="Authenticating Credentials..." />;
+  }
+
   return (
     <div className="min-h-screen nebula-bg flex flex-col pt-[env(safe-area-inset-top,0px)]">
       <nav className="w-full z-50 py-6 px-6 md:px-12 flex justify-between items-center">
@@ -76,7 +82,7 @@ export default function LoginPage() {
           </div>
 
           <div className="relative">
-            <GlassCard className="relative z-10 p-10 md:p-12 border-white/10 backdrop-blur-3xl shadow-[0_0_50px_rgba(239,26,184,0.1)]">
+            <GlassCard className="relative z-10 p-10 md:p-12 border-white/10 backdrop-blur-3xl shadow-[0_0_50px_rgba(239,26,184,0.15)]">
               <form className="space-y-6" onSubmit={handleLogin}>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>

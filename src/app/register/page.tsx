@@ -29,10 +29,12 @@ import {
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { useAuth, useFirestore } from '@/firebase'
+import { AppLoader } from "@/components/ui/app-loader"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -78,8 +80,13 @@ export default function RegisterPage() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
+      
+      // Save profile and then show preloader for transition
       await setDoc(doc(db, "userProfiles", user.uid), profileData)
+      
+      setIsTransitioning(true)
       toast({ title: "Account Created!" })
+      
       if (formData.role === 'student') router.push("/dashboard")
       else if (formData.role === 'vendor') router.push("/vendor/dashboard")
       else router.push("/admin/dashboard")
@@ -89,6 +96,10 @@ export default function RegisterPage() {
     }
   }
 
+  if (isTransitioning) {
+    return <AppLoader message="Establishing Digital Identity..." />;
+  }
+
   return (
     <div className="min-h-screen nebula-bg flex flex-col pt-[env(safe-area-inset-top,0px)]">
       <nav className="w-full z-50 py-6 px-6 md:px-12 flex justify-between items-center">
@@ -96,7 +107,7 @@ export default function RegisterPage() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(239,26,184,0.5)]">
             <Zap className="text-white w-5 h-5" />
           </div>
-          <span className="font-headline font-bold text-xl tracking-tighter text-white">CampusSpend</span>
+          <span className="font-headline font-bold text-xl tracking-tighter text-white">CafePay Wallet</span>
         </div>
       </nav>
 
@@ -104,7 +115,7 @@ export default function RegisterPage() {
         <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-5xl font-headline font-bold leading-tight text-white">
-              Join <span className="text-primary neon-text-glow">CampusSpend</span>
+              Join <span className="text-primary neon-text-glow">CafePay</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
               Experience the luxury of automated expense tracking and smart campus spending.
@@ -164,7 +175,7 @@ export default function RegisterPage() {
       </main>
 
       <footer className="py-12 px-6 mt-auto text-center border-t border-white/5 pb-[calc(3rem+env(safe-area-inset-bottom,0px))]">
-        <p className="text-xs text-muted-foreground/40">© 2024 CampusSpend. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground/40">© 2024 CafePay Wallet. All rights reserved.</p>
       </footer>
     </div>
   )

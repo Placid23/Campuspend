@@ -1,11 +1,21 @@
+"use client"
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
-import { ArrowRight, Zap, Shield, ShoppingBag, BrainCircuit, CreditCard, ChevronRight } from "lucide-react";
+import { ArrowRight, Zap, Shield, ShoppingBag, BrainCircuit, ShieldCheck, ChevronRight } from "lucide-react";
 import { PWAHandler } from "@/components/pwa/PWAHandler";
+import { useUser } from "@/firebase";
+import { AppLoader } from "@/components/ui/app-loader";
 
 export default function LandingPage() {
+  const { isUserLoading } = useUser();
+
+  if (isUserLoading) {
+    return <AppLoader message="Initializing CafePay Engine..." />;
+  }
+
   return (
     <div className="min-h-screen nebula-bg">
       {/* Creative Floating Pill Navbar */}
