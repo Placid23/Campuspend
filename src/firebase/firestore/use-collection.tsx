@@ -42,6 +42,7 @@ export function useCollection<T = any>(
       return;
     }
 
+    // Stabilize by serializing the query state
     const currentKey = queryRef.toString();
     if (lastQueryKey.current === currentKey) return;
     lastQueryKey.current = currentKey;

@@ -37,7 +37,8 @@ import {
   UserCheck,
   ShieldCheck,
   ShieldAlert,
-  Plus
+  Plus,
+  AlertTriangle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
@@ -72,15 +73,14 @@ export default function ManageVendorsPage() {
     pickupLocation: "",
   })
 
-  const vendorsQuery = useMemoFirebase(() => {
-    return query(collection(db, "vendors"), orderBy("name", "asc"))
-  }, [db])
-
-  const { data: allVendors, isLoading } = useCollection(vendorsQuery)
+  // Stability: Fetch collection directly and handle sorting in memo
+  const vendorsQuery = useMemoFirebase(() => collection(db, "vendors"), [db])
+  const { data: allVendors, isLoading, error } = useCollection(vendorsQuery)
 
   const filteredVendors = React.useMemo(() => {
     if (!allVendors) return []
     let result = [...allVendors]
+    
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       result = result.filter(v => 
@@ -88,93 +88,87 @@ export default function ManageVendorsPage() {
         v.contactEmail?.toLowerCase().includes(q)
       )
     }
+    
     if (statusFilter !== 'all') {
       result = result.filter(v => (v.status || 'Active').toLowerCase() === statusFilter)
     }
-    return result
+    
+    return result.sort((a, b) => (a.name || "").localeCompare(b.name || ""))
   }, [allVendors, searchQuery, statusFilter])
 
   const handleAddVendor = async () => {
     if (!newVendorData.name || !newVendorData.email) return
     setIsSaving(true)
-    try {
-      // For the prototype, we create a Vendor profile. 
-      // In a real app, this would also trigger a Firebase Auth user creation via Admin SDK.
-      const vendorId = `VND-${Date.now()}`
-      const vendorRef = doc(db, "vendors", vendorId)
-      const profileRef = doc(db, "userProfiles", vendorId)
+    
+    const vendorId = `VND-${Date.now()}`
+    const vendorRef = doc(db, "vendors", vendorId)
+    const profileRef = doc(db, "userProfiles", vendorId)
 
-      const vendorDoc = {
-        id: vendorId,
-        userId: vendorId,
-        name: newVendorData.name,
-        contactEmail: newVendorData.email,
-        pickupLocation: newVendorData.pickupLocation,
-        status: "Active",
-        isVerified: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
-
-      const profileDoc = {
-        id: vendorId,
-        firebaseUid: vendorId,
-        name: newVendorData.name,
-        email: newVendorData.email,
-        role: "vendor",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
-
-      await setDoc(vendorRef, vendorDoc)
-      await setDoc(profileRef, profileDoc)
-
-      toast({ title: "Merchant Initialized", description: "New vendor profile created in registry." })
-      setIsAddDialogOpen(false)
-      setNewVendorData({ name: "", email: "", pickupLocation: "" })
-    } catch (error) {
-      toast({ variant: "destructive", title: "Registration Failed", description: "Could not initialize vendor account." })
-    } finally {
-      setIsSaving(false)
+    const vendorDoc = {
+      id: vendorId,
+      userId: vendorId,
+      name: newVendorData.name,
+      contactEmail: newVendorData.email,
+      pickupLocation: newVendorData.pickupLocation,
+      status: "Active",
+      isVerified: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     }
+
+    const profileDoc = {
+      id: vendorId,
+      firebaseUid: vendorId,
+      name: newVendorData.name,
+      email: newVendorData.email,
+      role: "vendor",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }
+
+    setDoc(vendorRef, vendorDoc)
+      .then(() => setDoc(profileRef, profileDoc))
+      .then(() => {
+        toast({ title: "Merchant Initialized", description: "New vendor profile created in registry." })
+        setIsAddDialogOpen(false)
+        setNewVendorData({ name: "", email: "", pickupLocation: "" })
+      })
+      .catch(() => toast({ variant: "destructive", title: "Registration Failed" }))
+      .finally(() => setIsSaving(false))
   }
 
   const handleToggleStatus = async (vendorId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Inactive' ? 'Active' : 'Inactive'
-    try {
-      await updateDoc(doc(db, "vendors", vendorId), {
-        status: newStatus,
-        updatedAt: serverTimestamp()
-      })
-      toast({ title: "Status Updated", description: `Vendor store is now ${newStatus}.` })
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to update vendor status." })
-    }
+    updateDoc(doc(db, "vendors", vendorId), {
+      status: newStatus,
+      updatedAt: serverTimestamp()
+    }).then(() => toast({ title: "Status Updated" }))
   }
 
   const handleToggleVerification = async (vendorId: string, currentVerified: boolean) => {
-    try {
-      await updateDoc(doc(db, "vendors", vendorId), {
-        isVerified: !currentVerified,
-        updatedAt: serverTimestamp()
-      })
-      toast({ 
-        title: !currentVerified ? "Vendor Verified" : "Verification Revoked", 
-        description: `Verification badge ${!currentVerified ? 'granted to' : 'removed from'} store.` 
-      })
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to update verification status." })
-    }
+    updateDoc(doc(db, "vendors", vendorId), {
+      isVerified: !currentVerified,
+      updatedAt: serverTimestamp()
+    }).then(() => toast({ title: "Verification Updated" }))
   }
 
   const handleDeleteVendor = async (vendorId: string) => {
-    try {
-      await deleteDoc(doc(db, "vendors", vendorId))
-      await deleteDoc(doc(db, "userProfiles", vendorId))
-      toast({ title: "Vendor Deleted", description: "Vendor records purged from infrastructure." })
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to delete vendor record." })
-    }
+    deleteDoc(doc(db, "vendors", vendorId))
+      .then(() => deleteDoc(doc(db, "userProfiles", vendorId)))
+      .then(() => toast({ title: "Vendor Deleted" }))
+  }
+
+  if (error) {
+    return (
+      <AdminShell>
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-4 text-center">
+          <AlertTriangle className="w-12 h-12 text-rose-500" />
+          <h2 className="text-xl font-bold">Failed to Load Registry</h2>
+          <p className="text-muted-foreground text-sm max-w-xs">{error.message}</p>
+          <Button onClick={() => window.location.reload()} variant="outline">Retry Sync</Button>
+        </div>
+      </AdminShell>
+    )
   }
 
   return (
