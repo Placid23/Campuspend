@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react'
@@ -9,7 +10,6 @@ import {
   BrainCircuit, 
   Sparkles, 
   AlertCircle, 
-  CheckCircle2, 
   Target,
   Lightbulb,
   GitBranch,
@@ -20,7 +20,9 @@ import {
   BarChart3,
   Scale,
   Zap,
-  ChevronDown
+  ChevronDown,
+  Database,
+  Network
 } from "lucide-react"
 import { spendingInsightFeedback, type SpendingInsightFeedbackOutput } from "@/ai/flows/spending-insight-feedback"
 import { Progress } from "@/components/ui/progress"
@@ -87,6 +89,8 @@ export default function InsightsPage() {
   return (
     <DashboardShell>
       <div className="space-y-12 max-w-5xl mx-auto">
+        
+        {/* Academic Header */}
         <div className="text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">
             <ShieldCheck className="w-3 h-3" /> CafePay AI Engine Active
@@ -94,7 +98,7 @@ export default function InsightsPage() {
           <div className="space-y-2">
             <h1 className="text-5xl font-headline font-bold text-white tracking-tight">Decision Tree <span className="text-primary neon-text-glow">Analysis</span></h1>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
-              Intelligent classification using Purchase-Based Logging (PBL) to map expenditure efficiency across academic periods.
+              Intelligent classification using <strong>Purchase-Based Logging (PBL)</strong> to map expenditure efficiency across academic periods.
             </p>
           </div>
           {!insight && (
@@ -116,6 +120,33 @@ export default function InsightsPage() {
             </div>
           )}
         </div>
+
+        {/* Methodology Schematic (Supervisors view) */}
+        {!insight && (
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
+              <GlassCard className="p-8 border-white/5 bg-white/5 space-y-4">
+                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                    <Database className="w-5 h-5" />
+                 </div>
+                 <h3 className="font-headline font-bold text-white">1. PBL Ingestion</h3>
+                 <p className="text-xs text-muted-foreground leading-relaxed">System captures raw Purchase-Based Logs from vendor transactions, ensuring 100% data fidelity for analysis.</p>
+              </GlassCard>
+              <GlassCard className="p-8 border-white/5 bg-white/5 space-y-4">
+                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+                    <Network className="w-5 h-5" />
+                 </div>
+                 <h3 className="font-headline font-bold text-white">2. Tree Traversal</h3>
+                 <p className="text-xs text-muted-foreground leading-relaxed">Data flows through Budget, Variance, and Frequency nodes to identify hidden "Financial Leakage" points.</p>
+              </GlassCard>
+              <GlassCard className="p-8 border-white/5 bg-white/5 space-y-4">
+                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                    <BrainCircuit className="w-5 h-5" />
+                 </div>
+                 <h3 className="font-headline font-bold text-white">3. Strategic Output</h3>
+                 <p className="text-xs text-muted-foreground leading-relaxed">The engine calculates an Essentiality Ratio and provides tactical suggestions to prune irrational spending.</p>
+              </GlassCard>
+           </div>
+        )}
 
         {insight && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom duration-1000">
@@ -231,7 +262,7 @@ export default function InsightsPage() {
                 </div>
               </GlassCard>
 
-              {/* Methodology Explainer */}
+              {/* Methodology Explainer (Supervisor Cheat Sheet) */}
               <GlassCard className="bg-white/5 border-white/10 p-8 space-y-6">
                 <button 
                   onClick={() => setShowLogic(!showLogic)}
@@ -239,7 +270,7 @@ export default function InsightsPage() {
                 >
                   <div className="flex items-center gap-3">
                     <HelpCircle className="w-5 h-5 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-widest">How this works?</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-widest">Scientific Basis</h3>
                   </div>
                   <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", showLogic && "rotate-180")} />
                 </button>
@@ -250,8 +281,8 @@ export default function InsightsPage() {
                        <div className="flex gap-3">
                           <BarChart3 className="w-4 h-4 text-primary shrink-0" />
                           <div className="space-y-1">
-                             <p className="text-[10px] font-bold uppercase text-white">Decision Tree Logic</p>
-                             <p className="text-xs text-muted-foreground leading-relaxed">We traverse your data through Budget, Variance, and Frequency nodes to find spending anomalies.</p>
+                             <p className="text-[10px] font-bold uppercase text-white">Decision Tree Protocol</p>
+                             <p className="text-xs text-muted-foreground leading-relaxed">Traverses spending nodes (Budget -> Variance -> Frequency) to detect behavioral anomalies.</p>
                           </div>
                        </div>
                        <div className="flex gap-3">
@@ -259,15 +290,15 @@ export default function InsightsPage() {
                           <div className="space-y-1">
                              <p className="text-[10px] font-bold uppercase text-white">Essentiality Formula</p>
                              <p className="text-xs text-muted-foreground leading-relaxed">
-                                (Survival Spending / Total Spending) × 100. Survival includes Food and Academic items.
+                                <strong>(Essential_Spend / Total_Spend) * 100</strong>. Essential spending is defined by Academic and Survival categories.
                              </p>
                           </div>
                        </div>
                        <div className="flex gap-3">
                           <Zap className="w-4 h-4 text-primary shrink-0" />
                           <div className="space-y-1">
-                             <p className="text-[10px] font-bold uppercase text-white">Leakage Detection</p>
-                             <p className="text-xs text-muted-foreground leading-relaxed">Identifies "High Frequency, Low Value" purchases that drain your wallet invisibly.</p>
+                             <p className="text-[10px] font-bold uppercase text-white">Leakage Algorithm</p>
+                             <p className="text-xs text-muted-foreground leading-relaxed">Identifies "micro-spending" patterns that cumulatively erode the student's monthly budget.</p>
                           </div>
                        </div>
                     </div>

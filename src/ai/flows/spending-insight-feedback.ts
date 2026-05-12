@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for providing Intelligent Financial Analysis using a Decision Tree model.
@@ -50,26 +51,26 @@ const spendingInsightFeedbackPrompt = ai.definePrompt({
   name: 'spendingInsightFeedbackPrompt',
   input: {schema: SpendingInsightFeedbackInputSchema},
   output: {schema: SpendingInsightFeedbackOutputSchema},
-  prompt: `You are the CampusSpend Intelligent Engine. Your goal is to apply a Decision Tree Analysis to the following Purchase-Based Logging (PBL) data.
+  prompt: `You are the CafePay Intelligent Engine. Your goal is to apply a Decision Tree Analysis to the following Purchase-Based Logging (PBL) data for academic expenditure tracking.
 
 LOGICAL DECISION TREE STEPS:
-1. BUDGET NODE: Is total spending > budget? 
-2. VARIANCE NODE: Which categories show >15% variance from allocation?
-3. FREQUENCY NODE: Is there a pattern of daily high-frequency low-value purchases (leakage)?
-4. CLASSIFICATION NODE: Classify purchases as 'Survival' (Food/Books) or 'Lifestyle' (Entertainment).
+1. BUDGET NODE: Is total spending > student budget? 
+2. VARIANCE NODE: Which specific categories (Food, Stationery, etc) show >15% variance from their planned allocation?
+3. FREQUENCY NODE: Is there a pattern of daily high-frequency low-value purchases? These are identified as "Financial Leakage".
+4. CLASSIFICATION NODE: Classify the final leaf state as 'Survival' (Essential Food/Academic items) or 'Lifestyle' (Entertainment/Irrational spending).
 
 Input Data:
 Total Budget: {{totalBudget}}
 Allocations: {{{json categoryBudgets}}}
 Transaction Logs: {{{json spendingRecords}}}
 
-Based on this Decision Tree, provide:
-1. 'decisionTreePath': A summary of the logic used (e.g., 'Over-Budget -> Food Variance -> High Frequency Leakage').
-2. 'classification': Essentiality ratio and specific 'leakagePoints' where spending was irrational.
-3. 'overallFeedback': The final leaf node classification.
-4. 'suggestions': Strategic interventions to prune spending.
+Based on this Decision Tree traversal, provide:
+1. 'decisionTreePath': A summary string of the logical path (e.g., 'Over-Budget -> Food Variance -> High Frequency Leakage').
+2. 'classification': The mathematical Essentiality ratio and a list of specific 'leakagePoints' where spending was irrational.
+3. 'overallFeedback': The final leaf node classification (Excellent, Warning, or Overspending).
+4. 'suggestions': Tactical interventions to "prune" the decision tree and improve financial health.
 
-Strictly return valid JSON.`,
+Return strictly valid JSON.`,
 });
 
 const spendingInsightFeedbackFlow = ai.defineFlow(
