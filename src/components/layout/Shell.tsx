@@ -127,8 +127,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return null
   }
 
-  // 4. Handle Missing Index Error gracefully for students
-  if (queryError?.message?.includes('requires an index')) {
+  // 4. Enhanced Index Error Detection
+  const hasIndexError = queryError?.message?.toLowerCase().includes('index') || queryError?.code === 'failed-precondition'
+
+  if (hasIndexError) {
     return (
       <div className="min-h-screen nebula-bg flex items-center justify-center p-6 text-center">
         <div className="max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
@@ -149,7 +151,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               Activate Student Index
             </a>
           </Button>
-          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-50">This is separate from the vendor index you already created.</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-50">This enables the Intelligent Expenditure Tracker.</p>
         </div>
       </div>
     )
@@ -228,13 +230,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </div>
 
               <div className="ml-auto flex items-center gap-3 shrink-0 min-w-0">
-                <div className="h-10 md:h-12 px-3 md:px-5 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group max-w-[120px] sm:max-w-none">
+                <div className="h-10 md:h-12 px-3 md:px-5 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group max-w-[150px] sm:max-w-none">
                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                    <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest relative hidden sm:inline">Balance</span>
                    <div className="flex items-center gap-1 min-w-0">
                      <span className="text-[10px] md:text-sm font-bold text-primary shrink-0">₦</span>
                      <span className="text-sm md:text-xl font-headline font-bold text-primary relative truncate">
-                       {profile?.walletBalance?.toLocaleString() || '0'}
+                       {profile?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                      </span>
                    </div>
                 </div>

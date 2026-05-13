@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -149,7 +148,6 @@ export default function DashboardPage() {
               operation: 'update',
               requestResourceData: updateData
             }))
-            toast({ variant: "destructive", title: "Wallet Sync Failed", description: "Payment was successful but wallet failed to sync. Please contact support." })
           })
       },
       onClose: function() {
@@ -190,7 +188,9 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <span className="text-xs text-muted-foreground mr-2 font-bold">₦</span>
-                    <span className="text-4xl font-headline font-bold text-white tracking-tight">{profile?.walletBalance?.toLocaleString() || '0'}</span>
+                    <span className="text-4xl font-headline font-bold text-white tracking-tight">
+                      {profile?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                    </span>
                   </div>
                   <Dialog open={isTopUpOpen} onOpenChange={(val) => { if(!isProcessing) setIsTopUpOpen(val); if(!val) setPaymentStep('input'); }}>
                     <DialogTrigger asChild><Button variant="outline" className="rounded-xl border-primary/30 text-primary h-12 px-6 font-bold hover:bg-primary/10 transition-all"><Plus className="w-4 h-4 mr-2" /> Top Up</Button></DialogTrigger>
@@ -301,7 +301,7 @@ export default function DashboardPage() {
             <GlassCard className="p-6 border-white/5 relative overflow-hidden bg-black/20">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Daily Threshold</h3>
-                <div className="text-right"><span className="text-sm font-bold text-white">₦{todaySpending.toLocaleString()}</span></div>
+                <div className="text-right"><span className="text-sm font-bold text-white">₦{todaySpending.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span></div>
               </div>
               <Progress value={Math.min((todaySpending / dailyLimit) * 100, 100)} className={cn("h-2 bg-white/5", todaySpending > dailyLimit ? "[&>div]:bg-rose-500" : "[&>div]:bg-emerald-500")} />
               <div className="flex justify-between items-center pt-3">
@@ -322,7 +322,7 @@ export default function DashboardPage() {
                         <p className="text-[8px] text-muted-foreground uppercase tracking-widest">{format(new Date(exp.expenseDate), 'MMM d, p')}</p>
                       </div>
                     </div>
-                    <p className="text-xs font-bold text-primary">₦{exp.amount.toLocaleString()}</p>
+                    <p className="text-xs font-bold text-primary">₦{exp.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                   </div>
                 ))}
                 {(!expenses || expenses.length === 0) && (
