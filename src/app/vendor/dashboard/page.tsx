@@ -14,7 +14,8 @@ import {
   Clock,
   AlertTriangle,
   ArrowUpRight,
-  Package
+  Package,
+  Database
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -40,8 +41,8 @@ export default function VendorDashboardPage() {
     )
   }, [db, user?.uid])
 
-  const { data: products } = useCollection(productsQuery)
-  const { data: orderItems, error: queryError } = useCollection(itemsQuery)
+  const { data: products, isLoading: productsLoading } = useCollection(productsQuery)
+  const { data: orderItems, error: queryError, isLoading: itemsLoading } = useCollection(itemsQuery)
 
   const totalSales = React.useMemo(() => {
     return orderItems?.reduce((sum, item) => sum + (item.subtotal || 0), 0) || 0
@@ -49,35 +50,41 @@ export default function VendorDashboardPage() {
 
   const pendingCount = orderItems?.filter(i => !i.status || i.status === 'placed' || i.status === 'preparing').length || 0
 
-  if (isProfileLoading || !user) {
+  // Standard Index Required Handler
+  if (queryError?.message?.includes('requires an index')) {
     return (
       <VendorShell>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8 text-center max-w-lg mx-auto p-6 animate-in fade-in zoom-in duration-500">
+          <div className="relative">
+            <div className="absolute -inset-4 bg-amber-500/20 blur-2xl rounded-full opacity-50 animate-pulse"></div>
+            <div className="w-24 h-24 rounded-3xl bg-amber-500/10 flex items-center justify-center border-2 border-amber-500/30 relative z-10">
+              <Database className="w-12 h-12 text-amber-500" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-3xl font-headline font-bold text-white tracking-tight">System Activation Required</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              To track your merchant sales in real-time, the <strong>CafePay Intelligent Engine</strong> requires a cross-collection index. This is a one-time setup step for your project.
+            </p>
+          </div>
+          <div className="w-full space-y-4 pt-4">
+            <Button asChild className="w-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold h-16 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all">
+              <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
+                <TrendingUp className="mr-2 w-5 h-5" /> Execute Index Setup
+              </a>
+            </Button>
+            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-[0.2em] opacity-60">Estimated activation time: 90 seconds</p>
+          </div>
         </div>
       </VendorShell>
     )
   }
 
-  // Handle Missing Index Error locally for clarity if it occurs here
-  if (queryError?.message?.includes('requires an index')) {
+  if (isProfileLoading || itemsLoading || productsLoading) {
     return (
       <VendorShell>
-        <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 text-center max-w-md mx-auto">
-          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-            <AlertTriangle className="w-10 h-10 text-amber-500" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-headline font-bold text-white">Action Required</h2>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              We need to enable cross-collection indexing to track your sales.
-            </p>
-          </div>
-          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-12 px-8 rounded-xl">
-            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
-              Create vendorOwnerId Index
-            </a>
-          </Button>
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
         </div>
       </VendorShell>
     )
@@ -159,7 +166,7 @@ export default function VendorDashboardPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">₦{item.subtotal.toLocaleString()}</p>
+                    <p className="text-sm font-bold">₦{item.subtotal?.toLocaleString()}</p>
                     <p className="text-[10px] text-muted-foreground">{item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
                   </div>
                 </div>

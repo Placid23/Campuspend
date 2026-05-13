@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Bell,
   Menu,
-  AlertTriangle
+  AlertTriangle,
+  Database
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -57,7 +58,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { toast } = useToast()
   const { user, isUserLoading, profile, isProfileLoading } = useUser()
 
-  // 1. Stable Index Query
+  // 1. Stable Index Query for Order Status Notifications
   const itemsQuery = useMemoFirebase(() => {
     if (!user?.uid) return null
     return query(
@@ -70,7 +71,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const statusCache = React.useRef<Record<string, string>>({})
   const isFirstLoad = React.useRef(true)
 
-  // 2. Status Notifications
+  // 2. Real-time Status Notification Logic
   React.useEffect(() => {
     if (!orderItems || !profile?.settings?.notifications?.transactions) return
 
@@ -96,7 +97,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     })
   }, [orderItems, profile, toast])
 
-  // 3. Guards
+  // 3. Security Guards
   React.useEffect(() => {
     if (!isUserLoading && !isProfileLoading) {
       if (!user) {
@@ -125,26 +126,29 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return null
   }
 
-  // 4. Handle Missing Index Error gracefully
+  // 4. Handle Missing Index Error gracefully for students
   if (queryError?.message?.includes('requires an index')) {
     return (
       <div className="min-h-screen nebula-bg flex items-center justify-center p-6 text-center">
-        <div className="max-w-md space-y-6 animate-in fade-in zoom-in duration-500">
-          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20 mx-auto shadow-[0_0_50px_rgba(245,158,11,0.2)]">
-            <AlertTriangle className="w-10 h-10 text-amber-500" />
+        <div className="max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
+          <div className="relative mx-auto w-24 h-24">
+             <div className="absolute -inset-4 bg-amber-500/20 blur-2xl rounded-full opacity-50 animate-pulse"></div>
+             <div className="w-24 h-24 rounded-3xl bg-amber-500/10 flex items-center justify-center border-2 border-amber-500/30 relative z-10">
+               <Database className="w-10 h-10 text-amber-500" />
+             </div>
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-headline font-bold text-white">Action Required: Enable Index</h2>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-headline font-bold text-white">System Optimization Required</h2>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              To track your order status in real-time, a cross-collection index is required for your project.
+              To enable real-time order status tracking, we need to activate a cross-collection index in your project's database.
             </p>
           </div>
-          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-12 px-8 rounded-xl w-full">
+          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-extrabold h-14 px-8 rounded-2xl w-full shadow-lg transition-all">
             <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cltwcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvc3R1ZGVudElkEAIaDQoJc3R1ZGVudElkEAE" target="_blank" rel="noopener noreferrer">
-              Create studentId Index
+              Activate Tracking Index
             </a>
           </Button>
-          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-50">Estimated setup time: 1 minute</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-50">One-time setup • Takes ~2 minutes</p>
         </div>
       </div>
     )
@@ -223,7 +227,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </div>
 
               <div className="ml-auto flex items-center gap-3 shrink-0 min-w-0">
-                <div className="h-10 md:h-12 px-3 md:px-6 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group max-w-[150px] md:max-w-none">
+                <div className="h-10 md:h-12 px-3 md:px-5 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group max-w-[120px] sm:max-w-none">
                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                    <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest relative hidden sm:inline">Balance</span>
                    <div className="flex items-center gap-1 min-w-0">
