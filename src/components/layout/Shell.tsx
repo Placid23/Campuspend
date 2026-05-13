@@ -138,17 +138,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
              </div>
           </div>
           <div className="space-y-3">
-            <h2 className="text-2xl font-headline font-bold text-white">System Optimization Required</h2>
+            <h2 className="text-2xl font-headline font-bold text-white uppercase tracking-tight">Student Index Required</h2>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              To enable real-time order status tracking, we need to activate a cross-collection index in your project's database.
+              To enable real-time order tracking, we need to activate a collection group index for the <strong className="text-white">studentId</strong> field.
             </p>
           </div>
           <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-extrabold h-14 px-8 rounded-2xl w-full shadow-lg transition-all">
             <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cltwcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvc3R1ZGVudElkEAIaDQoJc3R1ZGVudElkEAE" target="_blank" rel="noopener noreferrer">
-              Activate Tracking Index
+              Activate Student Index
             </a>
           </Button>
-          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-50">One-time setup • Takes ~2 minutes</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-50">This is separate from the vendor index you already created.</p>
         </div>
       </div>
     )
@@ -255,7 +255,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               { icon: Store, label: "Market", href: "/vendors" },
               { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
               { icon: CreditCard, label: "Expend", href: "/calendar" },
-              { icon: ShoppingCart, label: "Tray", href: "/cart" },
+              { icon: ShoppingBag, label: "Tray", href: "/cart" },
             ].map((item) => (
               <Link 
                 key={item.href} 

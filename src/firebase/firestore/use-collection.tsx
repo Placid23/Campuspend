@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -59,8 +58,9 @@ export function useCollection<T = any>(
       (err: FirestoreError) => {
         if (!isMounted.current) return;
         
+        // Log errors except for standard permission/index ones which are handled by UI
         if (err.code !== 'permission-denied' && !err.message.includes('requires an index')) {
-          console.warn("Firestore Listener Error:", err.message);
+          console.error("Firestore Listener Error:", err);
         }
         
         setError(err);
@@ -73,7 +73,7 @@ export function useCollection<T = any>(
       isMounted.current = false;
       unsubscribe();
     };
-  }, [queryRef]);
+  }, [queryRef]); // Stable queryRef via useMemoFirebase is critical here
 
   return { data, isLoading, error };
 }
