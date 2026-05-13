@@ -21,10 +21,12 @@ import {
   Clock,
   Play,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Database,
+  TrendingUp
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { collectionGroup, query, where, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collectionGroup, query, where, doc, updateDoc, serverTimestamp, limit } from 'firebase/firestore'
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase'
 import { format } from 'date-fns'
 import { useToast } from "@/hooks/use-toast"
@@ -34,12 +36,13 @@ export default function VendorOrdersPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  // 1. Hooks first
+  // 1. Hooks first - Merchant Specific Items
   const itemsQuery = useMemoFirebase(() => {
     if (!user?.uid) return null
     return query(
       collectionGroup(db, "orderItems"),
-      where("vendorOwnerId", "==", user.uid)
+      where("vendorOwnerId", "==", user.uid),
+      limit(50)
     )
   }, [db, user?.uid])
 
@@ -59,11 +62,6 @@ export default function VendorOrdersPage() {
       })
     } catch (error) {
       console.error("Failed to update status", error)
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "Could not update order status.",
-      })
     }
   }
 
@@ -76,36 +74,41 @@ export default function VendorOrdersPage() {
     }
   }
 
-  // 3. Early return
-  if (isProfileLoading || !user) {
+  // 3. Error Guard (Catching missing indexes immediately)
+  const hasIndexError = queryError?.message?.toLowerCase().includes('index') || queryError?.code === 'failed-precondition'
+
+  if (hasIndexError) {
     return (
       <VendorShell>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6 text-center max-w-md mx-auto p-6">
+          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <Database className="w-10 h-10 text-amber-500" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-headline font-bold text-white uppercase tracking-tight">Orders Index Required</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              To manage your orders across the platform, a collection group index for <strong className="text-white">vendorOwnerId</strong> is required.
+            </p>
+          </div>
+          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-14 px-8 rounded-2xl w-full shadow-lg">
+            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
+              <TrendingUp className="mr-2 w-4 h-4" /> Activate Orders Tracker
+            </a>
+          </Button>
         </div>
       </VendorShell>
     )
   }
 
-  // Handle Missing Index Error
-  if (queryError?.message?.includes('requires an index')) {
+  // 4. Loading Guard
+  if (isProfileLoading || isLoading) {
     return (
       <VendorShell>
-        <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 text-center max-w-md mx-auto">
-          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-            <AlertTriangle className="w-10 h-10 text-amber-500" />
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="flex flex-col items-center gap-6">
+            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground">Retrieving Active Orders...</p>
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-headline font-bold text-white">Index Setup Required</h2>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              We need to enable cross-collection indexing to track your sales across student orders.
-            </p>
-          </div>
-          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-12 px-8 rounded-xl">
-            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
-              Click Here to Create Index
-            </a>
-          </Button>
         </div>
       </VendorShell>
     )
@@ -129,12 +132,7 @@ export default function VendorOrdersPage() {
             </div>
 
             <GlassCard className="p-0 border-white/10 bg-white/5 backdrop-blur-3xl overflow-hidden min-h-[400px]">
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-40 gap-4">
-                  <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Syncing Merchant Data...</p>
-                </div>
-              ) : orderItems && orderItems.length > 0 ? (
+              {orderItems && orderItems.length > 0 ? (
                 <Table>
                   <TableHeader className="bg-white/5">
                     <TableRow className="border-white/5 hover:bg-transparent">
@@ -153,8 +151,8 @@ export default function VendorOrdersPage() {
                           <TableCell className="pl-8 py-6">
                             <div className="space-y-0.5">
                               <p className="text-sm font-bold text-white">{item.name}</p>
-                              <p className="text-[10px] text-muted-foreground">
-                                {item.createdAt ? format(new Date(item.createdAt), 'MMM d, h:mm a') : 'N/A'}
+                              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                                PBL NODE: {item.id.substring(0, 8)}
                               </p>
                             </div>
                           </TableCell>

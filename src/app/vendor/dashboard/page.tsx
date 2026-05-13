@@ -26,18 +26,20 @@ export default function VendorDashboardPage() {
   const { user, profile, isProfileLoading } = useUser()
   const db = useFirestore()
 
+  // 1. Fetch Merchant Products
   const productsQuery = useMemoFirebase(() => {
     if (!user?.uid) return null
     return query(collection(db, "products"), where("vendorOwnerId", "==", user.uid), limit(50))
   }, [db, user?.uid])
 
+  // 2. Fetch Merchant Sales (Collection Group)
+  // Simplified query to reduce index friction
   const itemsQuery = useMemoFirebase(() => {
     if (!user?.uid) return null
     return query(
       collectionGroup(db, "orderItems"), 
       where("vendorOwnerId", "==", user.uid),
-      orderBy("createdAt", "desc"),
-      limit(10)
+      limit(20)
     )
   }, [db, user?.uid])
 
@@ -50,8 +52,10 @@ export default function VendorDashboardPage() {
 
   const pendingCount = orderItems?.filter(i => !i.status || i.status === 'placed' || i.status === 'preparing').length || 0
 
-  // Standard Index Required Handler
-  if (queryError?.message?.includes('requires an index')) {
+  // 3. Robust Error Handling (Before Loading Spinner)
+  const hasIndexError = queryError?.message?.toLowerCase().includes('index') || queryError?.code === 'failed-precondition'
+
+  if (hasIndexError) {
     return (
       <VendorShell>
         <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8 text-center max-w-lg mx-auto p-6 animate-in fade-in zoom-in duration-500">
@@ -80,11 +84,15 @@ export default function VendorDashboardPage() {
     )
   }
 
+  // 4. Loading State
   if (isProfileLoading || itemsLoading || productsLoading) {
     return (
       <VendorShell>
         <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <div className="flex flex-col items-center gap-6">
+             <Loader2 className="w-12 h-12 text-primary animate-spin" />
+             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground animate-pulse">Syncing Merchant HQ...</p>
+          </div>
         </div>
       </VendorShell>
     )
@@ -167,7 +175,6 @@ export default function VendorDashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold">₦{item.subtotal?.toLocaleString()}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
                   </div>
                 </div>
               ))}

@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -21,7 +20,8 @@ import {
   PenTool,
   Loader2,
   ShoppingBag,
-  AlertTriangle
+  AlertTriangle,
+  Database
 } from "lucide-react"
 import { 
   BarChart, 
@@ -39,11 +39,11 @@ import {
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useFirestore, useUser, useCollection, useMemoFirebase } from "@/firebase"
-import { collectionGroup, query, where, orderBy } from 'firebase/firestore'
+import { collectionGroup, query, where, orderBy, limit } from 'firebase/firestore'
 import { format, subDays, startOfDay } from 'date-fns'
 
 export default function SalesSummaryPage() {
-  const { user } = useUser()
+  const { user, isProfileLoading } = useUser()
   const db = useFirestore()
 
   // 1. Fetch live order items for this vendor
@@ -52,7 +52,7 @@ export default function SalesSummaryPage() {
     return query(
       collectionGroup(db, "orderItems"),
       where("vendorOwnerId", "==", user.uid),
-      orderBy("createdAt", "desc")
+      limit(100)
     )
   }, [db, user?.uid])
 
@@ -70,7 +70,7 @@ export default function SalesSummaryPage() {
       total += item.subtotal || 0
       
       // Daily aggregation
-      const date = item.createdAt ? format(new Date(item.createdAt), 'MMM d') : 'N/A'
+      const date = item.createdAt ? format(new Date(item.createdAt), 'MMM d') : 'Today'
       if (!dailyMap[date]) dailyMap[date] = { name: date, sales: 0, orders: 0 }
       dailyMap[date].sales += item.subtotal || 0
       dailyMap[date].orders += 1
@@ -81,35 +81,48 @@ export default function SalesSummaryPage() {
       productMap[item.productId].count += item.quantity || 1
     })
 
-    const chart = Object.values(dailyMap).reverse().slice(-14)
+    const chart = Object.values(dailyMap).slice(-14)
     const top = Object.values(productMap)
       .sort((a, b) => b.sales - a.sales)
       .slice(0, 5)
-      .map(p => ({ ...p, percentage: ((p.sales / total) * 100).toFixed(1) + "%" }))
+      .map(p => ({ ...p, percentage: ((p.sales / (total || 1)) * 100).toFixed(1) + "%" }))
 
     return { total, count: orderItems.length, avg: total / (orderItems.length || 1), chart, top }
   }, [orderItems])
 
-  if (isLoading) {
+  // 3. Robust Error Catching
+  const hasIndexError = queryError?.message?.toLowerCase().includes('index') || queryError?.code === 'failed-precondition'
+
+  if (hasIndexError) {
     return (
       <VendorShell>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6 text-center max-w-md mx-auto p-6">
+          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <Database className="w-10 h-10 text-amber-500" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-headline font-bold text-white uppercase tracking-tight">Sales Analytics Activation</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Real-time sales analytics require a <strong>vendorOwnerId</strong> cross-collection index to be active in your database.
+            </p>
+          </div>
+          <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-14 px-8 rounded-2xl w-full shadow-lg">
+            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
+              Activate Analytics Engine
+            </a>
+          </Button>
         </div>
       </VendorShell>
     )
   }
 
-  if (queryError?.message?.includes('requires an index')) {
+  if (isProfileLoading || isLoading) {
     return (
       <VendorShell>
-        <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 text-center max-w-md mx-auto">
-          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-            <AlertTriangle className="w-10 h-10 text-amber-500" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-headline font-bold text-white">Index Required</h2>
-            <p className="text-muted-foreground text-sm">Please enable the Firestore index to view live sales analytics.</p>
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="flex flex-col items-center gap-6">
+            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground animate-pulse">Processing Sales Data...</p>
           </div>
         </div>
       </VendorShell>
@@ -178,7 +191,7 @@ export default function SalesSummaryPage() {
                        </div>
                        <div className="flex-1 min-w-0">
                           <h4 className="text-base font-bold text-white">{item.name}</h4>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">{item.createdAt ? format(new Date(item.createdAt), 'MMM d, h:mm a') : 'N/A'}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">TRANSACTION LOGGED</p>
                        </div>
                        <div className="text-right">
                           <p className="text-lg font-bold text-primary">₦{item.subtotal?.toLocaleString()}</p>
@@ -205,6 +218,9 @@ export default function SalesSummaryPage() {
                     <div className="text-sm font-bold text-white">{product.percentage}</div>
                   </div>
                 ))}
+                {stats.top.length === 0 && (
+                   <p className="text-xs text-muted-foreground italic">No sales recorded yet.</p>
+                )}
               </div>
             </GlassCard>
           </div>
