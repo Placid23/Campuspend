@@ -42,7 +42,8 @@ export function useCollection<T = any>(
     }
 
     // Stabilize query key to prevent re-subscriptions on identical logic
-    const currentKey = JSON.stringify((queryRef as any)._query || queryRef.toString());
+    // Using string representation as a fingerprint
+    const currentKey = queryRef.toString();
     if (currentKey === lastQueryKey.current) return;
     lastQueryKey.current = currentKey;
 
