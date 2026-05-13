@@ -16,8 +16,8 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { doc, setDoc, updateDoc, collection } from 'firebase/firestore'
-import { useFirestore, useUser, errorEmitter, FirestorePermissionError } from '@/firebase'
+import { doc, collection } from 'firebase/firestore'
+import { useFirestore, useUser, setDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase'
 import { useToast } from "@/hooks/use-toast"
 
 export default function CartPage() {
@@ -52,7 +52,7 @@ export default function CartPage() {
   const deliveryFee = 10.00
   const total = subtotal + tax + deliveryFee
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!user || !profile) return
     if (cart.length === 0) return
 
@@ -71,9 +71,9 @@ export default function CartPage() {
     const studentId = user.uid
     const now = new Date().toISOString()
 
-    // 1. Prepare Parent Order Document
+    // 1. Log Parent Order (Non-blocking)
     const orderRef = doc(db, "users", studentId, "orders", orderId)
-    const orderData = {
+    setDocumentNonBlocking(orderRef, {
       id: orderId,
       studentId,
       orderDate: now,
@@ -82,37 +82,27 @@ export default function CartPage() {
       itemCount: cart.length,
       createdAt: now,
       updatedAt: now
-    }
+    }, { merge: true })
 
-    // 2. Prepare Expense Document
+    // 2. Log Expense (Non-blocking)
     const expenseId = `EXP-${Date.now()}`
     const expenseRef = doc(db, "users", studentId, "expenses", expenseId)
-    const expenseData = {
+    setDocumentNonBlocking(expenseRef, {
       id: expenseId,
       studentId,
       orderId,
       amount: total,
       expenseDate: now,
-      description: `Purchase of ${cart.length} items`,
+      description: `Order #${orderId.substring(4)} from Campus Vendors`,
       categoryId: cart[0]?.category || "general",
       createdAt: now,
       updatedAt: now
-    }
+    }, { merge: true })
 
-    // 3. Initiate Non-blocking writes
-    // DO NOT await mutation calls to avoid UI blocking and 10s timeouts
-    setDoc(orderRef, orderData).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: orderRef.path,
-        operation: 'create',
-        requestResourceData: orderData
-      }));
-    });
-    
-    // Process items in parallel
+    // 3. Log Items (Non-blocking)
     cart.forEach(item => {
       const itemRef = doc(collection(db, "users", studentId, "orders", orderId, "orderItems"))
-      const itemData = {
+      setDocumentNonBlocking(itemRef, {
         id: itemRef.id,
         orderId,
         studentId,
@@ -125,46 +115,24 @@ export default function CartPage() {
         status: "placed",
         createdAt: now,
         updatedAt: now
-      }
-      setDoc(itemRef, itemData).catch(err => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: itemRef.path,
-          operation: 'create',
-          requestResourceData: itemData
-        }));
-      });
-    });
+      }, { merge: true })
+    })
 
-    setDoc(expenseRef, expenseData).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: expenseRef.path,
-        operation: 'create',
-        requestResourceData: expenseData
-      }));
-    });
-
+    // 4. Update Wallet (Non-blocking)
     const profileRef = doc(db, "userProfiles", studentId)
-    const profileUpdate = { 
+    updateDocumentNonBlocking(profileRef, { 
       walletBalance: profile.walletBalance - total,
       updatedAt: now
-    }
-    updateDoc(profileRef, profileUpdate).catch(err => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: profileRef.path,
-        operation: 'update',
-        requestResourceData: profileUpdate
-      }));
-    });
+    })
 
-    // Proceed to success screen optimistically
+    // 5. Success Path (Immediate / Optimistic)
     localStorage.removeItem('campus-spend-cart')
-    toast({ title: "Order Placed!", description: "Funds deducted from your wallet." })
+    toast({ title: "Order Synchronized", description: "Transaction logged in the PBL engine." })
     
-    // Artificial delay for visual transition feedback
     setTimeout(() => {
       router.push("/checkout")
       setIsProcessing(false)
-    }, 800)
+    }, 1000)
   }
 
   return (

@@ -25,8 +25,8 @@ import {
   Database,
   Info
 } from "lucide-react"
-import { useFirestore, useUser } from "@/firebase"
-import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore"
+import { useFirestore, useUser, setDocumentNonBlocking } from "@/firebase"
+import { collection, doc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 
@@ -39,7 +39,7 @@ interface ParsedProduct {
 }
 
 export default function BulkImportPage() {
-  const { user } = useUser()
+  const { user } = userUser()
   const db = useFirestore()
   const { toast } = useToast()
   const router = useRouter()
@@ -71,14 +71,15 @@ export default function BulkImportPage() {
     }
   }
 
-  const handleSyncToCloud = async () => {
+  const handleSyncToCloud = () => {
     if (!user || parsedData.length === 0) return
     setIsProcessing(true)
     
     try {
-      const syncPromises = parsedData.map(product => {
+      // Execute non-blocking writes for each product
+      parsedData.forEach(product => {
         const productRef = doc(collection(db, "products"))
-        return setDoc(productRef, {
+        setDocumentNonBlocking(productRef, {
           ...product,
           id: productRef.id,
           vendorOwnerId: user.uid,
@@ -86,15 +87,17 @@ export default function BulkImportPage() {
           imageUrl: `https://picsum.photos/seed/${productRef.id}/600/600`,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
-        })
+        }, { merge: true })
       })
 
-      await Promise.all(syncPromises)
-      toast({ title: "Ingestion Complete", description: "Catalog has been updated in the global marketplace." })
-      router.push("/vendor/manage")
+      // Optimistic Success
+      toast({ title: "Ingestion Initialized", description: "Catalog is synchronizing in the background." })
+      
+      setTimeout(() => {
+        router.push("/vendor/manage")
+      }, 1000)
     } catch (err) {
       toast({ variant: "destructive", title: "Sync Failed" })
-    } finally {
       setIsProcessing(false)
     }
   }
