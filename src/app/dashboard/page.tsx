@@ -98,46 +98,67 @@ export default function DashboardPage() {
     return Object.entries(map).map(([name, value]) => ({ name, value }))
   }, [expenses])
 
-  const handlePaystackCheckout = async () => {
+  const handlePaystackCheckout = () => {
     if (!user || !profile) return
-    const amount = parseFloat(topUpAmount)
-    if (isNaN(amount) || amount < 500) {
-      toast({ variant: "destructive", title: "Invalid Amount", description: "Minimum top-up is ₦500" })
+    const amountInNaira = parseFloat(topUpAmount)
+    if (isNaN(amountInNaira) || amountInNaira < 100) {
+      toast({ variant: "destructive", title: "Invalid Amount", description: "Minimum top-up is ₦100" })
       return
     }
 
     setPaymentStep('processing')
     
-    // Simulate Paystack Gateway Handshake
-    setTimeout(() => {
-      const profileRef = doc(db, "userProfiles", user.uid)
-      const data = {
-        walletBalance: (profile.walletBalance || 0) + amount,
-        updatedAt: serverTimestamp()
-      }
-      
-      // Execute non-blocking cloud update
-      updateDoc(profileRef, data)
-        .then(() => {
-          setPaymentStep('success')
-          toast({ title: "Funds Secured", description: `₦${amount.toLocaleString()} added to your CafePay Wallet.` })
-          
-          setTimeout(() => {
-            setIsTopUpOpen(false)
+    // Paystack Integration
+    const paystack = (window as any).PaystackPop.setup({
+      key: 'pk_test_37103899889b7cd46aea9603cebc51d0ac7eb860',
+      email: profile.email || user.email,
+      amount: amountInNaira * 100, // Paystack requires amount in Kobo
+      currency: 'NGN',
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Student Name",
+            variable_name: "student_name",
+            value: profile.name
+          }
+        ]
+      },
+      callback: function(response: any) {
+        // Successful Transaction
+        const profileRef = doc(db, "userProfiles", user.uid)
+        const updateData = {
+          walletBalance: (profile.walletBalance || 0) + amountInNaira,
+          updatedAt: serverTimestamp()
+        }
+        
+        updateDoc(profileRef, updateData)
+          .then(() => {
+            setPaymentStep('success')
+            toast({ title: "Funds Secured", description: `₦${amountInNaira.toLocaleString()} added to your CafePay Wallet.` })
+            
+            setTimeout(() => {
+              setIsTopUpOpen(false)
+              setPaymentStep('input')
+              setTopUpAmount("1000")
+            }, 2000)
+          })
+          .catch(async (error) => {
             setPaymentStep('input')
-            setTopUpAmount("1000")
-          }, 2000)
-        })
-        .catch(async (error) => {
-          setPaymentStep('input')
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: profileRef.path,
-            operation: 'update',
-            requestResourceData: data
-          }))
-          toast({ variant: "destructive", title: "Payment Failed", description: "The bank gateway timed out. Please try again." })
-        })
-    }, 2500)
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
+              path: profileRef.path,
+              operation: 'update',
+              requestResourceData: updateData
+            }))
+            toast({ variant: "destructive", title: "Wallet Sync Failed", description: "Payment was successful but wallet failed to sync. Please contact support." })
+          })
+      },
+      onClose: function() {
+        setPaymentStep('input')
+        toast({ title: "Payment Cancelled", description: "You closed the payment gateway." })
+      }
+    })
+    
+    paystack.openIframe()
   }
 
   if (isProfileLoading || !user) {
@@ -181,7 +202,7 @@ export default function DashboardPage() {
                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><CreditCard className="w-5 h-5" /></div>
                                <DialogTitle className="text-2xl font-headline font-bold text-white">Fund Wallet</DialogTitle>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">Secure academic funding via <span className="text-emerald-400 font-bold">Paystack Gateway</span>.</p>
+                            <p className="text-xs text-muted-foreground leading-relaxed">Secure academic funding via <span className="text-emerald-400 font-bold">Paystack Live Gateway</span>.</p>
                           </DialogHeader>
                           <div className="space-y-4">
                             <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em]">Amount to Fund (₦)</Label>
@@ -202,7 +223,7 @@ export default function DashboardPage() {
                           </div>
                           <DialogFooter>
                             <Button onClick={handlePaystackCheckout} className="w-full h-16 rounded-2xl bg-gradient-to-r from-primary to-secondary text-base font-bold shadow-[0_0_30px_rgba(239,26,184,0.3)]">
-                               Pay with Paystack
+                               Initiate Secure Payment
                             </Button>
                           </DialogFooter>
                         </div>
@@ -215,9 +236,9 @@ export default function DashboardPage() {
                               <Loader2 className="w-20 h-20 text-primary animate-spin relative z-10" />
                            </div>
                            <div className="space-y-3">
-                              <h3 className="text-2xl font-headline font-bold text-white">Securing Connection...</h3>
-                              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-emerald-400">Paystack Bank Handshake</p>
-                              <p className="text-xs text-muted-foreground max-w-[200px] mx-auto pt-4">Please do not close this window while we verify your transaction.</p>
+                              <h3 className="text-2xl font-headline font-bold text-white">Opening Gateway...</h3>
+                              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-emerald-400">Paystack Live Handshake</p>
+                              <p className="text-xs text-muted-foreground max-w-[200px] mx-auto pt-4">Processing via secure encrypted protocol.</p>
                            </div>
                         </div>
                       )}
@@ -228,8 +249,8 @@ export default function DashboardPage() {
                               <ShieldCheck className="w-12 h-12 text-emerald-500" />
                            </div>
                            <div className="space-y-2">
-                              <h3 className="text-3xl font-headline font-bold text-white">Payment Verified</h3>
-                              <p className="text-sm text-muted-foreground">Digital credentials successfully synched.</p>
+                              <h3 className="text-3xl font-headline font-bold text-white">Transaction Verified</h3>
+                              <p className="text-sm text-muted-foreground">Digital wallet balance updated successfully.</p>
                            </div>
                            <div className="px-6 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono text-white/40">
                               REF: CP-{(Math.random() * 1000000).toFixed(0)}

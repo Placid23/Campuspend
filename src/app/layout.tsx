@@ -2,6 +2,7 @@ import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'CafePay Wallet | Intelligent Student Finance',
@@ -52,6 +53,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </FirebaseClientProvider>
+        <Script src="https://js.paystack.co/v1/inline.js" strategy="beforeInteractive" />
       </body>
     </html>
   );
