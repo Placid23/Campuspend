@@ -17,6 +17,7 @@ export interface UseCollectionResult<T> {
 
 /**
  * Robust real-time collection hook with internal state protection.
+ * Uses a unique query fingerprint to prevent redundant resubscriptions.
  */
 export function useCollection<T = any>(
   queryRef: Query<DocumentData> | null | undefined
@@ -27,6 +28,7 @@ export function useCollection<T = any>(
   
   // Guard against updates on unmounted components
   const isMounted = useRef(true);
+  const lastQueryKey = useRef<string>("");
 
   useEffect(() => {
     isMounted.current = true;
@@ -35,8 +37,14 @@ export function useCollection<T = any>(
       setData(null);
       setIsLoading(false);
       setError(null);
+      lastQueryKey.current = "";
       return;
     }
+
+    // Stabilize query key to prevent re-subscriptions on identical logic
+    const currentKey = JSON.stringify((queryRef as any)._query || queryRef.toString());
+    if (currentKey === lastQueryKey.current) return;
+    lastQueryKey.current = currentKey;
 
     setIsLoading(true);
 
