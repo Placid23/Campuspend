@@ -16,8 +16,8 @@ export interface UseCollectionResult<T> {
 }
 
 /**
- * Robust real-time collection hook with internal state protection.
- * Uses a unique query fingerprint to prevent redundant resubscriptions.
+ * Robust real-time collection hook.
+ * Monitors Firestore queries and provides data, loading, and error states.
  */
 export function useCollection<T = any>(
   queryRef: Query<DocumentData> | null | undefined
@@ -26,34 +26,28 @@ export function useCollection<T = any>(
   const [isLoading, setIsLoading] = useState<boolean>(!!queryRef);
   const [error, setError] = useState<FirestoreError | null>(null);
   
-  // Guard against updates on unmounted components
-  const isMounted = useRef(true);
-  const lastQueryKey = useRef<string>("");
+  // Track the current active subscription to prevent race conditions
+  const activeQuery = useRef<Query<DocumentData> | null>(null);
 
   useEffect(() => {
-    isMounted.current = true;
-    
+    // If no query is provided (e.g. user not loaded), reset state
     if (!queryRef) {
       setData(null);
       setIsLoading(false);
       setError(null);
-      lastQueryKey.current = "";
+      activeQuery.current = null;
       return;
     }
 
-    // Stabilize query key to prevent re-subscriptions on identical logic
-    // Using string representation as a fingerprint
-    const currentKey = queryRef.toString();
-    if (currentKey === lastQueryKey.current) return;
-    lastQueryKey.current = currentKey;
+    // Prevent redundant subscriptions if the query object is identical
+    if (activeQuery.current === queryRef) return;
+    activeQuery.current = queryRef;
 
     setIsLoading(true);
 
     const unsubscribe = onSnapshot(
       queryRef,
       (snapshot: QuerySnapshot<DocumentData>) => {
-        if (!isMounted.current) return;
-        
         const results = snapshot.docs.map(doc => ({
           ...(doc.data() as T),
           id: doc.id,
@@ -65,11 +59,9 @@ export function useCollection<T = any>(
         setError(null);
       },
       (err: FirestoreError) => {
-        if (!isMounted.current) return;
-        
-        // Log errors except for standard permission/index ones which are handled by UI
-        if (err.code !== 'permission-denied' && !err.message.includes('requires an index')) {
-          console.error("Firestore Listener Error:", err);
+        // Log errors except for standard index ones which are handled by the UI
+        if (!err.message.includes('requires an index')) {
+          console.error("Firestore Collection Error:", err);
         }
         
         setError(err);
@@ -79,10 +71,10 @@ export function useCollection<T = any>(
     );
 
     return () => {
-      isMounted.current = false;
       unsubscribe();
+      activeQuery.current = null;
     };
-  }, [queryRef]); // Stable queryRef via useMemoFirebase is critical here
+  }, [queryRef]);
 
   return { data, isLoading, error };
 }
