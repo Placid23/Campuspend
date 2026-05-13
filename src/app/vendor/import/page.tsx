@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -39,7 +38,7 @@ interface ParsedProduct {
 }
 
 export default function BulkImportPage() {
-  const { user } = userUser()
+  const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
   const router = useRouter()
