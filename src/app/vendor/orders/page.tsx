@@ -23,20 +23,21 @@ import {
   CheckCircle2,
   AlertTriangle,
   Database,
-  TrendingUp
+  TrendingUp,
+  Mail
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { collectionGroup, query, where, doc, updateDoc, serverTimestamp, limit } from 'firebase/firestore'
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase'
 import { format } from 'date-fns'
 import { useToast } from "@/hooks/use-toast"
+import { NotificationService } from "@/lib/notifications"
 
 export default function VendorOrdersPage() {
   const { user, isProfileLoading } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
 
-  // 1. Hooks first - Merchant Specific Items
   const itemsQuery = useMemoFirebase(() => {
     if (!user?.uid) return null
     return query(
@@ -48,18 +49,23 @@ export default function VendorOrdersPage() {
 
   const { data: orderItems, isLoading, error: queryError } = useCollection(itemsQuery)
 
-  // 2. Status updater
-  const updateStatus = async (itemPath: string, newStatus: string) => {
+  const updateStatus = async (itemPath: string, newStatus: string, itemName: string, studentId: string) => {
     try {
       const itemRef = doc(db, itemPath)
       await updateDoc(itemRef, {
         status: newStatus,
         updatedAt: serverTimestamp()
       })
+      
       toast({
         title: "Status Updated",
-        description: `Item marked as ${newStatus}.`,
+        description: `Item marked as ${newStatus.toUpperCase()}.`,
       })
+
+      // If item is ready, simulate email to student
+      if (newStatus === 'ready') {
+        NotificationService.sendReadyAlertToStudent(`student-${studentId.substring(0, 5)}@university.edu`, itemName);
+      }
     } catch (error) {
       console.error("Failed to update status", error)
     }
@@ -74,7 +80,6 @@ export default function VendorOrdersPage() {
     }
   }
 
-  // 3. Error Guard (Catching missing indexes immediately)
   const hasIndexError = queryError?.message?.toLowerCase().includes('index') || queryError?.code === 'failed-precondition'
 
   if (hasIndexError) {
@@ -91,7 +96,7 @@ export default function VendorOrdersPage() {
             </p>
           </div>
           <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-14 px-8 rounded-2xl w-full shadow-lg">
-            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
+            <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer">
               <TrendingUp className="mr-2 w-4 h-4" /> Activate Orders Tracker
             </a>
           </Button>
@@ -100,7 +105,6 @@ export default function VendorOrdersPage() {
     )
   }
 
-  // 4. Loading Guard
   if (isProfileLoading || isLoading) {
     return (
       <VendorShell>
@@ -118,7 +122,12 @@ export default function VendorOrdersPage() {
     <VendorShell>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom duration-1000">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-headline font-bold text-white tracking-tight">Order Lifecycle</h1>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-headline font-bold text-white tracking-tight">Order Lifecycle</h1>
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest flex items-center gap-2">
+               <Mail className="w-3 h-3 text-primary" /> Automated Student Alerts Active
+            </p>
+          </div>
           <Button variant="outline" className="border-white/10 rounded-xl h-12 px-6">
             <FileUp className="w-4 h-4 mr-2" /> Export Sales
           </Button>
@@ -140,7 +149,7 @@ export default function VendorOrdersPage() {
                       <TableHead className="text-[10px] font-bold uppercase py-6">Order ID</TableHead>
                       <TableHead className="text-[10px] font-bold uppercase py-6">Quantity</TableHead>
                       <TableHead className="text-[10px] font-bold uppercase py-6 text-center">Status</TableHead>
-                      <TableHead className="text-[10px] font-bold uppercase py-6 text-right pr-8">Actions</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase py-6 text-right pr-8">Lifecycle Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -168,22 +177,24 @@ export default function VendorOrdersPage() {
                           <TableCell className="text-right pr-8">
                             <div className="flex items-center justify-end gap-2">
                               {(!item.status || item.status === 'placed') && (
-                                <Button size="sm" onClick={() => updateStatus(item.path, 'preparing')} className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/40 rounded-xl px-4 text-[10px] font-bold uppercase">
+                                <Button size="sm" onClick={() => updateStatus(item.path, 'preparing', item.name, item.studentId)} className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/40 rounded-xl px-4 text-[10px] font-bold uppercase">
                                   Prepare
                                 </Button>
                               )}
                               {item.status === 'preparing' && (
-                                <Button size="sm" onClick={() => updateStatus(item.path, 'ready')} className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/40 rounded-xl px-4 text-[10px] font-bold uppercase">
-                                  Ready
+                                <Button size="sm" onClick={() => updateStatus(item.path, 'ready', item.name, item.studentId)} className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/40 rounded-xl px-4 text-[10px] font-bold uppercase">
+                                  Mark Ready
                                 </Button>
                               )}
                               {item.status === 'ready' && (
-                                <Button size="sm" onClick={() => updateStatus(item.path, 'completed')} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-xl px-4 text-[10px] font-bold uppercase">
-                                  Complete
+                                <Button size="sm" onClick={() => updateStatus(item.path, 'completed', item.name, item.studentId)} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-xl px-4 text-[10px] font-bold uppercase">
+                                  Pickup Complete
                                 </Button>
                               )}
                               {item.status === 'completed' && (
-                                <CheckCircle2 className="w-5 h-5 text-emerald-500 mr-4" />
+                                <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-bold uppercase pr-4">
+                                   <CheckCircle2 className="w-4 h-4" /> Fulfilled
+                                </div>
                               )}
                             </div>
                           </TableCell>

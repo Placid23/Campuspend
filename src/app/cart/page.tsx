@@ -11,7 +11,8 @@ import {
   Trash2, 
   ShoppingCart, 
   ShieldCheck, 
-  Loader2
+  Loader2,
+  Mail
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils"
 import { doc, collection } from 'firebase/firestore'
 import { useFirestore, useUser, setDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase'
 import { useToast } from "@/hooks/use-toast"
+import { NotificationService } from "@/lib/notifications"
 
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([])
@@ -99,8 +101,10 @@ export default function CartPage() {
       updatedAt: now
     }, { merge: true })
 
-    // 3. Log Items (Non-blocking)
+    // 3. Log Items and Notify Vendors
+    const vendorsToNotify = new Set<string>();
     cart.forEach(item => {
+      vendorsToNotify.add(item.vendorOwnerId);
       const itemRef = doc(collection(db, "users", studentId, "orders", orderId, "orderItems"))
       setDocumentNonBlocking(itemRef, {
         id: itemRef.id,
@@ -125,9 +129,14 @@ export default function CartPage() {
       updatedAt: now
     })
 
-    // 5. Success Path (Immediate / Optimistic)
+    // 5. Simulate Email Dispatches
+    vendorsToNotify.forEach(vendorId => {
+       NotificationService.sendOrderAlertToVendor(`vendor-${vendorId.substring(0, 5)}@university.edu`, orderId);
+    });
+
+    // 6. Success Path
     localStorage.removeItem('campus-spend-cart')
-    toast({ title: "Order Synchronized", description: "Transaction logged in the PBL engine." })
+    toast({ title: "Order Synchronized", description: "Transaction logged and merchants notified." })
     
     setTimeout(() => {
       router.push("/checkout")
@@ -140,7 +149,7 @@ export default function CartPage() {
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom duration-700">
         <div className="space-y-2">
           <h1 className="text-4xl font-headline font-bold">Your <span className="text-primary neon-text-glow">Tray</span></h1>
-          <p className="text-muted-foreground text-sm">Review your selected items before checking out.</p>
+          <p className="text-muted-foreground text-sm">Review your selected items and trigger the PBL sync node.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -189,19 +198,19 @@ export default function CartPage() {
           {cart.length > 0 && (
             <div className="lg:col-span-4 space-y-6">
               <GlassCard className="p-8 border-white/10 space-y-8">
-                <h3 className="text-xl font-headline font-bold">Summary</h3>
+                <h3 className="text-xl font-headline font-bold">Checkout Nodes</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-bold">₦{subtotal.toLocaleString()}</span>
+                    <span className="font-bold text-white">₦{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">VAT (2.5%)</span>
-                    <span className="font-bold">₦{tax.toLocaleString()}</span>
+                    <span className="font-bold text-white">₦{tax.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Service Fee</span>
-                    <span className="font-bold">₦{deliveryFee.toLocaleString()}</span>
+                    <span className="font-bold text-white">₦{deliveryFee.toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="pt-6 border-t border-white/5 space-y-4">
@@ -210,13 +219,21 @@ export default function CartPage() {
                     <span className="text-2xl font-headline font-bold text-primary neon-text-glow">₦{total.toLocaleString()}</span>
                   </div>
                 </div>
+
+                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3">
+                   <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest">
+                      <Mail className="w-3 h-3" /> Communication Protocols
+                   </div>
+                   <p className="text-[10px] text-muted-foreground leading-relaxed">System will dispatch academic emails to all respective merchants upon execution.</p>
+                </div>
+
                 <Button 
                   disabled={isProcessing || (profile?.walletBalance || 0) < total}
                   onClick={handleCheckout}
                   className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-base font-bold shadow-[0_0_30px_rgba(239,26,184,0.3)]"
                 >
                   {isProcessing ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <ShieldCheck className="w-5 h-5 mr-2" />}
-                  {(profile?.walletBalance || 0) < total ? "Insufficient Balance" : "Complete Order"}
+                  {(profile?.walletBalance || 0) < total ? "Insufficient Balance" : "Sync & Notify Vendors"}
                 </Button>
               </GlassCard>
             </div>
