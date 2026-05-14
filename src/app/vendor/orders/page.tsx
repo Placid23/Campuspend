@@ -96,7 +96,7 @@ export default function VendorOrdersPage() {
             </p>
           </div>
           <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-bold h-14 px-8 rounded-2xl w-full shadow-lg">
-            <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://console.firebase.google.com/v1/r/project/campusspend-733ab/firestore/indexes?create_exemption=Cl9wcm9qZWN0cy9jYW1wdXNzcGVuZC03MzNhYi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvb3JkZXJJdGVtcy9maWVsZHMvdmVuZG9yT3duZXJJZBACGhEKDXZlbmRvck93bmVySWQQAQ" target="_blank" rel="noopener noreferrer">
               <TrendingUp className="mr-2 w-4 h-4" /> Activate Orders Tracker
             </a>
           </Button>
@@ -123,7 +123,7 @@ export default function VendorOrdersPage() {
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom duration-1000">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-4xl font-headline font-bold text-white tracking-tight">Order Lifecycle</h1>
+            <h1 className="text-4xl font-headline font-bold text-white tracking-tight">Sales Fulfillment</h1>
             <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest flex items-center gap-2">
                <Mail className="w-3 h-3 text-primary" /> Automated Student Alerts Active
             </p>

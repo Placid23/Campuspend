@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -90,6 +89,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       const currentStatus = item.status || 'placed'
       if (prevStatus && prevStatus !== currentStatus) {
         toast({ title: "Order Update", description: `Your order for "${item.name}" is now ${currentStatus.toUpperCase()}.` })
+        
+        // Trigger Device Notification
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("CafePay Order Update", {
+            body: `Your order for "${item.name}" is now ${currentStatus.toUpperCase()}.`,
+            icon: '/logo.png'
+          });
+        }
+        
         statusCache.current[item.id] = currentStatus
       }
     })

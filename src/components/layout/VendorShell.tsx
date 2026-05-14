@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -48,7 +47,7 @@ const vendorNavGroups = [
     items: [
       { name: "Overview", href: "/vendor/dashboard", icon: LayoutDashboard },
       { name: "Sales Intelligence", href: "/vendor/sales", icon: TrendingUp },
-      { name: "Order Lifecycle", href: "/vendor/orders", icon: History },
+      { name: "Sales Fulfillment", href: "/vendor/orders", icon: History },
     ]
   },
   {
@@ -78,6 +77,12 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   const seenItems = React.useRef<Set<string>>(new Set())
   const isFirstLoad = React.useRef(true)
 
+  // Unread badge logic
+  const unreadCount = React.useMemo(() => {
+    if (!orderItems) return 0
+    return orderItems.filter(item => item.status === 'placed' || !item.status).length
+  }, [orderItems])
+
   React.useEffect(() => {
     if (!orderItems || !profile?.settings?.notifications?.newOrders) return
     if (isFirstLoad.current) {
@@ -88,6 +93,15 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
     orderItems.forEach(item => {
       if (!seenItems.current.has(item.id) && (item.status === 'placed' || !item.status)) {
         toast({ title: "New Order Received!", description: `Student just ordered: ${item.name}` })
+        
+        // Trigger Device Notification
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("CafePay New Order", {
+            body: `Student just ordered: ${item.name}`,
+            icon: '/logo.png'
+          });
+        }
+        
         seenItems.current.add(item.id)
       }
     })
@@ -134,10 +148,15 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
                   <SidebarMenu className="gap-2">
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.name}>
-                        <SidebarMenuButton asChild isActive={pathname === item.href} className={cn("h-12 px-6 rounded-2xl transition-all duration-300 font-bold", pathname === item.href ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" : "hover:bg-accent text-muted-foreground hover:text-foreground")}>
+                        <SidebarMenuButton asChild isActive={pathname === item.href} className={cn("h-12 px-6 rounded-2xl transition-all duration-300 font-bold relative", pathname === item.href ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" : "hover:bg-accent text-muted-foreground hover:text-foreground")}>
                           <Link href={item.href} className="flex items-center gap-4">
                             <item.icon className="w-5 h-5" />
                             <span className="text-sm tracking-wide">{item.name}</span>
+                            {item.name === "Sales Fulfillment" && unreadCount > 0 && pathname !== "/vendor/orders" && (
+                              <span className="absolute right-4 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-white shadow-[0_0_10px_rgba(239,26,184,1)] animate-pulse">
+                                {unreadCount}
+                              </span>
+                            )}
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
