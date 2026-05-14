@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useEffect, use } from "react"
+import { useState, useEffect, use, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { VendorShell } from "@/components/layout/VendorShell"
 import { GlassCard } from "@/components/ui/glass-card"
@@ -26,7 +26,8 @@ import {
   Package,
   Info,
   Zap,
-  ImageIcon
+  ImageIcon,
+  Upload
 } from "lucide-react"
 import { updateDoc, serverTimestamp, doc } from 'firebase/firestore'
 import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase'
@@ -39,6 +40,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const db = useFirestore()
   const { toast } = useToast()
   const { user } = useUser()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const productRef = useMemoFirebase(() => doc(db, "products", productId), [db, productId])
   const { data: product, isLoading: productLoading } = useDoc(productRef)
@@ -69,6 +71,23 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       })
     }
   }, [product])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 800000) {
+      toast({ variant: "destructive", title: "File Too Large", description: "Image must be under 800KB." })
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setFormData({ ...formData, imageUrl: reader.result as string })
+      toast({ title: "Visual Node Updated", description: "New local asset captured." })
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,7 +148,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                   <div className="md:col-span-4 space-y-4">
-                    <div className="aspect-square rounded-3xl border border-white/10 bg-black/20 relative overflow-hidden group shadow-inner">
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="aspect-square rounded-3xl border border-white/10 bg-black/20 relative overflow-hidden group shadow-inner cursor-pointer hover:border-primary/40 transition-all"
+                    >
                        <Image 
                         src={formData.imageUrl || `https://picsum.photos/seed/${productId}/600/600`} 
                         alt="Product" 
@@ -137,9 +159,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         className="object-cover rounded-3xl transition-transform group-hover:scale-105" 
                        />
                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <p className="text-[8px] font-bold text-white uppercase tracking-[0.2em]">Visual Node Preview</p>
+                          <div className="flex flex-col items-center gap-2">
+                             <Upload className="w-6 h-6 text-white" />
+                             <p className="text-[8px] font-bold text-white uppercase tracking-[0.2em]">Change Asset</p>
+                          </div>
                        </div>
                     </div>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                    />
                   </div>
 
                   <div className="md:col-span-8 space-y-6">
@@ -167,9 +199,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                        </Select>
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Visual Asset URL</Label>
+                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Asset Visual Protocol (Local or URL)</Label>
                        <Input 
-                          value={formData.imageUrl}
+                          value={formData.imageUrl.startsWith('data:') ? 'Local Image Active' : formData.imageUrl}
                           onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
                           placeholder="https://images.unsplash.com/..." 
                           className="h-12 bg-white/5 border-white/10 rounded-xl px-6 text-xs"

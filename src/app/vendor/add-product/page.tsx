@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { VendorShell } from "@/components/layout/VendorShell"
 import { GlassCard } from "@/components/ui/glass-card"
@@ -26,7 +26,8 @@ import {
   Package,
   Info,
   ImageIcon,
-  Zap
+  Zap,
+  Upload
 } from "lucide-react"
 import Image from "next/image"
 import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore'
@@ -38,6 +39,7 @@ export default function AddProductPage() {
   const db = useFirestore()
   const { toast } = useToast()
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
     name: "",
@@ -49,6 +51,23 @@ export default function AddProductPage() {
     isActive: true,
     imageUrl: ""
   })
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 800000) { // ~800KB limit for prototype stability
+      toast({ variant: "destructive", title: "File Too Large", description: "Please select an image under 800KB for the prototype." })
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setFormData({ ...formData, imageUrl: reader.result as string })
+      toast({ title: "Visual Node Captured", description: "Local asset mapped to product buffer." })
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -103,16 +122,29 @@ export default function AddProductPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                   <div className="md:col-span-4 space-y-4">
-                    <div className="aspect-square rounded-3xl border-2 border-dashed border-white/10 bg-black/20 flex flex-col items-center justify-center gap-4 relative overflow-hidden group shadow-inner">
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="aspect-square rounded-3xl border-2 border-dashed border-white/10 bg-black/20 flex flex-col items-center justify-center gap-4 relative overflow-hidden group shadow-inner cursor-pointer hover:border-primary/40 transition-all"
+                    >
                        {formData.imageUrl ? (
                          <Image src={formData.imageUrl} alt="Preview" fill className="object-cover transition-transform group-hover:scale-110" />
                        ) : (
                          <div className="flex flex-col items-center gap-2">
-                           <ImageIcon className="w-10 h-10 text-muted-foreground/40" />
-                           <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Image Preview</p>
+                           <Upload className="w-10 h-10 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                           <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Select Image</p>
                          </div>
                        )}
+                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <p className="text-[8px] font-bold text-white uppercase tracking-[0.2em]">Change Local Asset</p>
+                       </div>
                     </div>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                    />
                   </div>
 
                   <div className="md:col-span-8 space-y-6">
@@ -141,11 +173,11 @@ export default function AddProductPage() {
                        </Select>
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Product Image URL</Label>
+                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Visual Asset Protocol (Local or URL)</Label>
                        <Input 
-                          value={formData.imageUrl}
+                          value={formData.imageUrl.startsWith('data:') ? 'Local Image Captured' : formData.imageUrl}
                           onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                          placeholder="https://images.unsplash.com/photo-..." 
+                          placeholder="Or paste an image URL here..." 
                           className="h-12 bg-white/5 border-white/10 rounded-xl px-6 text-xs"
                        />
                     </div>
