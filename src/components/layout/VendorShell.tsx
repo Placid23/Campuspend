@@ -14,7 +14,9 @@ import {
   User,
   Database,
   Box,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Store,
+  Sparkles
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -38,13 +40,23 @@ import { AppLoader } from "@/components/ui/app-loader"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
-const vendorNavItems = [
-  { name: "Overview Dashboard", href: "/vendor/dashboard", icon: LayoutDashboard },
-  { name: "Active Inventory", href: "/vendor/manage", icon: ShoppingCart },
-  { name: "Add New Item", href: "/vendor/add-product", icon: PlusCircle },
-  { name: "Bulk Import (Excel)", href: "/vendor/import", icon: FileSpreadsheet },
-  { name: "Active Orders", href: "/vendor/orders", icon: History },
-  { name: "Sales Intelligence", href: "/vendor/sales", icon: TrendingUp },
+const vendorNavGroups = [
+  {
+    label: "Merchant HQ",
+    items: [
+      { name: "Overview", href: "/vendor/dashboard", icon: LayoutDashboard },
+      { name: "Sales Intelligence", href: "/vendor/sales", icon: TrendingUp },
+      { name: "Order Lifecycle", href: "/vendor/orders", icon: History },
+    ]
+  },
+  {
+    label: "Catalog Management",
+    items: [
+      { name: "Active Inventory", href: "/vendor/manage", icon: ShoppingCart },
+      { name: "Bulk Ingester", href: "/vendor/import", icon: FileSpreadsheet },
+      { name: "Add Product", href: "/vendor/add-product", icon: PlusCircle },
+    ]
+  }
 ]
 
 export function VendorShell({ children }: { children: React.ReactNode }) {
@@ -108,35 +120,40 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-headline font-bold text-2xl tracking-tighter leading-none">CafePay</span>
+                  <span className="font-headline font-bold text-2xl tracking-tighter leading-none text-white">CafePay</span>
                   <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-primary mt-1">Merchant Portal</span>
                 </div>
               </Link>
             </SidebarHeader>
-            <SidebarContent className="px-6 py-8">
-              <SidebarMenu className="gap-2">
-                {vendorNavItems.map((item) => (
-                  <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href} className={cn("h-12 px-6 rounded-2xl transition-all duration-300 font-bold", pathname === item.href ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" : "hover:bg-accent text-muted-foreground hover:text-foreground")}>
-                      <Link href={item.href} className="flex items-center gap-4">
-                        <item.icon className="w-5 h-5" />
-                        <span className="text-sm tracking-wide">{item.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
+            <SidebarContent className="px-6 py-4">
+              {vendorNavGroups.map((group) => (
+                <div key={group.label} className="mb-8 last:mb-0">
+                  <p className="px-6 mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">{group.label}</p>
+                  <SidebarMenu className="gap-2">
+                    {group.items.map((item) => (
+                      <SidebarMenuItem key={item.name}>
+                        <SidebarMenuButton asChild isActive={pathname === item.href} className={cn("h-12 px-6 rounded-2xl transition-all duration-300 font-bold", pathname === item.href ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" : "hover:bg-accent text-muted-foreground hover:text-foreground")}>
+                          <Link href={item.href} className="flex items-center gap-4">
+                            <item.icon className="w-5 h-5" />
+                            <span className="text-sm tracking-wide">{item.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </div>
+              ))}
             </SidebarContent>
             <SidebarFooter className="p-8 space-y-4">
               <Link href="/vendor/settings" className="block w-full">
                 <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:bg-accent rounded-2xl px-6 h-12 group">
-                  <User className="w-5 h-5 mr-4 group-hover:text-primary transition-colors" />
+                  <Store className="w-5 h-5 mr-4 group-hover:text-primary transition-colors" />
                   <span className="font-bold text-sm">Store HQ</span>
                 </Button>
               </Link>
               <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl px-6 h-12">
                 <LogOut className="w-5 h-5 mr-4" />
-                <span className="font-bold text-sm">Logout</span>
+                <span className="font-bold text-sm">Terminate Session</span>
               </Button>
             </SidebarFooter>
           </Sidebar>

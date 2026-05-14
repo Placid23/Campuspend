@@ -16,7 +16,8 @@ import {
   Database,
   ShoppingBag,
   Zap,
-  BrainCircuit
+  BrainCircuit,
+  Package
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -41,13 +42,23 @@ import { PermissionPrompt } from "@/components/pwa/PWAHandler"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
-const navItems = [
-  { name: "Marketplace", href: "/vendors", icon: Store },
-  { name: "My Tray", href: "/cart", icon: ShoppingBag },
-  { name: "Home Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "AI Insights", href: "/insights", icon: BrainCircuit },
-  { name: "Expenditure Map", href: "/calendar", icon: CreditCard },
-  { name: "Track Logs", href: "/orders", icon: History },
+const navGroups = [
+  {
+    label: "Operations",
+    items: [
+      { name: "Marketplace", href: "/vendors", icon: Store },
+      { name: "My Tray", href: "/cart", icon: ShoppingBag },
+      { name: "Order History", href: "/orders", icon: History },
+    ]
+  },
+  {
+    label: "Intelligence",
+    items: [
+      { name: "Home Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { name: "AI Insights", href: "/insights", icon: BrainCircuit },
+      { name: "Expenditure Map", href: "/calendar", icon: CreditCard },
+    ]
+  }
 ]
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -145,39 +156,44 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 </div>
               </Link>
             </SidebarHeader>
-            <SidebarContent className="px-6 py-8">
-              <SidebarMenu className="gap-2">
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors'))}
-                      className={cn(
-                        "h-12 px-6 rounded-2xl transition-all duration-300 font-bold",
-                        (pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors')))
-                          ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" 
-                          : "hover:bg-accent text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <Link href={item.href} className="flex items-center gap-4">
-                        <item.icon className="w-5 h-5" />
-                        <span className="text-sm tracking-wide">{item.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
+            <SidebarContent className="px-6 py-4">
+              {navGroups.map((group) => (
+                <div key={group.label} className="mb-8 last:mb-0">
+                  <p className="px-6 mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">{group.label}</p>
+                  <SidebarMenu className="gap-2">
+                    {group.items.map((item) => (
+                      <SidebarMenuItem key={item.name}>
+                        <SidebarMenuButton 
+                          asChild 
+                          isActive={pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors'))}
+                          className={cn(
+                            "h-12 px-6 rounded-2xl transition-all duration-300 font-bold",
+                            (pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors')))
+                              ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" 
+                              : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          <Link href={item.href} className="flex items-center gap-4">
+                            <item.icon className="w-5 h-5" />
+                            <span className="text-sm tracking-wide">{item.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </div>
+              ))}
             </SidebarContent>
             <SidebarFooter className="p-8 space-y-4">
               <Link href="/settings" className="block w-full">
                 <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:bg-accent rounded-2xl px-6 h-12 group">
                   <User className="w-5 h-5 mr-4 group-hover:text-primary transition-colors" />
-                  <span className="font-bold text-sm">Account Settings</span>
+                  <span className="font-bold text-sm">Account Center</span>
                 </Button>
               </Link>
               <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl px-6 h-12">
                 <LogOut className="w-5 h-5 mr-4" />
-                <span className="font-bold text-sm">Logout</span>
+                <span className="font-bold text-sm">Terminate Session</span>
               </Button>
             </SidebarFooter>
           </Sidebar>

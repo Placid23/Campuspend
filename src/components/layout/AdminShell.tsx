@@ -14,7 +14,8 @@ import {
   AlertCircle,
   ShieldCheck,
   Zap,
-  Settings
+  Settings,
+  ShieldAlert
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -36,14 +37,24 @@ import { useAuth, useUser } from '@/firebase'
 import { AppLoader } from "@/components/ui/app-loader"
 import Image from "next/image"
 
-const adminNavItems = [
-  { name: "System Overview", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Student Directory", href: "/admin/students", icon: Users },
-  { name: "Vendor Registry", href: "/admin/vendors", icon: Store },
-  { name: "Global Inventory", href: "/admin/products", icon: Package },
-  { name: "Product Taxonomy", href: "/admin/categories", icon: Box },
-  { name: "Platform Analytics", href: "/admin/reports", icon: ClipboardList },
-  { name: "Security Thresholds", href: "/admin/settings", icon: AlertCircle },
+const adminNavGroups = [
+  {
+    label: "Platform Governance",
+    items: [
+      { name: "System Overview", href: "/admin/dashboard", icon: LayoutDashboard },
+      { name: "Student Directory", href: "/admin/students", icon: Users },
+      { name: "Vendor Registry", href: "/admin/vendors", icon: Store },
+    ]
+  },
+  {
+    label: "System Intelligence",
+    items: [
+      { name: "Global Inventory", href: "/admin/products", icon: Package },
+      { name: "Product Taxonomy", href: "/admin/categories", icon: Box },
+      { name: "Platform Analytics", href: "/admin/reports", icon: ClipboardList },
+      { name: "Security Thresholds", href: "/admin/settings", icon: ShieldAlert },
+    ]
+  }
 ]
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -86,25 +97,30 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </div>
               </Link>
             </SidebarHeader>
-            <SidebarContent className="px-6 py-8">
-              <SidebarMenu className="gap-2">
-                {adminNavItems.map((item) => (
-                  <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href} className={cn("h-12 px-6 rounded-2xl transition-all font-bold", pathname === item.href ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" : "hover:bg-white/5 text-muted-foreground")}>
-                      <Link href={item.href} className="flex items-center gap-4">
-                        <item.icon className="w-5 h-5" />
-                        <span className="text-sm tracking-wide">{item.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
+            <SidebarContent className="px-6 py-4">
+              {adminNavGroups.map((group) => (
+                <div key={group.label} className="mb-8 last:mb-0">
+                  <p className="px-6 mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">{group.label}</p>
+                  <SidebarMenu className="gap-2">
+                    {group.items.map((item) => (
+                      <SidebarMenuItem key={item.name}>
+                        <SidebarMenuButton asChild isActive={pathname === item.href} className={cn("h-12 px-6 rounded-2xl transition-all duration-300 font-bold", pathname === item.href ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" : "hover:bg-white/5 text-muted-foreground")}>
+                          <Link href={item.href} className="flex items-center gap-4">
+                            <item.icon className="w-5 h-5" />
+                            <span className="text-sm tracking-wide">{item.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </div>
+              ))}
             </SidebarContent>
             <SidebarFooter className="p-8 space-y-4">
               <Link href="/admin/profile" className="w-full">
                 <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:bg-white/5 rounded-2xl px-6 h-12 group">
                   <ShieldCheck className="w-5 h-5 mr-4 group-hover:text-primary transition-colors" />
-                  <span className="font-bold text-sm">Security Profile</span>
+                  <span className="font-bold text-sm">Security Center</span>
                 </Button>
               </Link>
               <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl px-6 h-12">
