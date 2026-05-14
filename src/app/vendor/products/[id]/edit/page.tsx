@@ -57,7 +57,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     imageUrl: ""
   })
 
-  // Synchronize existing product data to form state
+  // DEEP STATE SYNC: Synchronize existing product data to form state when it loads
   useEffect(() => {
     if (product) {
       setFormData({
@@ -126,6 +126,18 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       <VendorShell>
         <div className="flex items-center justify-center h-[60vh]">
           <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+      </VendorShell>
+    )
+  }
+
+  if (!product && !productLoading) {
+    return (
+      <VendorShell>
+        <div className="text-center py-20">
+          <Package className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+          <h3 className="text-xl font-bold">Product Not Found</h3>
+          <Link href="/vendor/manage"><Button variant="link">Back to Inventory</Button></Link>
         </div>
       </VendorShell>
     )
