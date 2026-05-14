@@ -288,7 +288,7 @@ export default function InsightsPage() {
                           <BarChart3 className="w-4 h-4 text-primary shrink-0" />
                           <div className="space-y-1">
                              <p className="text-[10px] font-bold uppercase text-white">Decision Tree Protocol</p>
-                             <p className="text-xs text-muted-foreground leading-relaxed">Traverses spending nodes (Budget -> Variance -> Frequency) to detect behavioral anomalies.</p>
+                             <p className="text-xs text-muted-foreground leading-relaxed">Traverses spending nodes (Budget &rarr; Variance &rarr; Frequency) to detect behavioral anomalies.</p>
                           </div>
                        </div>
                        <div className="flex gap-3">
@@ -304,7 +304,7 @@ export default function InsightsPage() {
                           <Zap className="w-4 h-4 text-primary shrink-0" />
                           <div className="space-y-1">
                              <p className="text-[10px] font-bold uppercase text-white">Leakage Algorithm</p>
-                             <p className="text-xs text-muted-foreground leading-relaxed">Identifies "micro-spending" patterns that cumulatively erode the student's monthly budget.</p>
+                             <p className="text-xs text-muted-foreground leading-relaxed">Identifies &quot;micro-spending&quot; patterns that cumulatively erode the student's monthly budget.</p>
                           </div>
                        </div>
                     </div>
