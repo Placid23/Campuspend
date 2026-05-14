@@ -130,7 +130,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         src={product?.imageUrl || `https://picsum.photos/seed/${productId}/600/600`} 
                         alt="Product" 
                         fill 
-                        className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                        className="object-cover rounded-3xl" 
                        />
                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <p className="text-[8px] font-bold text-white uppercase tracking-[0.2em]">PBL Image Node</p>

@@ -24,7 +24,6 @@ import {
   CheckCircle,
   Zap,
   FileUp,
-  MousePointer2,
   FileCheck
 } from "lucide-react"
 import { useFirestore, useUser, setDocumentNonBlocking } from "@/firebase"
