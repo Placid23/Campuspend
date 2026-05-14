@@ -53,15 +53,17 @@ export default function BulkImportPage() {
     try {
       const lines = csvContent.split('\n')
       const products: ParsedProduct[] = lines.slice(1).map(line => {
-        const [name, category, price, stock, description] = line.split(',').map(s => s.trim())
+        const parts = line.split(',')
+        if (parts.length < 3) return null
+        const [name, category, price, stock, description] = parts.map(s => s?.trim())
         return {
-          name,
+          name: name || "",
           category: category || "general",
           price: parseFloat(price) || 0,
           stock: parseInt(stock) || 0,
           description: description || ""
         }
-      }).filter(p => p.name)
+      }).filter((p): p is ParsedProduct => p !== null && !!p.name)
 
       setParsedProducts(products)
       toast({ title: "Extraction Successful", description: `${products.length} nodes identified from CSV buffer.` })

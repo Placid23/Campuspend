@@ -1,8 +1,7 @@
-
 "use client"
 
 import * as React from 'react'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { DashboardShell } from "@/components/layout/Shell"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
@@ -16,7 +15,7 @@ import {
   SearchCode,
   ShieldCheck,
   Info,
-  HelpCircle,
+  CircleHelp,
   BarChart3,
   Scale,
   Zap,
@@ -44,9 +43,16 @@ export default function InsightsPage() {
   const [insight, setInsight] = useState<SpendingInsightFeedbackOutput | null>(null)
   const [showLogic, setShowLogic] = useState(false)
 
-  const thirtyDaysAgo = subDays(new Date(), 30).toISOString()
+  // Use state for the date to prevent hydration mismatch
+  const [thirtyDaysAgo, setThirtyDaysAgo] = useState<string>("")
+
+  useEffect(() => {
+    // Set the date only on the client
+    setThirtyDaysAgo(subDays(new Date(), 30).toISOString())
+  }, [])
+
   const expensesQuery = useMemoFirebase(() => {
-    if (!user) return null
+    if (!user || !thirtyDaysAgo) return null
     return query(
       collection(db, "users", user.uid, "expenses"),
       where("expenseDate", ">=", thirtyDaysAgo),
@@ -121,7 +127,7 @@ export default function InsightsPage() {
           )}
         </div>
 
-        {/* Methodology Schematic (Supervisors view) */}
+        {/* Methodology Schematic */}
         {!insight && (
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
               <GlassCard className="p-8 border-white/5 bg-white/5 space-y-4">
@@ -170,8 +176,8 @@ export default function InsightsPage() {
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Essentiality Ratio</p>
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger>
-                            <Info className="w-3.5 h-3.5 text-muted-foreground/60" />
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-muted-foreground/60 cursor-help" />
                           </TooltipTrigger>
                           <TooltipContent className="bg-card border-white/10 text-xs p-3 max-w-[200px]">
                             Ratio of survival spending (Food/Books) against lifestyle choices.
@@ -262,14 +268,13 @@ export default function InsightsPage() {
                 </div>
               </GlassCard>
 
-              {/* Methodology Explainer (Supervisor Cheat Sheet) */}
               <GlassCard className="bg-white/5 border-white/10 p-8 space-y-6">
                 <button 
                   onClick={() => setShowLogic(!showLogic)}
                   className="w-full flex items-center justify-between text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <HelpCircle className="w-5 h-5 text-primary" />
+                    <CircleHelp className="w-5 h-5 text-primary" />
                     <h3 className="text-sm font-bold uppercase tracking-widest">Scientific Basis</h3>
                   </div>
                   <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", showLogic && "rotate-180")} />

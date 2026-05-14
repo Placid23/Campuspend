@@ -15,7 +15,8 @@ import {
   Bell,
   Database,
   ShoppingBag,
-  Zap
+  Zap,
+  BrainCircuit
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -44,6 +45,7 @@ const navItems = [
   { name: "Marketplace", href: "/vendors", icon: Store },
   { name: "My Tray", href: "/cart", icon: ShoppingBag },
   { name: "Home Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "AI Insights", href: "/insights", icon: BrainCircuit },
   { name: "Expenditure Map", href: "/calendar", icon: CreditCard },
   { name: "Track Logs", href: "/orders", icon: History },
 ]
@@ -138,7 +140,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-2 scale-150" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-headline font-bold text-2xl tracking-tighter leading-none">CafePay</span>
+                  <span className="font-headline font-bold text-2xl tracking-tighter leading-none text-white">CafePay</span>
                   <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-primary mt-1">Student Wallet</span>
                 </div>
               </Link>
@@ -187,7 +189,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <div className="w-9 h-9 rounded-xl bg-white/5 relative flex items-center justify-center border border-white/10 p-1 shrink-0 overflow-hidden">
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5 scale-125" />
                 </div>
-                <span className="font-headline font-bold text-base tracking-tighter hidden xs:block">CafePay</span>
+                <span className="font-headline font-bold text-base tracking-tighter hidden xs:block text-white">CafePay</span>
               </div>
               <div className="ml-auto flex items-center gap-3">
                 <div className="h-10 md:h-12 px-3 md:px-5 rounded-2xl bg-card border border-border flex items-center gap-2 md:gap-4 shadow-inner relative overflow-hidden group">

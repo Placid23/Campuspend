@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useMemo } from "react"
 import { DashboardShell } from "@/components/layout/Shell"
 import { GlassCard } from "@/components/ui/glass-card"
 import { 
@@ -78,16 +79,17 @@ export default function DashboardPage() {
   const { data: orders } = useCollection(ordersQuery)
   const { data: expenses } = useCollection(expensesQuery)
 
-  const todaySpending = React.useMemo(() => {
+  const todaySpending = useMemo(() => {
     return expenses?.filter(e => isToday(new Date(e.expenseDate)))
       .reduce((sum, e) => sum + e.amount, 0) || 0
   }, [expenses])
 
-  const spendTrendData = React.useMemo(() => {
+  const spendTrendData = useMemo(() => {
     if (!expenses) return []
     const map: Record<string, number> = {}
+    const now = new Date()
     for (let i = 13; i >= 0; i--) {
-      const d = format(subDays(new Date(), i), 'MMM dd')
+      const d = format(subDays(now, i), 'MMM dd')
       map[d] = 0
     }
     expenses.forEach(e => {
@@ -182,14 +184,14 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 relative z-10">
                 <div className="space-y-1">
-                  <h3 className="text-xl font-headline font-bold">Wallet Balance</h3>
+                  <h3 className="text-xl font-headline font-bold text-white">Wallet Balance</h3>
                   <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Functional Digital Credit</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <span className="text-xs text-muted-foreground mr-2 font-bold">₦</span>
                     <span className="text-4xl font-headline font-bold text-white tracking-tight">
-                      {profile?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                      {(profile?.walletBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <Dialog open={isTopUpOpen} onOpenChange={(val) => { if(!isProcessing) setIsTopUpOpen(val); if(!val) setPaymentStep('input'); }}>
@@ -212,7 +214,7 @@ export default function DashboardPage() {
                                 type="number" 
                                 value={topUpAmount} 
                                 onChange={(e) => setTopUpAmount(e.target.value)} 
-                                className="h-16 pl-10 bg-white/5 border-white/10 text-2xl font-headline font-bold rounded-2xl focus:border-primary/50" 
+                                className="h-16 pl-10 bg-white/5 border-white/10 text-2xl font-headline font-bold rounded-2xl focus:border-primary/50 text-white" 
                               />
                             </div>
                             <div className="grid grid-cols-3 gap-2">
@@ -252,9 +254,6 @@ export default function DashboardPage() {
                               <h3 className="text-3xl font-headline font-bold text-white">Transaction Verified</h3>
                               <p className="text-sm text-muted-foreground">Digital wallet balance updated successfully.</p>
                            </div>
-                           <div className="px-6 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono text-white/40">
-                              REF: CP-{(Math.random() * 1000000).toFixed(0)}
-                           </div>
                         </div>
                       )}
                     </DialogContent>
@@ -273,7 +272,7 @@ export default function DashboardPage() {
             <GlassCard className="p-8 border-white/10 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-headline font-bold flex items-center gap-2"><Activity className="w-5 h-5 text-primary" /> Spend Trajectory</h3>
+                  <h3 className="text-lg font-headline font-bold flex items-center gap-2 text-white"><Activity className="w-5 h-5 text-primary" /> Spend Trajectory</h3>
                   <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">14-Day Velocity Mapping</p>
                 </div>
               </div>
@@ -311,7 +310,7 @@ export default function DashboardPage() {
             </GlassCard>
 
             <GlassCard className="p-6 border-white/5 space-y-6 bg-black/20">
-              <h3 className="text-lg font-headline font-bold border-b border-white/5 pb-4">Recent Nodes</h3>
+              <h3 className="text-lg font-headline font-bold border-b border-white/5 pb-4 text-white">Recent Nodes</h3>
               <div className="space-y-4">
                 {expenses?.slice(0, 4).map((exp, i) => (
                   <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group">
