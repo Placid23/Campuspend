@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -20,12 +21,12 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { 
   Save, 
-  ChevronLeft, 
+  ArrowLeft, 
   Loader2,
   Package,
   Info,
   Zap,
-  ArrowLeft
+  ImageIcon
 } from "lucide-react"
 import { updateDoc, serverTimestamp, doc } from 'firebase/firestore'
 import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase'
@@ -50,7 +51,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     price: "0",
     stock: "0",
     lowStockThreshold: "5",
-    isActive: true
+    isActive: true,
+    imageUrl: ""
   })
 
   useEffect(() => {
@@ -62,7 +64,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         price: String(product.price || 0),
         stock: String(product.stock || 0),
         lowStockThreshold: String(product.lowStockThreshold || 5),
-        isActive: product.isActive ?? true
+        isActive: product.isActive ?? true,
+        imageUrl: product.imageUrl || ""
       })
     }
   }, [product])
@@ -80,6 +83,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       stock: parseInt(formData.stock),
       lowStockThreshold: parseInt(formData.lowStockThreshold),
       isActive: formData.isActive,
+      imageUrl: formData.imageUrl,
       updatedAt: serverTimestamp()
     }
 
@@ -114,7 +118,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
            <Link href="/vendor/manage" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">
               <ArrowLeft className="w-3 h-3" /> Back to Inventory
            </Link>
-           <h1 className="text-3xl font-headline font-bold text-white tracking-tight">Edit Product</h1>
+           <h1 className="text-3xl font-headline font-bold text-white tracking-tight">Edit Product Node</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -127,13 +131,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   <div className="md:col-span-4 space-y-4">
                     <div className="aspect-square rounded-3xl border border-white/10 bg-black/20 relative overflow-hidden group shadow-inner">
                        <Image 
-                        src={product?.imageUrl || `https://picsum.photos/seed/${productId}/600/600`} 
+                        src={formData.imageUrl || `https://picsum.photos/seed/${productId}/600/600`} 
                         alt="Product" 
                         fill 
-                        className="object-cover rounded-3xl" 
+                        className="object-cover rounded-3xl transition-transform group-hover:scale-105" 
                        />
                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <p className="text-[8px] font-bold text-white uppercase tracking-[0.2em]">PBL Image Node</p>
+                          <p className="text-[8px] font-bold text-white uppercase tracking-[0.2em]">Visual Node Preview</p>
                        </div>
                     </div>
                   </div>
@@ -151,7 +155,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <div className="space-y-2">
                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Taxonomy Category</Label>
                        <Select value={formData.category} onValueChange={(val) => setFormData({...formData, category: val})}>
-                          <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl px-6 focus:ring-primary/30">
+                          <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl px-6">
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                           <SelectContent className="bg-card border-white/10">
@@ -163,14 +167,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                        </Select>
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Description Buffer</Label>
-                       <Textarea 
-                          value={formData.description}
-                          onChange={(e) => setFormData({...formData, description: e.target.value})}
-                          className="min-h-[120px] bg-white/5 border-white/10 rounded-xl p-6 focus:border-primary/50 transition-all text-sm"
+                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Visual Asset URL</Label>
+                       <Input 
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                          placeholder="https://images.unsplash.com/..." 
+                          className="h-12 bg-white/5 border-white/10 rounded-xl px-6 text-xs"
                        />
                     </div>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Description Buffer</Label>
+                   <Textarea 
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      className="min-h-[100px] bg-white/5 border-white/10 rounded-xl p-6 focus:border-primary/50 text-sm"
+                   />
                 </div>
               </div>
 

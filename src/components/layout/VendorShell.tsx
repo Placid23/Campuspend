@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -16,7 +17,8 @@ import {
   Box,
   FileSpreadsheet,
   Store,
-  Sparkles
+  Sparkles,
+  Package
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -160,7 +162,7 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
 
           <SidebarInset className="bg-transparent overflow-hidden">
             <header className="flex h-20 md:h-24 items-center gap-4 px-6 md:px-10 border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
-              <SidebarTrigger className="md:hidden h-10 w-10" />
+              <SidebarTrigger className="md:hidden h-10 w-10 text-white" />
               <div className="hidden md:flex items-center gap-10">
                 <Link href="/vendor/dashboard" className={cn("text-[10px] font-bold tracking-widest uppercase transition-colors", pathname === '/vendor/dashboard' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>Analytics HQ</Link>
                 <Link href="/vendor/manage" className={cn("text-[10px] font-bold tracking-widest uppercase transition-colors", pathname === '/vendor/manage' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>Inventory Node</Link>

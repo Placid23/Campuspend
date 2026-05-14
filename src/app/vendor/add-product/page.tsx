@@ -24,8 +24,11 @@ import {
   ChevronRight, 
   Loader2,
   Package,
-  Info
+  Info,
+  ImageIcon,
+  Zap
 } from "lucide-react"
+import Image from "next/image"
 import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore'
 import { useFirestore, useUser, errorEmitter, FirestorePermissionError } from '@/firebase'
 
@@ -43,7 +46,8 @@ export default function AddProductPage() {
     price: "0",
     stock: "0",
     lowStockThreshold: "5",
-    isActive: true
+    isActive: true,
+    imageUrl: ""
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,12 +67,11 @@ export default function AddProductPage() {
       lowStockThreshold: parseInt(formData.lowStockThreshold),
       isActive: formData.isActive,
       vendorOwnerId: user.uid,
-      imageUrl: `https://picsum.photos/seed/${productRef.id}/600/600`,
+      imageUrl: formData.imageUrl || `https://picsum.photos/seed/${productRef.id}/600/600`,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     }
 
-    // Non-blocking write
     setDoc(productRef, productData)
       .then(() => {
         toast({
@@ -78,12 +81,11 @@ export default function AddProductPage() {
         router.push("/vendor/manage")
       })
       .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: productRef.path,
           operation: 'create',
           requestResourceData: productData,
-        })
-        errorEmitter.emit('permission-error', permissionError)
+        }))
       })
       .finally(() => setLoading(false))
   }
@@ -101,13 +103,15 @@ export default function AddProductPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                   <div className="md:col-span-4 space-y-4">
-                    <div className="aspect-square rounded-2xl border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 group transition-all relative overflow-hidden">
-                       <div className="p-4 rounded-full bg-primary/10 text-primary">
-                          <Package className="w-8 h-8" />
-                       </div>
-                       <div className="text-center space-y-1">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Image Auto-Generated</p>
-                       </div>
+                    <div className="aspect-square rounded-3xl border-2 border-dashed border-white/10 bg-black/20 flex flex-col items-center justify-center gap-4 relative overflow-hidden group shadow-inner">
+                       {formData.imageUrl ? (
+                         <Image src={formData.imageUrl} alt="Preview" fill className="object-cover transition-transform group-hover:scale-110" />
+                       ) : (
+                         <div className="flex flex-col items-center gap-2">
+                           <ImageIcon className="w-10 h-10 text-muted-foreground/40" />
+                           <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Image Preview</p>
+                         </div>
+                       )}
                     </div>
                   </div>
 
@@ -118,14 +122,14 @@ export default function AddProductPage() {
                           required
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          placeholder="e.g. Classic Beef Burger" 
-                          className="h-12 bg-white/5 border-white/10 rounded-xl px-6 focus:border-primary/50 transition-all text-sm"
+                          placeholder="e.g. Premium Beef Burger" 
+                          className="h-12 bg-white/5 border-white/10 rounded-xl px-6 focus:border-primary/50 transition-all font-bold"
                        />
                     </div>
                     <div className="space-y-2">
                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Category</Label>
                        <Select value={formData.category} onValueChange={(val) => setFormData({...formData, category: val})}>
-                          <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl px-6 focus:ring-primary/30">
+                          <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl px-6">
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                           <SelectContent className="bg-card border-white/10">
@@ -137,22 +141,32 @@ export default function AddProductPage() {
                        </Select>
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Description</Label>
-                       <Textarea 
-                          value={formData.description}
-                          onChange={(e) => setFormData({...formData, description: e.target.value})}
-                          placeholder="Tell students about your product..." 
-                          className="min-h-[120px] bg-white/5 border-white/10 rounded-xl p-6 focus:border-primary/50 transition-all text-sm"
+                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Product Image URL</Label>
+                       <Input 
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                          placeholder="https://images.unsplash.com/photo-..." 
+                          className="h-12 bg-white/5 border-white/10 rounded-xl px-6 text-xs"
                        />
                     </div>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Description</Label>
+                   <Textarea 
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="Describe your product to students..." 
+                      className="min-h-[100px] bg-white/5 border-white/10 rounded-xl p-6 focus:border-primary/50"
+                   />
                 </div>
               </div>
 
               <div className="h-px bg-white/5 w-full"></div>
 
               <div className="space-y-6">
-                 <h3 className="text-lg font-headline font-bold text-white/80 tracking-wide">Pricing & Stock</h3>
+                 <h3 className="text-lg font-headline font-bold text-white/80 tracking-wide">Economics</h3>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Price (₦)</Label>
@@ -160,11 +174,11 @@ export default function AddProductPage() {
                         type="number"
                         value={formData.price}
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
-                        className="h-12 bg-white/5 border-white/10 rounded-xl px-6 text-sm" 
+                        className="h-12 bg-white/5 border-white/10 rounded-xl px-6 text-sm font-bold" 
                        />
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Stock Quantity</Label>
+                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Initial Stock</Label>
                        <Input 
                         type="number"
                         value={formData.stock}
@@ -173,10 +187,7 @@ export default function AddProductPage() {
                        />
                     </div>
                     <div className="space-y-2">
-                       <div className="flex items-center gap-2 mb-2">
-                          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Low Stock Alert</Label>
-                          <Info className="w-3 h-3 text-muted-foreground/40" />
-                       </div>
+                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Low Stock Alert</Label>
                        <Input 
                         type="number"
                         value={formData.lowStockThreshold}
@@ -191,10 +202,10 @@ export default function AddProductPage() {
 
           <div className="lg:col-span-4 space-y-8">
             <GlassCard className="p-8 border-primary/20 bg-primary/5 space-y-8">
-              <h3 className="text-lg font-headline font-bold text-white">Status & Visibility</h3>
+              <h3 className="text-lg font-headline font-bold text-white">System Visibility</h3>
               <div className="space-y-6">
                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-white/80">Active Listing</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">Active Node</span>
                     <Switch 
                       checked={formData.isActive} 
                       onCheckedChange={(val) => setFormData({...formData, isActive: val})}
@@ -204,10 +215,15 @@ export default function AddProductPage() {
                  <Button 
                   type="submit"
                   disabled={loading}
-                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-base font-bold shadow-[0_0_30px_rgba(239,26,184,0.4)] hover:opacity-90 active:scale-[0.98] transition-all"
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-base font-bold shadow-[0_0_30px_rgba(239,26,184,0.4)]"
                  >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Publish Product"}
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Publish Listing"}
                  </Button>
+                 <div className="text-center">
+                    <p className="text-[8px] text-muted-foreground uppercase font-bold tracking-[0.2em]">
+                       <Zap className="inline w-2 h-2 text-primary mr-1" /> Atomic Cloud Sync Active
+                    </p>
+                 </div>
               </div>
             </GlassCard>
           </div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -6,18 +7,17 @@ import { usePathname, useRouter } from "next/navigation"
 import { 
   LayoutDashboard, 
   Store, 
-  Settings, 
-  LogOut, 
+  History, 
   CreditCard,
-  ShoppingCart,
-  History,
-  User,
-  Bell,
-  Database,
   ShoppingBag,
-  Zap,
   BrainCircuit,
-  Package
+  LogOut,
+  User,
+  Database,
+  Zap,
+  Smartphone,
+  ChevronRight,
+  Menu
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -129,7 +129,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
              </div>
           </div>
           <div className="space-y-3">
-            <h2 className="text-2xl font-headline font-bold text-white uppercase">Index Required</h2>
+            <h2 className="text-2xl font-headline font-bold text-white uppercase">Student Index Required</h2>
             <p className="text-muted-foreground text-sm">To enable real-time tracking, we need to activate a collection group index for studentId.</p>
           </div>
           <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-extrabold h-14 px-8 rounded-2xl w-full transition-all">
@@ -200,7 +200,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
           <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
             <header className="flex h-[calc(5rem+env(safe-area-inset-top,0px))] md:h-24 items-center gap-4 px-6 md:px-10 pt-[env(safe-area-inset-top,0px)] border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
-              <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-1" />
+              <SidebarTrigger className="md:hidden h-10 w-10 flex items-center justify-center mr-1 text-white" />
               <div className="flex md:hidden items-center gap-2 flex-1">
                 <div className="w-9 h-9 rounded-xl bg-white/5 relative flex items-center justify-center border border-white/10 p-1 shrink-0 overflow-hidden">
                   <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5 scale-125" />
