@@ -57,6 +57,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     imageUrl: ""
   })
 
+  // Synchronize existing product data to form state
   useEffect(() => {
     if (product) {
       setFormData({
@@ -198,15 +199,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                           </SelectContent>
                        </Select>
                     </div>
-                    <div className="space-y-2">
-                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Asset Visual Protocol (Local or URL)</Label>
-                       <Input 
-                          value={formData.imageUrl.startsWith('data:') ? 'Local Image Active' : formData.imageUrl}
-                          onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                          placeholder="https://images.unsplash.com/..." 
-                          className="h-12 bg-white/5 border-white/10 rounded-xl px-6 text-xs"
-                       />
-                    </div>
                   </div>
                 </div>
 
@@ -215,7 +207,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                    <Textarea 
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      className="min-h-[100px] bg-white/5 border-white/10 rounded-xl p-6 focus:border-primary/50 text-sm"
+                      className="min-h-[140px] bg-white/5 border border-white/10 rounded-xl p-6 focus:border-primary/50 text-sm"
                    />
                 </div>
               </div>
