@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -40,6 +39,7 @@ import { useAuth, useUser, useCollection, useMemoFirebase, useFirestore } from '
 import { collectionGroup, query, where } from 'firebase/firestore'
 import { AppLoader } from "@/components/ui/app-loader"
 import { PermissionPrompt } from "@/components/pwa/PWAHandler"
+import { SpendingChat } from "@/components/chat/SpendingChat"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
@@ -236,6 +236,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </SidebarInset>
         </div>
         <PermissionPrompt />
+        <SpendingChat />
         <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
           <div className="bg-card/90 backdrop-blur-3xl border border-border rounded-[2rem] h-16 flex items-center justify-around px-4 shadow-2xl">
             {[
