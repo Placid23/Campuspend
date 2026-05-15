@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -16,7 +17,8 @@ import {
   Zap,
   Smartphone,
   ChevronRight,
-  Menu
+  Menu,
+  Wallet
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -47,13 +49,14 @@ const navGroups = [
     items: [
       { name: "Marketplace", href: "/vendors", icon: Store },
       { name: "My Tray", href: "/cart", icon: ShoppingBag },
-      { name: "Order History", href: "/orders", icon: History },
+      { name: "Purchase History", href: "/orders", icon: History },
     ]
   },
   {
     label: "Intelligence",
     items: [
       { name: "Home Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { name: "Wallet Ledger", href: "/wallet", icon: Wallet },
       { name: "AI Insights", href: "/insights", icon: BrainCircuit },
       { name: "Expenditure Map", href: "/calendar", icon: CreditCard },
     ]
@@ -90,7 +93,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       if (prevStatus && prevStatus !== currentStatus) {
         toast({ title: "Order Update", description: `Your order for "${item.name}" is now ${currentStatus.toUpperCase()}.` })
         
-        // Trigger Device Notification
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("CafePay Order Update", {
             body: `Your order for "${item.name}" is now ${currentStatus.toUpperCase()}.`,
@@ -173,10 +175,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       <SidebarMenuItem key={item.name}>
                         <SidebarMenuButton 
                           asChild 
-                          isActive={pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors'))}
+                          isActive={pathname === item.href}
                           className={cn(
                             "h-12 px-6 rounded-2xl transition-all duration-300 font-bold",
-                            (pathname === item.href || (item.href === '/vendors' && pathname.startsWith('/vendors')))
+                            pathname === item.href
                               ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl" 
                               : "hover:bg-accent text-muted-foreground hover:text-foreground"
                           )}
@@ -239,7 +241,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             {[
               { icon: Store, label: "Market", href: "/vendors" },
               { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
-              { icon: CreditCard, label: "Expend", href: "/calendar" },
+              { icon: Wallet, label: "Wallet", href: "/wallet" },
               { icon: ShoppingBag, label: "Tray", href: "/cart" },
             ].map((item) => (
               <Link key={item.href} href={item.href} className={cn("flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all active:scale-90", pathname === item.href ? "text-primary bg-primary/10" : "text-muted-foreground")}>

@@ -52,7 +52,7 @@ const adminNavGroups = [
     items: [
       { name: "Global Inventory", href: "/admin/products", icon: Package },
       { name: "Product Taxonomy", href: "/admin/categories", icon: Box },
-      { name: "Platform Analytics", href: "/admin/reports", icon: ClipboardList },
+      { name: "Intelligence Reports", href: "/admin/reports", icon: ClipboardList },
       { name: "Security Thresholds", href: "/admin/settings", icon: ShieldAlert },
     ]
   }
@@ -85,7 +85,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full nebula-bg p-0 md:p-8">
-        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl">
+        <div className="flex flex-1 w-full bg-black/40 backdrop-blur-3xl border-0 md:border md:border-white/10 rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl relative">
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-4 group">
@@ -131,7 +131,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </SidebarFooter>
           </Sidebar>
 
-          <SidebarInset className="bg-transparent overflow-hidden">
+          <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
             <header className="flex h-20 md:h-24 items-center gap-4 px-6 md:px-10 border-b border-white/5 sticky top-0 z-40 bg-transparent backdrop-blur-xl">
               <SidebarTrigger className="md:hidden text-white" />
               <div className="ml-auto flex items-center gap-4">
@@ -149,6 +149,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               {children}
             </main>
           </SidebarInset>
+
+          {/* Bottom Nav for Admins */}
+          <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
+            <div className="bg-card/90 backdrop-blur-3xl border border-white/10 rounded-[2rem] h-16 flex items-center justify-around px-4 shadow-2xl">
+              {[
+                { icon: LayoutDashboard, label: "Root", href: "/admin/dashboard" },
+                { icon: Users, label: "Students", href: "/admin/students" },
+                { icon: Store, label: "Vendors", href: "/admin/vendors" },
+                { icon: ClipboardList, label: "Reports", href: "/admin/reports" },
+              ].map((item) => (
+                <Link key={item.href} href={item.href} className={cn("flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all", pathname === item.href ? "text-primary bg-primary/10" : "text-muted-foreground")}>
+                  <item.icon className={cn("w-5 h-5", pathname === item.href && "neon-text-glow")} />
+                  <span className="text-[7px] font-bold uppercase mt-1 tracking-tighter">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </SidebarProvider>

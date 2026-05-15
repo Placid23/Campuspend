@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -17,7 +18,8 @@ import {
   FileSpreadsheet,
   Store,
   Sparkles,
-  Package
+  Package,
+  Plus
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -77,7 +79,6 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   const seenItems = React.useRef<Set<string>>(new Set())
   const isFirstLoad = React.useRef(true)
 
-  // Unread badge logic
   const unreadCount = React.useMemo(() => {
     if (!orderItems) return 0
     return orderItems.filter(item => item.status === 'placed' || !item.status).length
@@ -94,7 +95,6 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
       if (!seenItems.current.has(item.id) && (item.status === 'placed' || !item.status)) {
         toast({ title: "New Order Received!", description: `Student just ordered: ${item.name}` })
         
-        // Trigger Device Notification
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("CafePay New Order", {
             body: `Student just ordered: ${item.name}`,
@@ -128,7 +128,7 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full nebula-bg p-0 md:p-8">
-        <div className="flex flex-1 w-full bg-card/40 backdrop-blur-3xl border-0 md:border md:border-border rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl">
+        <div className="flex flex-1 w-full bg-card/40 backdrop-blur-3xl border-0 md:border md:border-border rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl relative">
           <Sidebar className="border-r-0 bg-transparent w-72">
             <SidebarHeader className="p-8 pb-4">
               <Link href="/" className="flex items-center gap-4 group">
@@ -179,7 +179,7 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
             </SidebarFooter>
           </Sidebar>
 
-          <SidebarInset className="bg-transparent overflow-hidden">
+          <SidebarInset className="bg-transparent overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
             <header className="flex h-20 md:h-24 items-center gap-4 px-6 md:px-10 border-b border-border sticky top-0 z-40 bg-background/40 backdrop-blur-xl">
               <SidebarTrigger className="md:hidden h-10 w-10 text-white" />
               <div className="hidden md:flex items-center gap-10">
@@ -201,6 +201,28 @@ export function VendorShell({ children }: { children: React.ReactNode }) {
               {children}
             </main>
           </SidebarInset>
+
+          {/* Bottom Nav for Vendors */}
+          <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
+            <div className="bg-card/90 backdrop-blur-3xl border border-border rounded-[2rem] h-16 flex items-center justify-around px-4 shadow-2xl">
+              {[
+                { icon: LayoutDashboard, label: "HQ", href: "/vendor/dashboard" },
+                { icon: History, label: "Sales", href: "/vendor/orders", badge: unreadCount },
+                { icon: ShoppingCart, label: "Stock", href: "/vendor/manage" },
+                { icon: Plus, label: "Add", href: "/vendor/add-product" },
+              ].map((item) => (
+                <Link key={item.href} href={item.href} className={cn("flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all relative", pathname === item.href ? "text-primary bg-primary/10" : "text-muted-foreground")}>
+                  <item.icon className={cn("w-5 h-5", pathname === item.href && "neon-text-glow")} />
+                  <span className="text-[7px] font-bold uppercase mt-1 tracking-tighter">{item.label}</span>
+                  {item.badge && item.badge > 0 && pathname !== item.href && (
+                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[6px] font-bold text-white animate-pulse">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </SidebarProvider>

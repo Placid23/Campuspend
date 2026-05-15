@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -18,7 +19,8 @@ import {
   Activity,
   ShieldCheck,
   Smartphone,
-  Lock
+  Lock,
+  Wallet
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
@@ -47,7 +49,7 @@ import {
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase"
-import { collection, query, limit, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, limit, orderBy, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { isToday, format, subDays } from 'date-fns'
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
@@ -109,34 +111,41 @@ export default function DashboardPage() {
 
     setPaymentStep('processing')
     
-    // Paystack Integration
     const paystack = (window as any).PaystackPop.setup({
       key: 'pk_test_37103899889b7cd46aea9603cebc51d0ac7eb860',
       email: profile.email || user.email,
-      amount: amountInNaira * 100, // Paystack requires amount in Kobo
+      amount: amountInNaira * 100, 
       currency: 'NGN',
       metadata: {
         custom_fields: [
-          {
-            display_name: "Student Name",
-            variable_name: "student_name",
-            value: profile.name
-          }
+          { display_name: "Student Name", variable_name: "student_name", value: profile.name }
         ]
       },
       callback: function(response: any) {
-        // Successful Transaction
         const profileRef = doc(db, "userProfiles", user.uid)
+        const txRef = doc(collection(db, "users", user.uid, "walletTransactions"))
+        
         const updateData = {
           walletBalance: (profile.walletBalance || 0) + amountInNaira,
           updatedAt: serverTimestamp()
         }
+
+        const txData = {
+          id: txRef.id,
+          studentId: user.uid,
+          amount: amountInNaira,
+          type: 'funding',
+          description: `Wallet Top-up via Paystack`,
+          reference: response.reference,
+          timestamp: new Date().toISOString()
+        }
         
-        updateDoc(profileRef, updateData)
+        // Log transaction and update balance
+        setDoc(txRef, txData)
+          .then(() => updateDoc(profileRef, updateData))
           .then(() => {
             setPaymentStep('success')
             toast({ title: "Funds Secured", description: `₦${amountInNaira.toLocaleString()} added to your CafePay Wallet.` })
-            
             setTimeout(() => {
               setIsTopUpOpen(false)
               setPaymentStep('input')
@@ -330,8 +339,8 @@ export default function DashboardPage() {
                    </div>
                 )}
               </div>
-              <Link href="/orders" className="block pt-2">
-                 <Button variant="ghost" className="w-full text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">View All Logs</Button>
+              <Link href="/wallet" className="block pt-2">
+                 <Button variant="ghost" className="w-full text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">View Full Ledger <Wallet className="ml-2 w-3 h-3" /></Button>
               </Link>
             </GlassCard>
           </div>
